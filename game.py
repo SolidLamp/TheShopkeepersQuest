@@ -35,12 +35,13 @@ def ending(a):
     print()
     print("Try again?")
 
-def lose():
+def lose(text):
     print()
     print()
     print()
     time.sleep(0.25)
     print("You died!")
+    print(text)
     time.sleep(0.5)
     print()
     print()
@@ -55,7 +56,7 @@ def getRuby(num):
     print()
     print2("You got \033[1m" + str(num) + "\033[0m Rubies!")
     rubies=rubies+num
-    print()
+    print("\033[0m")
     print2("You currently have \033[1m" + str(rubies) + "\033[0m Rubies.")
     print()
 
@@ -63,10 +64,12 @@ def getRuby(num):
 # The Game
 
 def intro():
-    print2("\033[1m" + "The Game" + "\033[0m")
+    print("\033[1m" + "The Shopkeeper's Quest" + "\033[0m\n" + "or" + "\n\033[1" + "The Merchant's Q est" + "\ \033[0\" + "[[[rking title]\\n\033[0m]")
     print2("Use the numbers to choose options")
     query = option(["Begin","Quit"])
     if query == "1":
+        print2("You are a travelling merchant, approaching a new town to sell your wares  another region.\nAs y you approach the town, the atmosphere seems odd and eerily silent, almost frightening in a ay. \n"Suddently, a man appears, and walks ver\n"The man speaks, 'Greetings. I am a local shopkeeper, just outside the limits of our little village Siopwyrdigofaint/Llansiopwyrdod/Siopwyrd/Llanamausiop/Llanerchwyrd.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched all.\nAny that resided within the town limits have disappeared.'\nThe man grunts and scratches his chin.\nHe looks back at the town with a longing expression, before turning his gaze back to you. \n'It worries me, you know?' he continues, 'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\nThe man sighs deeply, and waits a moment before speaking again, 'I do have some experience with magic, however.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a silver _.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main town.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'")
+        print()
         gameLoop()
     else:
         exit()
@@ -140,13 +143,14 @@ def forest3():
             print2("You manage to defeat the bonobo, using your weapon.")
             print2("You manage to find a chest, containing 15 rubies!")
             getRuby(15)
+            print2("Underneath all the rubies, you find the rusted sword.")
             forest2()
         else:
             print2("You attempt to fight the bonobo, but it easily overpowers you. You are killed.")
-            lose()
+            lose("What did you think was going to happen?")
     elif query == "2":
         print2("You attempt to leave, but the bonobo catches you. You are killed.")
-        lose()
+        lose("Bonobos are quite agressive.")
     else:
         forest3()
 
@@ -172,4 +176,4 @@ def action3():
     print2("")
 
 intro()
-exit()
+exit
