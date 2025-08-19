@@ -1,4 +1,5 @@
 import time
+from dataclasses import dataclass
 
 def print2(a):
     for i in a:
@@ -10,10 +11,16 @@ def option(a):
     print()
     for i, options in enumerate(a, start=1):
         print2(f"{i}. {options}")
+    print2("i. Inventory")
+    if True == True:
+      print2("d. debug")
     query=input(">>> ")
+    if query == "i":
+      print(game_state.inventory)
+    if query == "d":
+      print(game_state)
     print()
     return(query)
-
 
 
 
@@ -36,39 +43,91 @@ def ending(a):
     print("Try again?")
 
 def lose(text):
-    print()
-    print()
-    print()
+    print("\n\n")
     time.sleep(0.25)
-    print("You died!")
-    print(text)
+    print("\033[31m\033[1mYou died!\033[0m")
+    print("'" + text + "'")
     time.sleep(0.5)
-    print()
-    print()
-    print()
-    print("Try again?")
+    print("\n\n\nTry again?")
 
-global rubies
-rubies=int(0)
+ShopkeeperQuotes = [
+  "Remember, tomorrow is another day.",
+  "Be seeing you.",
+  "I wish you the best of luck.",
+  "I give you my grace.",
+  "I wish you luck on your quest.",
+  "I'll get started on my tea.",
+  "May all the spirits be with you."
+  ]
+
+ShopkeeperQuotes = [
+  "Welcome!",
+  "Sit down, my friend. Stay a while.",
+  "You'll always be welcome here in my shop.",
+  "Have a look at my wares. They could prove to be useful.",
+  "Sorry I can't give discounts - I have a business to run, and I must make my money somehow.",
+  "I don't blame you for coming inside in this winter.",
+  "Sit down a while. I don't want you too stressed, my friend.",
+  "I always believe that everyone has a tale worth telling - maybe talk to more people.",
+  "Have you checked out the bazaar? There's a fisherman there who sells excellent-quality rods.",
+  "Have you heard the news about the King? It's said that he's fallen ill. He's a good man - I hope he fully recovers.",
+  "Have you seen the nearby forest? There's been some monkey sightings there."
+  ]
+@dataclass
+class Inventory:
+    items: list[str]
+    def __str__(self):
+        if not self.items:
+            return "Your inventory is empty"
+        return "Inventory items:\n" + "\n".join(f"- {item}" for item in self.items)
+
+
+@dataclass
+class gameState:
+    inventory: Inventory
+    rubies: int = 0
+    shopkeeperName: str = "The Shopkeeper"
+    position: float = 0.0
+    beatenGame: bool = False
 
 def getRuby(num):
-    global rubies
     print()
     print2("You got \033[1m" + str(num) + "\033[0m Rubies!")
-    rubies=rubies+num
+    gameState.rubies=gameState.rubies+num
     print("\033[0m")
-    print2("You currently have \033[1m" + str(rubies) + "\033[0m Rubies.")
+    print2("You currently have \033[1m" + str(gameState.rubies) + "\033[0m Rubies.")
     print()
+
+game_state = gameState(
+    inventory=Inventory(items=[])
+)
+
+print("DEBUG: Initial game state")
+print(game_state)
+print("Initial inventory:")
+print(game_state.inventory)
 
 
 # The Game
 
 def intro():
-    print("\033[1m" + "The Shopkeeper's Quest" + "\033[0m\n" + "or" + "\n\033[1" + "The Merchant's Q est" + "\ \033[0\" + "[[[rking title]\\n\033[0m]")
+    print("\033[1m" + "The Shopkeeper's Quest" + "\033[0m\n" + "or" + "\n\033[1m" + "The Merchant's Quest" + "\033[0m\n" + "[Working title]\n\033[0m")
+    print("\033[36m\033[40m" + r"""___ _  _ ____ 
+ |  |__| |___ 
+ |  |  | |___ 
+              
+____ _  _ ____ ___  _  _ ____ ____ ___  ____ ____ ____ 
+[__  |__| |  | |__] |_/  |___ |___ |__] |___ |__/ [__  
+___] |  | |__| |    | \_ |___ |___ |    |___ |  \ ___] 
+                                                       
+____ _  _ ____ ____ ___ 
+|  | |  | |___ [__   |  
+|_\| |__| |___ ___]  |  
+                        """ + "\033[0m")
     print2("Use the numbers to choose options")
     query = option(["Begin","Quit"])
     if query == "1":
-        print2("You are a travelling merchant, approaching a new town to sell your wares  another region.\nAs y you approach the town, the atmosphere seems odd and eerily silent, almost frightening in a ay. \n"Suddently, a man appears, and walks ver\n"The man speaks, 'Greetings. I am a local shopkeeper, just outside the limits of our little village Siopwyrdigofaint/Llansiopwyrdod/Siopwyrd/Llanamausiop/Llanerchwyrd.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched all.\nAny that resided within the town limits have disappeared.'\nThe man grunts and scratches his chin.\nHe looks back at the town with a longing expression, before turning his gaze back to you. \n'It worries me, you know?' he continues, 'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\nThe man sighs deeply, and waits a moment before speaking again, 'I do have some experience with magic, however.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a silver _.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main town.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'")
+        #print2("You are a travelling merchant, approaching a new town to sell your wares in another region.\nAs you approach the town, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little town of Llanerchwyrd.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them all.\nAny that resided within the town limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the town with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?' he continues, 'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic, however.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a silver _.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main town.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
         print()
         gameLoop()
     else:
