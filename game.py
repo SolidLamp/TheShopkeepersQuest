@@ -212,9 +212,136 @@ def forest3():
         lose("Bonobos are quite agressive.")
     else:
         forest3()
+        
 
+def road():
+    print2("You follow the road, but although it looks like a short distance, it feels like a long journey, as if it were a mile long. You wish for a mule to travel on.")
+    query = option(["Continue","Go Back"])
+    if query == "1":
+        townArrival()
+    elif query == "2":
+        field()
+    else:
+        action1()
 
+def townArrival():
+    print2("You follow the road to town. It seems barren and no one is there.")
+    query = option(["Follow the High Street further","Go Back"])
+    if query == "1":
+        door()
+    elif query == "2":
+        road()
+    else:
+        town()
 
+def town():
+    print2("You are in the town. It seems barren and no one is there.")
+    query = option(["Follow the High Street further","Go Back"])
+    if query == "1":
+        door()
+    elif query == "2":
+        road()
+    else:
+        town()
+
+def door():
+    print("You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?")
+    query = option(["Attempt to turn the handle","Unlock the door with the Ancient Key","Go back"])
+    if query == "1":
+        lock()
+    elif query == "2":
+        unlock()
+    elif query == "3":
+        town()
+    else:
+        door()
+
+def lock():
+    print2("You attempt to turn the handle, but it does not budge.")
+    query = option(["Try Again","Go Back"])
+    if query == "1":
+        lock()
+    elif query == "2":
+        door()
+    else:
+        lock()
+  
+def unlock():
+    print2("You unlock the mysterious door with the Ancient Key.")
+    query = option(["Continue"])
+    if query == "1":
+        secret()
+    else:
+        print2("You cannot go back now.")
+        secret()
+
+def secret():
+    print2("You go through the door. It is pitch-black.")
+    query = option(["Continue"])
+    if query == "1":
+        secret2()
+    else:
+        print2("You cannot go back now.")
+        secret2()
+
+def secret2():
+    print2("As you continue, everything goes pitch-black.")
+    query = option(["Continue"])
+    if query == "1":
+        secret3()
+    else:
+        print2("You cannot go back now.")
+        secret3()
+
+def secret3():
+    print2("As you continue, you see a light at the end.")
+    query = option(["Continue"])
+    if query == "1":
+        secret4()
+    else:
+        print2("You cannot go back now.")
+        secret4()
+
+def secret4():
+    print2("Eventually, you get to the end, and can go through the illuminated exit.")
+    query = option(["Continue"])
+    if query == "1":
+        secret5()
+    else:
+        print2("You cannot go back now.")
+        secret5()
+
+def secret5():
+    print2("It is the back room of " + game_state.shopkeeperName + "'s shop. It is full of rubies and products.")
+    query = option(["Take some rubies","Take some lamp oil","Take some rope","Take some bombs","Go through to the front"])
+    if query == "1":
+        print2("You take some rubies.")
+        getRuby(9000)
+        secret5()
+    elif query == "2":
+        print2("You take some lamp oil.")
+        secret5()
+    elif query == "3":
+        print2("You take some rope.")
+        secret5()
+    elif query == "4":
+        print2("You take some bombs.")
+        secret5()
+    elif query == "5":
+        secret6()
+    else:
+        print2("You cannot go back now.")
+        secret5()
+
+def secret6():
+    print2("You are in the front room of " + game_state.shopkeeperName + "'s shop.")
+    query = option(["Become " + game_state.shopkeeperName])
+    if query == "1":
+        print2("You become " + game_state.shopkeeperName + ". The people eventually return. You begin selling your wares again, and you finally understand the full circumstances of these events.")
+        ending("Secret")
+    else:
+        print2("You cannot go back now.")
+        secret6()
 
 def action1():
     print2("")
