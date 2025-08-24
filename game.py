@@ -80,8 +80,7 @@ class Inventory:
         if not self.items:
             return "Your inventory is empty"
         return "Inventory items:\n" + "\n".join(f"- {item}" for item in self.items)
-
-
+#Rusted Sword (Forest), Amber Necklace (Town), AncientKey (Fountain) and Golden Idol (Cave)
 @dataclass
 class gameState:
     inventory: Inventory
@@ -216,7 +215,7 @@ def forest3():
 
 def road():
     print2("You follow the road, but although it looks like a short distance, it feels like a long journey, as if it were a mile long. You wish for a mule to travel on.")
-    query = option(["Continue","Go Back"])
+    query = option(["Go to the town","Go to the field"])
     if query == "1":
         townArrival()
     elif query == "2":
@@ -238,11 +237,81 @@ def town():
     print2("You are in the town. It seems barren and no one is there.")
     query = option(["Follow the High Street further","Go Back"])
     if query == "1":
-        door()
+        town2()
     elif query == "2":
         road()
     else:
         town()
+
+def town2():
+    print2("You are in the high street of the town. The town centre is to your north.")
+    query = option(["Go to the town centre","Go South"])
+    if query == "1":
+        town3()
+    elif query == "2":
+        town()
+    else:
+        town2()
+
+def town3():
+    print2("You are in the centre of town. There are paths each direction, with a fountain in the middle.")
+    query = option(["Go North","Go East","Go South","Go West","Go to the Fountain"])
+    if query == "1":
+        townNorth()
+    elif query == "2":
+        townEast()
+    elif query == "3":
+        town2()
+    elif query == "4":
+        townWest()
+    elif query == "5":
+        fountain()
+    else:
+        town3()
+
+def fountain():
+    print2("You are at the fountain in the town centre.")
+    query = option(["Admire it","Throw a ruby in for good luck","Go back"])
+    if query == "1":
+        print2("You admire the fountain.")
+        fountain()
+    elif query == "2":
+        print2("You throw a ruby in")
+        fountain() #TODO
+    elif query == "3":
+        town3()
+    else:
+        fountain()
+
+def townEast():
+    print2("There is a note on the floor.")
+    query = option(["Read the note","Return"])
+    if query == "1":
+        note()
+    elif query == "2":
+        town3()
+    else:
+        townEast()
+
+def note():
+    print2("You read the note. It reads, 'None can stop me now. At 38, they will know. North, North, South, South, West, East, West, East.'")
+    query = option(["Read the note again","Place it back down"])
+    if query == "1":
+        note()
+    elif query == "2":
+        townEast()
+    else:
+        note()
+
+def townNorth():
+    print2("You enter an empty street of market stalls. A northern route leads to a smaller street.")
+    query = option("Go down the smaller street","Go to the Town Centre."])
+    if query == "1":
+        door()
+    elif query == "2":
+        town3()
+    else:
+        townNorth()
 
 def door():
     print("You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?")
@@ -252,7 +321,7 @@ def door():
     elif query == "2":
         unlock()
     elif query == "3":
-        town()
+        town3()
     else:
         door()
 
@@ -312,8 +381,8 @@ def secret4():
         secret5()
 
 def secret5():
-    print2("It is the back room of " + game_state.shopkeeperName + "'s shop. It is full of rubies and products.")
-    query = option(["Take some rubies","Take some lamp oil","Take some rope","Take some bombs","Go through to the front"])
+    print2("It is the back room of " + game_state.shopkeeperName + "'s shop. It is full of rubies and products. There is a letter on a nearby desk.")
+    query = option(["Take some rubies","Take some lamp oil","Take some rope","Take some bombs","Go through to the front","Inspect the letter"])
     if query == "1":
         print2("You take some rubies.")
         getRuby(9000)
@@ -329,6 +398,9 @@ def secret5():
         secret5()
     elif query == "5":
         secret6()
+    elif query == "6":
+        print2("The envelope is sealed with a luxurious seal. The letter is addressed to 'The Overseer', and has the number 38 written on it. There is no letter inside the envelope.")
+        secret5()
     else:
         print2("You cannot go back now.")
         secret5()
@@ -342,6 +414,18 @@ def secret6():
     else:
         print2("You cannot go back now.")
         secret6()
+
+def townWest():
+    print2("There is a large square, with houses all around. There is an alley.")
+    query = option(["Go down the alley","Go to the Town Centre"])
+    if query == "1":
+        maze1()
+    elif query == "2":
+        town3()
+    else:
+        townWest() 
+
+
 
 def action1():
     print2("")
