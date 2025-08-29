@@ -1,11 +1,12 @@
 import time
 from dataclasses import dataclass
+import random
 
-def print2(a):
-    for i in a:
-        print(i, end="", flush=True)
+def print2(text, newline=True):
+    for char in text:
+        print(char, end="", flush=True)
         time.sleep(0.01)
-    print()
+    if newline: print()
 
 def option(a):
     print()
@@ -50,7 +51,7 @@ def lose(text):
     time.sleep(0.5)
     print("\n\n\nTry again?")
 
-ShopkeeperQuotes = [
+ShopkeeperQuotesExit = [
   "Remember, tomorrow is another day.",
   "Be seeing you.",
   "I wish you the best of luck.",
@@ -73,13 +74,32 @@ ShopkeeperQuotes = [
   "Have you heard the news about the King? It's said that he's fallen ill. He's a good man - I hope he fully recovers.",
   "Have you seen the nearby forest? There's been some monkey sightings there."
   ]
+  
+print(random.choice(ShopkeeperQuotes))
+print(random.choice(ShopkeeperQuotesExit))
+
 @dataclass
 class Inventory:
-    items: list[str]
+    items: list[str] = None
+    keyItems: list[str] = None
+    def __post_init__(self):
+        self.items = [] if self.items is None else self.items
+        self.keyItems = [] if self.keyItems is None else self.keyItems
+    def getItem(self, item: str):
+        print2("\nYou got \033[1m" + str(item) + "\033[0m!")
+        self.items.append(item)
+    def getKeyItem(self, item: str):
+        print2("\nYou got \033[1m" + str(item) + "\033[0m!")
+        self.keyItems.append(item)
     def __str__(self):
-        if not self.items:
+        if not self.items and not self.keyItems:
             return "Your inventory is empty"
-        return "Inventory items:\n" + "\n".join(f"- {item}" for item in self.items)
+        output = []
+        if self.items:
+            output.append("Items:\n" + "\n".join(f"- {item}" for item in self.items))
+        if self.keyItems:
+            output.append("Key Items:\n" + "\n".join(f"- {item}" for item in self.keyItems))
+        return "\n".join(output)
 #Rusted Sword (Forest), Amber Necklace (Town), AncientKey (Fountain) and Golden Idol (Cave)
 @dataclass
 class gameState:
@@ -88,29 +108,19 @@ class gameState:
     shopkeeperName: str = "The Shopkeeper"
     position: float = 0.0
     beatenGame: bool = False
-
-def getRuby(num):
-    print()
-    print2("You got \033[1m" + str(num) + "\033[0m Rubies!")
-    gameState.rubies=gameState.rubies+num
-    print("\033[0m")
-    print2("You currently have \033[1m" + str(gameState.rubies) + "\033[0m Rubies.")
-    print()
+    caveOpened: bool = False
+    def getRuby(self, num: int):
+        print2("\nYou got \033[1m" + str(num) + "\033[0m Rubies!")
+        self.rubies=self.rubies+num
+        print2("\033[0m You currently have \033[1m" + str(self.rubies) + "\033[0m Rubies.\n")
 
 game_state = gameState(
     inventory=Inventory(items=[])
 )
 
-print("DEBUG: Initial game state")
-print(game_state)
-print("Initial inventory:")
-print(game_state.inventory)
-
-
-# The Game
+game_state.inventory.getKeyItem("Rusted Sword")
 
 def intro():
-    print("\033[1m" + "The Shopkeeper's Quest" + "\033[0m\n" + "or" + "\n\033[1m" + "The Merchant's Quest" + "\033[0m\n" + "[Working title]\n\033[0m")
     print("\033[36m\033[40m" + r"""___ _  _ ____ 
  |  |__| |___ 
  |  |  | |___ 
@@ -200,8 +210,9 @@ def forest3():
         if 1 == 1:
             print2("You manage to defeat the bonobo, using your weapon.")
             print2("You manage to find a chest, containing 15 rubies!")
-            getRuby(15)
+            game_state.getRuby(15)
             print2("Underneath all the rubies, you find the rusted sword.")
+            game_state.inventory.getKeyItem("Rusted Sword")
             forest2()
         else:
             print2("You attempt to fight the bonobo, but it easily overpowers you. You are killed.")
@@ -212,6 +223,7 @@ def forest3():
     else:
         forest3()
         
+
 
 def road():
     print2("You follow the road, but although it looks like a short distance, it feels like a long journey, as if it were a mile long. You wish for a mule to travel on.")
@@ -305,7 +317,7 @@ def note():
 
 def townNorth():
     print2("You enter an empty street of market stalls. A northern route leads to a smaller street.")
-    query = option("Go down the smaller street","Go to the Town Centre."])
+    query = option(["Go down the smaller street","Go to the Town Centre."])
     if query == "1":
         door()
     elif query == "2":
@@ -425,6 +437,53 @@ def townWest():
     else:
         townWest() 
 
+def maze1():
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar. You believe the alley you entered from is to the South.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze1()
+    elif query == "2":
+        town3()
+    else:
+        townWest() 
+
+
+def shop():
+    print2("\033[33m'" + random.choice(ShopkeeperQuotes) + "'\033[0m")
+    print2("Current Rubies:" + str(game_state.rubies) + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies")
+    query = option(["Purchase lamp oil","Purchase rope","Purchase bomb","Ask about quest","Leave"])
+    if query == "1":
+        if game_state.rubies >= 15:
+          game_state.rubies = game_state.rubies - 15
+          game_state.inventory.getItem("Lamp Oil")
+        else:
+          print2("\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m")
+        shop()
+    elif query == "2":
+        if game_state.rubies >= 20:
+          game_state.rubies = game_state.rubies - 20
+          game_state.inventory.getItem("Rope")
+        else:
+          print2("\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m")
+        shop()
+    elif query == "3":
+        if game_state.rubies >= 30:
+          game_state.rubies = game_state.rubies - 30
+          game_state.inventory.getItem("Bomb")
+        else:
+          print2("\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m")
+        shop()
+    elif query == "4":
+        cursedItems = len({"Rusted Sword","Amber Necklace","Golden Idol"} & set(game_state.inventory.keyItems))
+        if cursedItems > 0:
+          print2(f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m")
+        print2("\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m")
+        shop()
+    elif query == "5":
+        print2("\033[33m'" + random.choice(ShopkeeperQuotesExit) + "'\033[0m")
+        field()
+    else:
+        shop() 
 
 
 def action1():
