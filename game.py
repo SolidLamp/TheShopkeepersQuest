@@ -77,6 +77,27 @@ endingCustomText = [
   ]
 defaultEndingText = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
 
+mysticalRocks = [
+    "What you think is an Emerald",
+    "A Funny-looking Rock"
+    "A Chunk of Marble"
+    "Some Tourmaline, maybe"
+    "A Stone that looks kind of like a face"
+    "A Weird shard of something"
+    "Some strange stone"
+    "a beautiful, azure blue rock"
+]
+
+rockPrices = [
+    "80"
+    "5"
+    "15"
+    "50"
+    "150"
+    "20"
+    "100"
+    "500"
+]
 
 @dataclass
 class Inventory:
@@ -109,6 +130,7 @@ class gameState:
     position: float = 0.0
     beatenGame: bool = False
     caveOpened: bool = False
+    fletcherOpen: bool = True
     def getRuby(self, num: int):
         print2("\nYou got \033[1m" + str(num) + "\033[0m Rubies!")
         self.rubies=self.rubies+num
@@ -138,7 +160,7 @@ ____ _  _ ____ ____ ___
     print2("Use the numbers to choose options")
     query = option(["Begin","Skip Intro","Quit"])
     if query == "1":
-        print2("You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little village of Llanerchwyrd.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them all.\nAny that resided within the village limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?' he continues, 'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic, however.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a silver _.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
+        print2("You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little village.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them..\nAny that resided within the village limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?'\033[0m he continues, \033[33m'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
         print()
         gameLoop()
     if query == "2":
@@ -408,12 +430,15 @@ def secret5():
         secret5()
     elif query == "2":
         print2("You take some lamp oil.")
+        game_state.inventory.getItem("Lamp Oil")
         secret5()
     elif query == "3":
         print2("You take some rope.")
+        game_state.inventory.getItem("Rope")
         secret5()
     elif query == "4":
         print2("You take some bombs.")
+        game_state.inventory.getItem("Bomb")
         secret5()
     elif query == "5":
         secret6()
@@ -504,7 +529,11 @@ def bazaar():
     if query == "1":
         fishermanStall()
     elif query == "2":
-        fletcherStall()
+        if game_state.fletcherOpen == True:
+            fletcherStall()
+        else:
+            print2("The stall in no longer open.")
+            bazaar()
     elif query == "3":
         mineralStall()
     elif query == "4":
@@ -513,58 +542,317 @@ def bazaar():
         bazaar()
 
 def fishermanStall():
-    print2("Current Rubies:" + str(game_state.rubies) + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies")
+    print2("Current Rubies:" + str(game_state.rubies) + "\nFillet of Cod - 2 rubies\nFillet of Salmon - 2 rubies\nSmoked Trout - 9 rubies\nJar of Tuna - 3 rubies\nFillet of Smoked Haddock - 6 rubies")
     print2("\033[36m'What are you here to buy?'\033[0m")
     query = option(["Purchase a fillet of cod","Purchase a fillet of salmon","Purchase smoked trout","Purchase a jar of tuna","Purchase a fillet of smoked haddock","Talk","Leave"])
     if query == "1":
         if game_state.rubies >= 2:
           game_state.rubies = game_state.rubies - 2
           game_state.inventory.getItem("Fillet of Cod")
+          fishermanStall()
         else:
           print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
-        bazaar()
+          bazaar()
     elif query == "2":
         if game_state.rubies >= 2:
           game_state.rubies = game_state.rubies - 2
           game_state.inventory.getItem("Fillet of Salmon")
+          fishermanStall()
         else:
           print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
-        bazaar()
+          bazaar()
     elif query == "3":
         if game_state.rubies >= 9:
           game_state.rubies = game_state.rubies - 9
           game_state.inventory.getItem("Smoked Trout")
+          fishermanStall()
         else:
           print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
-        bazaar()
+          bazaar()
     elif query == "4":
         if game_state.rubies >= 3:
           game_state.rubies = game_state.rubies - 3
           game_state.inventory.getItem("Jar of Tuna")
+          fishermanStall()
         else:
           print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
-        bazaar()
+          bazaar()
     elif query == "5":
         if game_state.rubies >= 6:
           game_state.rubies = game_state.rubies - 6
           game_state.inventory.getItem("Fillet of Smoked Haddock")
+          fishermanStall()
         else:
           print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
-        bazaar()
+          bazaar()
     elif query == "6":
         fishBought = len({"Fillet of Cod","Fillet of Salmon","Smoked Trout","Jar of Tuna","Fillet of Smoked Haddock"}) & set(game_state.inventory.keyItems)
-        if fishBought >= 1 and "Fishing Rod" not in game_state.inventory.items:
+        if fishBought >= 1 and "Fishing Rod" not in game_state.inventory.keyItems:
             print2("\033[36m'You know, I recently got a new fishing rod. Say, you can have my old one, since you bought something.'\033[0m")
-            game_state.inventory.getItem("Fishing Rod")
+            game_state.inventory.getKeyItem("Fishing Rod")
         else:
             print2("\033[36m'You know, I'd be more in the mood to talk if you bought something.'\033[0m")
+        fishermanStall()
     elif query == "7":
         bazaar()
     else:
-        print2("WHAT?")
-        action1()
+        fishermanStall()
 
-print2("\033[36m'That's not really enough.'\033[0m")
+def fletcherStall():
+    print2("Current Rubies:" + str(game_state.rubies))
+    print2("\033[35m'Hey. I've got one bow in stock right now. I'm sure you heard what happened. I hope everyone will return.'\033[0m")
+    query = option(["Purchase the bow","Talk","Leave"])
+    if query == "1":
+        if game_state.rubies >= 75:
+          game_state.rubies = game_state.rubies - 75
+          game_state.inventory.getKeyItem("Bow and Arrow")
+          game_state.fletcherOpen = False
+          bazaar()
+        else:
+          print2("\033[35m'Sorry, that's not really enough. I'd let it go for 75 rubies, maybe.'\033[0m")
+          fletcherStall()
+    elif query == "2":
+        if "Silver Amulet" in game_state.inventory.keyItems:
+            print2("\033[35m'You did it! I can't believe it! That's really it! That's my mother's \033[47mSilver Amulet\033[0m\033[35m! I can't thank you enough! Here, have this bow, no charge! Thank you, thank you!")
+            game_state.inventory.keyItems.remove("Silver Amulet")
+            game_state.inventory.getKeyItem("Bow and Arrow")
+            game_state.fletcherOpen = False
+            bazaar()
+        else:
+            print2("\033[35m'Hey, do you think you could do something for me? Since everyone disappeared last night, I miss my mother. Do you think you could see if you could find her \033[47mSilver Amulet\033[0m\033[35m? I'd give you the bow for free if you did.'\033[0m")
+            fletcherStall()
+    elif query == "3":
+        bazaar()
+    else:
+        fletcherStall()
+
+
+def cave(): #This is the worst and most fustrating part of the game. Have fun :)
+    print2("You are at the cave's entrance.")
+    query = option(["Enter the cave","Go back to the open field"])
+    if query == "1":
+        cave1()
+    elif query == "2":
+        field()
+    else:
+        cave()
+
+def cave1():
+    print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
+    query = option(["Go north","Go south"])
+    if query == "1":
+        cave2()
+    elif query == "2":
+        cave()
+    else:
+        cave1()
+
+def cave2():
+    print2("You are within the cave. It is difficult to see. There is a path to your north, south and west.")
+    query = option(["Go north","Go south","Go west"])
+    if query == "1":
+        cave3()
+    elif query == "2":
+        cave1()
+    elif query == "3":
+        cave7()
+    else:
+        cave2()
+
+def cave3():
+    print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
+    query = option(["Go north","Go south"])
+    if query == "1":
+        cave4()
+    elif query == "2":
+        cave2()
+    else:
+        cave3()
+
+def cave4():
+    print2("You are within the cave. It is difficult to see. There is a path to your east and south.")
+    query = option(["Go east","Go south"])
+    if query == "1":
+        cave5()
+    elif query == "2":
+        cave3()
+    else:
+        cave4()
+
+def cave5():
+    print2("You are within the cave. It is difficult to see. There is a path to your north, south and west.")
+    query = option(["Go north","Go south","Go west"])
+    if query == "1":
+        cave6()
+    elif query == "2":
+        cave11()
+    elif query == "3":
+        cave4()
+    else:
+        cave5()
+
+def cave6():
+    print2("You are within the cave. It is difficult to see. There is a path to your south and west.")
+    query = option(["Go south","Go west"])
+    if query == "1":
+        cave5()
+    elif query == "2":
+        cave10()
+    else:
+        cave6()
+
+def cave7():
+    print2("You are within the cave. It is difficult to see. There is a path to your north and east.")
+    query = option(["Go north","Go east"])
+    if query == "1":
+        cave8()
+    elif query == "2":
+        cave2()
+    else:
+        cave7()
+
+def cave8():
+    print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
+    query = option(["Go north","Go south"])
+    if query == "1":
+        cave9()
+    elif query == "2":
+        cave7()
+    else:
+        cave8()
+
+def cave9():
+    if game_state.caveOpened == True:
+        print2("You are within the cave. It is difficult to see. There is a path to your northeast, south and northwest.")
+    else:
+        print2("You are within the cave. It is difficult to see. There is a path to your northeast and south. There is a lot of rubble to your northwest.")
+    if game_state.caveOpened == True: query = option(["Go northeast","Go south","Go northwest"])
+    elif "Bomb" in game_state.inventory.items: query = option(["Go northeast","Go south","Destroy the rubble with a bomb"])
+    query = option(["Go northeast","Go south"])
+    if query == "1":
+        cave10()
+    elif query == "2":
+        cave8()
+    elif query == "3":
+        if game_state.caveOpened == True:
+            maze32()
+        elif "Bomb" in game_state.inventory.items:
+            print2("You blow up the rubble. Light shines through, and a path to the surface appears.")
+            game_state.caveOpened = True
+            cave9()
+        else:
+            cave9()
+    else:
+        cave9()
+
+def cave10():
+    print2("You are within the cave. It is difficult to see. There is a path to your north, east and southwest.")
+    query = option(["Go north","Go south","Go southwest"])
+    if query == "1":
+        cave39()
+    elif query == "2":
+        cave6()
+    elif query == "3":
+        cave9()
+    else:
+        cave10()
+
+def cave11():
+    print2("You are within the cave. It is difficult to see. There is a path to your north, northeast and south.")
+    query = option(["Go north","Go northeast","Go south"])
+    if query == "1":
+        cave5()
+    elif query == "2":
+        cave19()
+    elif query == "3":
+        cave12()
+    else:
+        cave11()
+
+def cave12():
+    print2("You are within the cave. It is difficult to see. There is a path to your north, northeast, southeast and south.")
+    query = option(["Go north","Go northeast","Go southeast","Go south"])
+    if query == "1":
+        cave11()
+    elif query == "2":
+        cave14()
+    elif query == "3":
+        cave13()
+    elif query == "4":
+        cave26()
+    else:
+        cave12()
+
+def cave13():
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave15()
+    elif query == "2":
+        cave12()
+    else:
+        cave13()
+
+def cave14():
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave17()
+    elif query == "2":
+        cave12()
+    else:
+        cave14()
+
+def cave15():
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave16()
+    elif query == "2":
+        cave13()
+    else:
+        cave15()
+
+def cave16():
+    print2("You are within the cave. It is difficult to see. There is a path to your north and west.")
+    query = option(["Go north","Go west"])
+    if query == "1":
+        cave18()
+    elif query == "2":
+        cave15()
+    else:
+        cave16()
+
+def cave17():
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave18()
+    elif query == "2":
+        cave14()
+    else:
+        cave17()
+
+def cave18():
+    print2("You are within the cave. It is difficult to see. There is a path to your south and west.")
+    query = option(["Go south","Go west"])
+    if query == "1":
+        cave16()
+    elif query == "2":
+        cave17()
+    else:
+        cave18()
+
+
+
+
+
+
+
+
+
+
+
 
 
 def action1():
@@ -600,13 +888,17 @@ def debug():
         game_state.inventory.getKeyItem("Amber Necklace")
         game_state.inventory.getKeyItem("Golden Idol")
         game_state.inventory.getKeyItem("Ancient Key")
-        game_state.inventory.getItem("Fishing Rod")
+        game_state.inventory.getKeyItem("Fishing Rod")
+        game_state.inventory.getKeyItem("Bow and Arrow")
+        game_state.inventory.getKeyItem("Silver Amulet")
         game_state.inventory.getItem("Lamp Oil") #Forest
         game_state.inventory.getItem("Lamp Oil") #Cave
         game_state.inventory.getItem("Rope") #Cave
-        game_state.inventory.getItem("Bombs") #Cave
-        game_state.inventory.getItem("Bombs") #Cave
+        game_state.inventory.getItem("Bomb") #Cave
+        game_state.inventory.getItem("Bomb") #Cave
         game_state.getRuby(9001)
+        for i in mysticalRocks:
+            game_state.inventory.getItem(i)
     elif query == "7":
         print("Good")
         if "Good" in endingsWithCustomText:
