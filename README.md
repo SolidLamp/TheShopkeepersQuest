@@ -4,11 +4,11 @@ An adventure game created for a school project.
 
 Inspired by:
 
-- Colossal Cave Adventure
-- King's Quest
-- Henry Stickmin
-- Minecraft: Story Mode
-- RTX Morshu: The Game
+- [Colossal Cave Adventure](https://en.wikipedia.org/wiki/Colossal_Cave_Adventure)
+- [King's Quest](https://en.wikipedia.org/wiki/King%27s_Quest_I)
+- [Henry Stickmin](https://simple.wikipedia.org/wiki/The_Henry_Stickmin_Collection)
+- [Minecraft: Story Mode](https://en.wikipedia.org/wiki/Minecraft%3A_Story_Mode)
+- [RTX Morshu: The Game](https://koshkamatew.itch.io/morshugame-demo)
 
 
 ## Usage and Requirements
