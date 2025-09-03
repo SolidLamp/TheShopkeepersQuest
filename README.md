@@ -1,3 +1,17 @@
-# Steamed Hams: The Game
-This is the repository containing a text-based meme game I originally created on the 25th of May, 2022, which was later uploaded to itch.io on the 13th of May, 2023.
-This is the original version before being refactored and improved, and it contains many errors and glitches.
+# The Shopkeeper's Quest
+
+An adventure game created for a school project.
+
+Inspired by:
+
+- Colossal Cave Adventure
+- King's Quest
+- Henry Stickmin
+- Minecraft: Story Mode
+- RTX Morshu: The Game
+
+
+## Usage and Requirements
+
+Requires Python 3.7+
+To run the game, you simply run the Python file with whatever your Python executable is named. It's a simple Python script, really.
