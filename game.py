@@ -141,6 +141,13 @@ game_state = gameState(
 )
 
 
+def caveItem():
+    if random.randrange(1,20) == 8:
+        foundRock = random.choice(mysticalRocks)
+        print2("On the ground, you find " + foundRock)
+        game_state.inventory.getItem(foundRock)
+
+
 ##
 
 
@@ -638,6 +645,7 @@ def cave(): #This is the worst and most fustrating part of the game. Have fun :)
         cave()
 
 def cave1():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
     query = option(["Go north","Go south"])
     if query == "1":
@@ -648,6 +656,7 @@ def cave1():
         cave1()
 
 def cave2():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north, south and west.")
     query = option(["Go north","Go south","Go west"])
     if query == "1":
@@ -660,6 +669,7 @@ def cave2():
         cave2()
 
 def cave3():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
     query = option(["Go north","Go south"])
     if query == "1":
@@ -670,6 +680,7 @@ def cave3():
         cave3()
 
 def cave4():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your east and south.")
     query = option(["Go east","Go south"])
     if query == "1":
@@ -680,6 +691,7 @@ def cave4():
         cave4()
 
 def cave5():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north, south and west.")
     query = option(["Go north","Go south","Go west"])
     if query == "1":
@@ -692,6 +704,7 @@ def cave5():
         cave5()
 
 def cave6():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your south and west.")
     query = option(["Go south","Go west"])
     if query == "1":
@@ -702,6 +715,7 @@ def cave6():
         cave6()
 
 def cave7():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north and east.")
     query = option(["Go north","Go east"])
     if query == "1":
@@ -712,6 +726,7 @@ def cave7():
         cave7()
 
 def cave8():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
     query = option(["Go north","Go south"])
     if query == "1":
@@ -722,6 +737,7 @@ def cave8():
         cave8()
 
 def cave9():
+    caveItem()
     if game_state.caveOpened == True:
         print2("You are within the cave. It is difficult to see. There is a path to your northeast, south and northwest.")
     else:
@@ -746,6 +762,7 @@ def cave9():
         cave9()
 
 def cave10():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north, east and southwest.")
     query = option(["Go north","Go south","Go southwest"])
     if query == "1":
@@ -758,6 +775,7 @@ def cave10():
         cave10()
 
 def cave11():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north, northeast and south.")
     query = option(["Go north","Go northeast","Go south"])
     if query == "1":
@@ -770,6 +788,7 @@ def cave11():
         cave11()
 
 def cave12():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north, northeast, southeast and south.")
     query = option(["Go north","Go northeast","Go southeast","Go south"])
     if query == "1":
@@ -784,6 +803,7 @@ def cave12():
         cave12()
 
 def cave13():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
     query = option(["Go east","Go west"])
     if query == "1":
@@ -794,6 +814,7 @@ def cave13():
         cave13()
 
 def cave14():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
     query = option(["Go east","Go west"])
     if query == "1":
@@ -804,6 +825,7 @@ def cave14():
         cave14()
 
 def cave15():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
     query = option(["Go east","Go west"])
     if query == "1":
@@ -814,6 +836,7 @@ def cave15():
         cave15()
 
 def cave16():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your north and west.")
     query = option(["Go north","Go west"])
     if query == "1":
@@ -824,6 +847,7 @@ def cave16():
         cave16()
 
 def cave17():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
     query = option(["Go east","Go west"])
     if query == "1":
@@ -834,6 +858,7 @@ def cave17():
         cave17()
 
 def cave18():
+    caveItem()
     print2("You are within the cave. It is difficult to see. There is a path to your south and west.")
     query = option(["Go south","Go west"])
     if query == "1":
@@ -843,16 +868,241 @@ def cave18():
     else:
         cave18()
 
+def cave19():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your north, southeast and southwest.")
+    query = option(["Go north","Go southeast","Go southwest"])
+    if query == "1":
+        cave20()
+    elif query == "2":
+        cave24()
+    elif query == "3":
+        cave11()
+    else:
+        cave19()
 
+def cave20():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your northeast and south.")
+    query = option(["Go northeast","Go south"])
+    if query == "1":
+        cave21()
+    elif query == "2":
+        cave19()
+    else:
+        cave20()
 
+def cave21():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your southeast and southwest.")
+    query = option(["Go southeast","Go southwest"])
+    if query == "1":
+        cave22()
+    elif query == "2":
+        cave20()
+    else:
+        cave21()
 
+def cave22():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your northwest and south.")
+    query = option(["Go northwest","Go south"])
+    if query == "1":
+        cave21()
+    elif query == "2":
+        cave23()
+    else:
+        cave22()
 
+def cave23():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your north and southwest.")
+    query = option(["Go north","Go southwest"])
+    if query == "1":
+        cave22()
+    elif query == "2":
+        cave24()
+    else:
+        cave23()
 
+def cave24():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your northeast and northwest.")
+    query = option(["Go northeast","Go northwest"])
+    if query == "1":
+        cave23()
+    elif query == "2":
+        cave19()
+    else:
+        cave24()
 
+def cave26():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
+    query = option(["Go north","Go south"])
+    if query == "1":
+        cave12()
+    elif query == "2":
+        cave27()
+    else:
+        cave26()
 
+def cave27():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your north, east and southeast.")
+    query = option(["Go north","Go east","Go southeast"])
+    if query == "1":
+        cave26()
+    elif query == "2":
+        cave28()
+    elif query == "3":
+        cave31()
+    else:
+        cave27()
 
+def cave28():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave29()
+    elif query == "2":
+        cave27()
+    else:
+        cave28()
 
+def cave29():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        if "Golden Idol" in game_state.inventory.keyItems:
+            print2("You see a Golden Idol on the floor of the cave.")
+            game_state.inventory.getKeyItem("Golden Idol")
+        cave30()
+    elif query == "2":
+        cave28()
+    else:
+        cave29()
 
+def cave30():
+    caveItem()
+    print2("You are within the cave. It is a dead-end. The only path is back where you came.")
+    query = option(["Go back"])
+    if query == "1":
+        cave29()
+    else:
+        cave30()
+
+def cave31():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your northwest and east.")
+    query = option(["Go northwest","Go east"])
+    if query == "1":
+        cave27()
+    elif query == "2":
+        cave32()
+    else:
+        cave31()
+
+def cave32():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave33()
+    elif query == "2":
+        cave31()
+    else:
+        cave32()
+
+def cave33():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave34()
+    elif query == "2":
+        cave32()
+    else:
+        cave33()
+
+def cave34():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your north and west.")
+    query = option(["Go north","Go west"])
+    if query == "1":
+        cave35()
+    elif query == "2":
+        cave33()
+    else:
+        cave34()
+
+def cave35():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
+    query = option(["Go north","Go south"])
+    if query == "1":
+        cave36()
+    elif query == "2":
+        cave34()
+    else:
+        cave35()
+
+def cave36():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your north and south.")
+    query = option(["Go north","Go south"])
+    if query == "1":
+        cave37()
+    elif query == "2":
+        cave35()
+    else:
+        cave36()
+
+def cave37():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your south and west. There is also a small pond.")
+    if "Fishing Rod" in game_state.inventory.keyItems:
+        query = option(["Go south","Go west","Fish in the pond"])
+    else:
+        query = option(["Go south","Go west"])
+    if query == "1":
+        cave36()
+    elif query == "2":
+        cave38()
+    elif query == "3":
+        if "Fishing Rod" in game_state.inventory.keyItems and not "Silver Amulet" in game_state.inventory.keyItems and game_state.fletcherOpen == True:
+            print2("You fish in the fishing pond and find a silver amulet.")
+            game_state.inventory.getKeyItem("Silver Amulet")
+        elif "Fishing Rod" in game_state.inventory.keyItems:
+            print2("You fish in the fishing pond but you find nothing.")
+        else:
+            cave37()
+    else:
+        cave37()
+
+def cave38():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
+    query = option(["Go east","Go west"])
+    if query == "1":
+        cave37()
+    elif query == "2":
+        cave39()
+    else:
+        cave38()
+
+def cave39():
+    caveItem()
+    print2("You are within the cave. It is difficult to see. There is a path to your east and south.")
+    query = option(["Go east","Go south"])
+    if query == "1":
+        cave38()
+    elif query == "2":
+        cave10()
+    else:
+        cave38()
 
 
 def action1():
@@ -877,7 +1127,7 @@ def action3():
 ##
 
 def debug():
-    query = option(["ShopkeeperQuote","ShopkeeperQuoteExit","Rusted Sword","Win the game","Secret ending","Get all items","Debug ending code","SHM Ending"])
+    query = option(["ShopkeeperQuote","ShopkeeperQuoteExit","Rusted Sword","Win the game","Secret ending","Get all items","Debug ending code","SHM Ending","Warp to pond","Warp to Golden Idol","Warp to rubble"])
     if query == "1": print(random.choice(ShopkeeperQuotes))
     elif query == "2": print(random.choice(ShopkeeperQuotesExit))
     elif query == "3": game_state.inventory.getKeyItem("Rusted Sword")
@@ -910,6 +1160,13 @@ def debug():
         print(defaultEndingText)
     elif query == "8":
         ending("SHM")
+    elif query == "9":
+        game_state.inventory.getKeyItem("Fishing Rod")
+        cave37()
+    elif query == "10":
+        cave29()
+    elif query == "11":
+        cave9()
 
 
 ##
