@@ -25,7 +25,10 @@ def option(a):
 
 
 
-def ending(a):
+def ending(ending):
+    if ending in endingsWithCustomText:
+      index = endingsWithCustomText.index(ending)
+      print(endingCustomText[index])
     print()
     print()
     print()
@@ -75,6 +78,13 @@ ShopkeeperQuotes = [
   "Have you seen the nearby forest? There's been some monkey sightings there."
   ]
   
+endingsWithCustomText = ["Good","Secret"]
+endingCustomText = [
+  "And so, overnight, all the people returned to the town, as if they had never left.\nSoon after, the town was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite, the prospering town, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to makemoney money.\n\nThe Shopkeeper's Quest\nSchool Project Edition\nCreated by SolidLamp\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\nYOU\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
+  "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe townspeople never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the town.\nThis, however, would not be the last of it...\na...and you knew that.\n\nThe Shopkeeper's Quest\nSchool Project Edition\nCreated by SolidLamp\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\nYOU\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
+  ]
+
+
 print(random.choice(ShopkeeperQuotes))
 print(random.choice(ShopkeeperQuotesExit))
 
@@ -195,10 +205,10 @@ def forest():
 
 def forest2():
     print2("You are deep in the forest. It is dim, and difficult to see.")
-    query = option(["Go further in","Leave"])
-    if query == "1":
+    if game_state.inventory. = option(["Leave","Go further in"])
+    if query == "2":
         forest3()
-    elif query == "2":
+    elif query == "1":
         forest()
     else:
         forest2()
@@ -474,8 +484,13 @@ def shop():
           print2("\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m")
         shop()
     elif query == "4":
-        cursedItems = len({"Rusted Sword","Amber Necklace","Golden Idol"} & set(game_state.inventory.keyItems))
-        if cursedItems > 0:
+        cursedItems = len({"Rusted Sword","Amber Necklace","Golden Idol"} & set(game_state.inventory.keyItems)
+        if cursedItems == 3:
+          print2("\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'")
+          time.sleep(0.25)
+          print2("\033[33m'Oh, and just one more thing: thank you.'\033[0m")
+          ending("Good")
+        elif cursedItems > 0:
           print2(f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m")
         print2("\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m")
         shop()
