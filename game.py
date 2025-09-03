@@ -2,8 +2,10 @@ import time
 from dataclasses import dataclass
 import random
 
-def print2(text, newline=True):
+def print2(text, newline=True, pauseAtNewline=0.0, endingChar=False):
     for char in text:
+        if char == "\n":
+            time.sleep(pauseAtNewline)
         print(char, end="", flush=True)
         time.sleep(0.01)
     if newline: print()
@@ -20,15 +22,21 @@ def option(a):
       print(game_state.inventory)
     if query == "d":
       print(game_state)
+      debug()
+    if query == "q":
+        exit()
     print()
     return(query)
 
 
 
-def ending(ending):
-    if ending in endingsWithCustomText:
-      index = endingsWithCustomText.index(ending)
-      print(endingCustomText[index])
+def ending(end):
+    if end in endingsWithCustomText:
+      index = endingsWithCustomText.index(end)
+      print2(endingCustomText[index].replace("|",end), pauseAtNewline=0.65)
+    print("\n\n")
+    print2(defaultEndingText.replace("|",end), pauseAtNewline=0.65)
+
     print()
     print()
     print()
@@ -36,7 +44,7 @@ def ending(ending):
     print("You achieved the:")
     time.sleep(0.25)
     print()
-    print("\033[1m" + a + "\033[0m")
+    print("\033[1m" + end + "\033[0m")
     time.sleep(0.25)
     print()
     print("Ending.")
@@ -78,15 +86,14 @@ ShopkeeperQuotes = [
   "Have you seen the nearby forest? There's been some monkey sightings there."
   ]
   
-endingsWithCustomText = ["Good","Secret"]
+endingsWithCustomText = ["Good","Secret","SHM"]
 endingCustomText = [
-  "And so, overnight, all the people returned to the town, as if they had never left.\nSoon after, the town was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite, the prospering town, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to makemoney money.\n\nThe Shopkeeper's Quest\nSchool Project Edition\nCreated by SolidLamp\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\nYOU\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
-  "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe townspeople never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the town.\nThis, however, would not be the last of it...\na...and you knew that.\n\nThe Shopkeeper's Quest\nSchool Project Edition\nCreated by SolidLamp\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\nYOU\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
+  "And so, overnight, all the people returned to the town, as if they had never left.\nSoon after, the town was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite, the prospering town, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
+  "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe townspeople never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the town.\nThis, however, would not be the last of it...\n...and you knew that.",
+  "You achieved the\n|\nEnding.\nTry Again?",
   ]
+defaultEndingText = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
 
-
-print(random.choice(ShopkeeperQuotes))
-print(random.choice(ShopkeeperQuotesExit))
 
 @dataclass
 class Inventory:
@@ -128,7 +135,9 @@ game_state = gameState(
     inventory=Inventory(items=[])
 )
 
-game_state.inventory.getKeyItem("Rusted Sword")
+
+##
+
 
 def intro():
     print("\033[36m\033[40m" + r"""___ _  _ ____ 
@@ -156,7 +165,7 @@ ____ _  _ ____ ____ ___
 
 def gameLoop():
     print2("You are standing in a field. There is a road to the north, leading to a town, a forest to the east, a cave to the south, a shop and bazaar to the west, and there are some bushes nearby.")
-    query = option(["Go to the forest","Follow the road to town","Explore the cave","Go to the shop","Go to the bazaar"])
+    query = option(["Go to the forest","Follow the road to town","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
     if query == "1":
         forest()
     elif query == "2":
@@ -179,7 +188,7 @@ def gameLoop():
 
 def field():
     print2("You are standing in a field.")
-    query = option(["Go to the forest","Follow the road to town","Explore the cave","Go to the shop","Go to the bazaar"])
+    query = option(["Go to the forest","Follow the road to town","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
     if query == "1":
         forest()
     elif query == "2":
@@ -205,9 +214,12 @@ def forest():
 
 def forest2():
     print2("You are deep in the forest. It is dim, and difficult to see.")
-    if game_state.inventory. = option(["Leave","Go further in"])
+    if "Rusted Sword" in game_state.inventory.keyItems: 
+        query = option(["Leave"])
+    else:
+        query = option(["Leave","Go further in"])
     if query == "2":
-        forest3()
+        if "Rusted Sword" in game_state.inventory.keyItems: forest3()
     elif query == "1":
         forest()
     else:
@@ -484,7 +496,7 @@ def shop():
           print2("\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m")
         shop()
     elif query == "4":
-        cursedItems = len({"Rusted Sword","Amber Necklace","Golden Idol"} & set(game_state.inventory.keyItems)
+        cursedItems = len({"Rusted Sword","Amber Necklace","Golden Idol"}) & set(game_state.inventory.keyItems)
         if cursedItems == 3:
           print2("\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'")
           time.sleep(0.25)
@@ -519,5 +531,43 @@ def action2():
 def action3():
     print2("")
 
-intro()
+
+##
+
+def debug():
+    query = option(["ShopkeeperQuote","ShopkeeperQuoteExit","Rusted Sword","Win the game","Secret ending","Get all items","Debug ending code","SHM Ending"])
+    if query == "1": print(random.choice(ShopkeeperQuotes))
+    elif query == "2": print(random.choice(ShopkeeperQuotesExit))
+    elif query == "3": game_state.inventory.getKeyItem("Rusted Sword")
+    elif query == "4": ending("Good")
+    elif query == "5": ending("Secret")
+    elif query == "6": 
+        game_state.inventory.getKeyItem("Rusted Sword")
+        game_state.inventory.getKeyItem("Amber Necklace")
+        game_state.inventory.getKeyItem("Golden Idol")
+        game_state.inventory.getKeyItem("Ancient Key")
+        game_state.inventory.getItem("Fishing Rod")
+        game_state.inventory.getItem("Lamp Oil") #Forest
+        game_state.inventory.getItem("Lamp Oil") #Cave
+        game_state.inventory.getItem("Rope") #Cave
+        game_state.inventory.getItem("Bombs") #Cave
+        game_state.inventory.getItem("Bombs") #Cave
+        game_state.getRuby(9001)
+    elif query == "7":
+        print("Good")
+        if "Good" in endingsWithCustomText:
+            print("Good is in there")
+        else: print("Not this time")
+        index = endingsWithCustomText.index("Good")
+        print(index)
+        print2(endingCustomText[index], pauseAtNewline=0.65)
+        print(defaultEndingText)
+    elif query == "8":
+        ending("SHM")
+
+
+##
+
+while True:
+    intro()
 exit
