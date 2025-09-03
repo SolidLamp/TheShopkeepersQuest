@@ -37,23 +37,6 @@ def ending(end):
     print("\n\n")
     print2(defaultEndingText.replace("|",end), pauseAtNewline=0.65)
 
-    print()
-    print()
-    print()
-    time.sleep(0.25)
-    print("You achieved the:")
-    time.sleep(0.25)
-    print()
-    print("\033[1m" + end + "\033[0m")
-    time.sleep(0.25)
-    print()
-    print("Ending.")
-    time.sleep(0.5)
-    print()
-    print()
-    print()
-    print("Try again?")
-
 def lose(text):
     print("\n\n")
     time.sleep(0.25)
@@ -88,8 +71,8 @@ ShopkeeperQuotes = [
   
 endingsWithCustomText = ["Good","Secret","SHM"]
 endingCustomText = [
-  "And so, overnight, all the people returned to the town, as if they had never left.\nSoon after, the town was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite, the prospering town, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
-  "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe townspeople never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the town.\nThis, however, would not be the last of it...\n...and you knew that.",
+  "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite, the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
+  "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
   "You achieved the\n|\nEnding.\nTry Again?",
   ]
 defaultEndingText = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
@@ -153,19 +136,21 @@ ____ _  _ ____ ____ ___
 |_\| |__| |___ ___]  |  
                         """ + "\033[0m")
     print2("Use the numbers to choose options")
-    query = option(["Begin","Quit"])
+    query = option(["Begin","Skip Intro","Quit"])
     if query == "1":
-        #print2("You are a travelling merchant, approaching a new town to sell your wares in another region.\nAs you approach the town, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little town of Llanerchwyrd.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them all.\nAny that resided within the town limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the town with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?' he continues, 'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic, however.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a silver _.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main town.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
+        print2("You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little village of Llanerchwyrd.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them all.\nAny that resided within the village limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?' he continues, 'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic, however.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a silver _.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
         print()
         gameLoop()
+    if query == "2":
+        field()
     else:
         exit()
 
 #altar uuddlrlrba
 
 def gameLoop():
-    print2("You are standing in a field. There is a road to the north, leading to a town, a forest to the east, a cave to the south, a shop and bazaar to the west, and there are some bushes nearby.")
-    query = option(["Go to the forest","Follow the road to town","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
+    print2("You are standing in a field. There is a road to the north, leading to a village, a forest to the east, a cave to the south, a shop and bazaar to the west, and there are some bushes nearby.")
+    query = option(["Go to the forest","Follow the road to village","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
     if query == "1":
         forest()
     elif query == "2":
@@ -188,7 +173,7 @@ def gameLoop():
 
 def field():
     print2("You are standing in a field.")
-    query = option(["Go to the forest","Follow the road to town","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
+    query = option(["Go to the forest","Follow the road to village","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
     if query == "1":
         forest()
     elif query == "2":
@@ -249,7 +234,7 @@ def forest3():
 
 def road():
     print2("You follow the road, but although it looks like a short distance, it feels like a long journey, as if it were a mile long. You wish for a mule to travel on.")
-    query = option(["Go to the town","Go to the field"])
+    query = option(["Go to the village","Go to the field"])
     if query == "1":
         townArrival()
     elif query == "2":
@@ -258,7 +243,7 @@ def road():
         action1()
 
 def townArrival():
-    print2("You follow the road to town. It seems barren and no one is there.")
+    print2("You follow the road to village. It seems barren and no one is there.")
     query = option(["Follow the High Street further","Go Back"])
     if query == "1":
         door()
@@ -268,7 +253,7 @@ def townArrival():
         town()
 
 def town():
-    print2("You are in the town. It seems barren and no one is there.")
+    print2("You are in the village. It seems barren and no one is there.")
     query = option(["Follow the High Street further","Go Back"])
     if query == "1":
         town2()
@@ -278,8 +263,8 @@ def town():
         town()
 
 def town2():
-    print2("You are in the high street of the town. The town centre is to your north.")
-    query = option(["Go to the town centre","Go South"])
+    print2("You are in the high street of the village. The village centre is to your north.")
+    query = option(["Go to the village centre","Go South"])
     if query == "1":
         town3()
     elif query == "2":
@@ -288,7 +273,7 @@ def town2():
         town2()
 
 def town3():
-    print2("You are in the centre of town. There are paths each direction, with a fountain in the middle.")
+    print2("You are in the centre of the village. There are paths each direction, with a fountain in the middle.")
     query = option(["Go North","Go East","Go South","Go West","Go to the Fountain"])
     if query == "1":
         townNorth()
@@ -304,7 +289,7 @@ def town3():
         town3()
 
 def fountain():
-    print2("You are at the fountain in the town centre.")
+    print2("You are at the fountain in the village centre.")
     query = option(["Admire it","Throw a ruby in for good luck","Go back"])
     if query == "1":
         print2("You admire the fountain.")
@@ -339,7 +324,7 @@ def note():
 
 def townNorth():
     print2("You enter an empty street of market stalls. A northern route leads to a smaller street.")
-    query = option(["Go down the smaller street","Go to the Town Centre."])
+    query = option(["Go down the smaller street","Go to the Village Centre."])
     if query == "1":
         door()
     elif query == "2":
@@ -511,6 +496,75 @@ def shop():
         field()
     else:
         shop() 
+
+
+def bazaar():
+    print2("You are in the bazaar. There is not many attended stalls around. There appears to be a fisherman at a stall, a fletcher, and a mineral collector.")
+    query = option(["Go to the fisherman","Go to the fletcher","Go to the mineral collector","Go to the field"])
+    if query == "1":
+        fishermanStall()
+    elif query == "2":
+        fletcherStall()
+    elif query == "3":
+        mineralStall()
+    elif query == "4":
+        field()
+    else:
+        bazaar()
+
+def fishermanStall():
+    print2("Current Rubies:" + str(game_state.rubies) + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies")
+    print2("\033[36m'What are you here to buy?'\033[0m")
+    query = option(["Purchase a fillet of cod","Purchase a fillet of salmon","Purchase smoked trout","Purchase a jar of tuna","Purchase a fillet of smoked haddock","Talk","Leave"])
+    if query == "1":
+        if game_state.rubies >= 2:
+          game_state.rubies = game_state.rubies - 2
+          game_state.inventory.getItem("Fillet of Cod")
+        else:
+          print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
+        bazaar()
+    elif query == "2":
+        if game_state.rubies >= 2:
+          game_state.rubies = game_state.rubies - 2
+          game_state.inventory.getItem("Fillet of Salmon")
+        else:
+          print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
+        bazaar()
+    elif query == "3":
+        if game_state.rubies >= 9:
+          game_state.rubies = game_state.rubies - 9
+          game_state.inventory.getItem("Smoked Trout")
+        else:
+          print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
+        bazaar()
+    elif query == "4":
+        if game_state.rubies >= 3:
+          game_state.rubies = game_state.rubies - 3
+          game_state.inventory.getItem("Jar of Tuna")
+        else:
+          print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
+        bazaar()
+    elif query == "5":
+        if game_state.rubies >= 6:
+          game_state.rubies = game_state.rubies - 6
+          game_state.inventory.getItem("Fillet of Smoked Haddock")
+        else:
+          print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
+        bazaar()
+    elif query == "6":
+        fishBought = len({"Fillet of Cod","Fillet of Salmon","Smoked Trout","Jar of Tuna","Fillet of Smoked Haddock"}) & set(game_state.inventory.keyItems)
+        if fishBought >= 1 and "Fishing Rod" not in game_state.inventory.items:
+            print2("\033[36m'You know, I recently got a new fishing rod. Say, you can have my old one, since you bought something.'\033[0m")
+            game_state.inventory.getItem("Fishing Rod")
+        else:
+            print2("\033[36m'You know, I'd be more in the mood to talk if you bought something.'\033[0m")
+    elif query == "7":
+        bazaar()
+    else:
+        print2("WHAT?")
+        action1()
+
+print2("\033[36m'That's not really enough.'\033[0m")
 
 
 def action1():
