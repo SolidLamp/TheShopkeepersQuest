@@ -10,19 +10,23 @@ def print2(text, newline=True, pauseAtNewline=0.0, endingChar=False):
         time.sleep(0.01)
     if newline: print()
 
-def option(a):
+def option(choice, Inventory=True):
     print()
-    for i, options in enumerate(a, start=1):
+    for i, options in enumerate(choice, start=1):
         print2(f"{i}. {options}")
-    print2("i. Inventory")
+    if Inventory == True:
+        print2("i. Inventory")
     if True == True:
       print2("d. debug")
     query=input(">>> ")
-    if query == "i":
+    if query == "i" and Inventory == True:
       print(game_state.inventory)
     if query == "d":
       print(game_state)
       debug()
+    if query == "xyzzy":
+      print(game_state)
+      debug()   
     if query == "q":
         exit()
     print()
@@ -79,24 +83,24 @@ defaultEndingText = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edit
 
 mysticalRocks = [
     "What you think is an Emerald",
-    "A Funny-looking Rock"
-    "A Chunk of Marble"
-    "Some Tourmaline, maybe"
-    "A Stone that looks kind of like a face"
-    "A Weird shard of something"
-    "Some strange stone"
-    "a beautiful, azure blue rock"
+    "A Funny-looking Rock",
+    "A Chunk of Marble",
+    "Some Tourmaline, maybe",
+    "A Stone that looks kind of like a face",
+    "A Weird shard of something",
+    "Some strange stone",
+    "a beautiful, azure blue rock",
 ]
 
 rockPrices = [
-    "80"
-    "5"
-    "15"
-    "50"
-    "150"
-    "20"
-    "100"
-    "500"
+    80,
+    5,
+    15,
+    50,
+    150,
+    20,
+    100,
+    500,
 ]
 
 @dataclass
@@ -165,7 +169,7 @@ ____ _  _ ____ ____ ___
 |_\| |__| |___ ___]  |  
                         """ + "\033[0m")
     print2("Use the numbers to choose options")
-    query = option(["Begin","Skip Intro","Quit"])
+    query = option(["Begin","Skip Intro","Quit"], Inventory=False)
     if query == "1":
         print2("You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little village.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them..\nAny that resided within the village limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?'\033[0m he continues, \033[33m'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
         print()
@@ -385,7 +389,7 @@ def lock():
   
 def unlock():
     print2("You unlock the mysterious door with the Ancient Key.")
-    query = option(["Continue"])
+    query = option(["Continue"], Inventory=False)
     if query == "1":
         secret()
     else:
@@ -394,7 +398,7 @@ def unlock():
 
 def secret():
     print2("You go through the door. It is pitch-black.")
-    query = option(["Continue"])
+    query = option(["Continue"], Inventory=False)
     if query == "1":
         secret2()
     else:
@@ -403,7 +407,7 @@ def secret():
 
 def secret2():
     print2("As you continue, everything goes pitch-black.")
-    query = option(["Continue"])
+    query = option(["Continue"], Inventory=False)
     if query == "1":
         secret3()
     else:
@@ -412,7 +416,7 @@ def secret2():
 
 def secret3():
     print2("As you continue, you see a light at the end.")
-    query = option(["Continue"])
+    query = option(["Continue"], Inventory=False)
     if query == "1":
         secret4()
     else:
@@ -421,7 +425,7 @@ def secret3():
 
 def secret4():
     print2("Eventually, you get to the end, and can go through the illuminated exit.")
-    query = option(["Continue"])
+    query = option(["Continue"], Inventory=False)
     if query == "1":
         secret5()
     else:
@@ -458,7 +462,7 @@ def secret5():
 
 def secret6():
     print2("You are in the front room of " + game_state.shopkeeperName + "'s shop.")
-    query = option(["Become " + game_state.shopkeeperName])
+    query = option(["Become " + game_state.shopkeeperName], Inventory=False)
     if query == "1":
         print2("You become " + game_state.shopkeeperName + ". The people eventually return. You begin selling your wares again, and you finally understand the full circumstances of these events.")
         ending("Secret")
@@ -633,6 +637,26 @@ def fletcherStall():
     else:
         fletcherStall()
 
+def mineralStall():
+    print2("\033[32m'Hello, I collect minerals. If you find any minerals, give them to me.'\033[0m")
+    query = option(["Sell minerals","Leave"])
+    if query == "1":
+        rocksYouHave = set(mysticalRocks) & set(game_state.inventory.items)
+        if rocksYouHave == 0:
+            print2("\033[32m'I'm sorry, but you don't appear to have any minerals. Good day.'\033[0m")
+        else:
+            for item in [item for item in list(game_state.inventory.items) if item in mysticalRocks]: #This is not that readable but it does stuff basically
+                index = mysticalRocks.index(item)
+                value = rockPrices[index]
+                game_state.getRuby(value)
+                game_state.inventory.items.remove(item)
+            print2("\033[32m'Thank you so much. These will be excellent to add to my collection.'\033[0m")
+        bazaar()
+    elif query == "2":
+        bazaar()
+    else:
+        mineralStall()
+
 
 def cave(): #This is the worst and most fustrating part of the game. Have fun :)
     print2("You are at the cave's entrance.")
@@ -742,9 +766,12 @@ def cave9():
         print2("You are within the cave. It is difficult to see. There is a path to your northeast, south and northwest.")
     else:
         print2("You are within the cave. It is difficult to see. There is a path to your northeast and south. There is a lot of rubble to your northwest.")
-    if game_state.caveOpened == True: query = option(["Go northeast","Go south","Go northwest"])
-    elif "Bomb" in game_state.inventory.items: query = option(["Go northeast","Go south","Destroy the rubble with a bomb"])
-    query = option(["Go northeast","Go south"])
+    if game_state.caveOpened == True:
+        query = option(["Go northeast","Go south","Go northwest"])
+    elif "Bomb" in game_state.inventory.items:
+        query = option(["Go northeast","Go south","Destroy the rubble with a bomb"])
+    else:
+        query = option(["Go northeast","Go south"])
     if query == "1":
         cave10()
     elif query == "2":
@@ -755,8 +782,10 @@ def cave9():
         elif "Bomb" in game_state.inventory.items:
             print2("You blow up the rubble. Light shines through, and a path to the surface appears.")
             game_state.caveOpened = True
+            game_state.inventory.items
             cave9()
         else:
+            print(343)
             cave9()
     else:
         cave9()
