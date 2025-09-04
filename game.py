@@ -16,14 +16,9 @@ def option(choice, Inventory=True):
         print2(f"{i}. {options}")
     if Inventory == True:
         print2("i. Inventory")
-    if True == True:
-      print2("d. debug")
     query=input(">>> ")
     if query == "i" and Inventory == True:
       print(game_state.inventory)
-    if query == "d":
-      print(game_state)
-      debug()
     if query == "xyzzy":
       print(game_state)
       debug()   
@@ -40,6 +35,7 @@ def ending(end):
       print2(endingCustomText[index].replace("|",end), pauseAtNewline=0.65)
     print("\n\n")
     print2(defaultEndingText.replace("|",end), pauseAtNewline=0.65)
+    time.sleep(2.5)
 
 def lose(text):
     print("\n\n")
@@ -75,7 +71,7 @@ ShopkeeperQuotes = [
   
 endingsWithCustomText = ["Good","Secret","SHM"]
 endingCustomText = [
-  "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite, the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
+  "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
   "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
   "You achieved the\n|\nEnding.\nTry Again?",
   ]
@@ -171,7 +167,7 @@ ____ _  _ ____ ____ ___
     print2("Use the numbers to choose options")
     query = option(["Begin","Skip Intro","Quit"], Inventory=False)
     if query == "1":
-        print2("You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little village.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them..\nAny that resided within the village limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?'\033[0m he continues, \033[33m'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the limits of the main village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
+        print2("You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just outside the limits of our little village.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them..\nAny that resided within the village limits have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?'\033[0m he continues, \033[33m'There's an old legend that if all seems to disappear overnight, then this marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the main limits of the village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m")
         print()
         gameLoop()
     if query == "2":
@@ -183,7 +179,7 @@ ____ _  _ ____ ____ ___
 
 def gameLoop():
     print2("You are standing in a field. There is a road to the north, leading to a village, a forest to the east, a cave to the south, a shop and bazaar to the west, and there are some bushes nearby.")
-    query = option(["Go to the forest","Follow the road to village","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
+    query = option(["Go to the forest","Follow the road to the village","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
     if query == "1":
         forest()
     elif query == "2":
@@ -206,7 +202,7 @@ def gameLoop():
 
 def field():
     print2("You are standing in a field.")
-    query = option(["Go to the forest","Follow the road to village","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
+    query = option(["Go to the forest","Follow the road to the village","Explore the cave","Go to " + game_state.shopkeeperName + "'s shop","Go to the bazaar"])
     if query == "1":
         forest()
     elif query == "2":
@@ -222,10 +218,10 @@ def field():
 
 def forest():
     print2("You come to the opening of the forest. The forest is vast and the trees tower over you.")
-    query = option(["Go further in","Leave"])
-    if query == "1":
+    query = option(["Leave","Go further in"])
+    if query == "2":
         forest2()
-    elif query == "2":
+    elif query == "1":
         field()
     else:
         forest()
@@ -237,7 +233,8 @@ def forest2():
     else:
         query = option(["Leave","Go further in"])
     if query == "2":
-        if "Rusted Sword" in game_state.inventory.keyItems: forest3()
+        if "Rusted Sword" not in game_state.inventory.keyItems:
+            forest3()
     elif query == "1":
         forest()
     else:
@@ -247,7 +244,7 @@ def forest3():
     print2("You come to a clearing, deep in the forest. There is a bonobo sitting, facing you")
     query = option(["Fight the bonobo","Leave"])
     if query == "1":
-        if 1 == 1:
+        if "Bow and Arrow" in game_state.inventory.keyItems:
             print2("You manage to defeat the bonobo, using your weapon.")
             print2("You manage to find a chest, containing 15 rubies!")
             game_state.getRuby(15)
@@ -276,10 +273,10 @@ def road():
         action1()
 
 def townArrival():
-    print2("You follow the road to village. It seems barren and no one is there.")
+    print2("You follow the road to the village. It seems barren and no one is there.")
     query = option(["Follow the High Street further","Go Back"])
     if query == "1":
-        door()
+        town2()
     elif query == "2":
         road()
     else:
@@ -328,8 +325,11 @@ def fountain():
         print2("You admire the fountain.")
         fountain()
     elif query == "2":
-        print2("You throw a ruby in")
-        fountain() #TODO
+        print2("You throw a ruby in for good luck.")
+        game_state.rubies = game_state.rubies - 1
+        print2("Out of the fountain, a key rises to the surface of the water.")
+        game_state.inventory.getKeyItem("Ancient Key")
+        fountain()
     elif query == "3":
         town3()
     else:
@@ -367,12 +367,16 @@ def townNorth():
 
 def door():
     print("You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?")
-    query = option(["Attempt to turn the handle","Unlock the door with the Ancient Key","Go back"])
+    if "Ancient Key" in game_state.inventory.keyItems:
+        query = option(["Attempt to turn the handle","Go back","Unlock the door with the Ancient Key"])
+    else:
+        query = option(["Attempt to turn the handle","Go back"])
     if query == "1":
         lock()
-    elif query == "2":
-        unlock()
     elif query == "3":
+        if "Ancient Key" in game_state.inventory.keyItems:
+            unlock()
+    elif query == "2":
         town3()
     else:
         door()
@@ -437,7 +441,7 @@ def secret5():
     query = option(["Take some rubies","Take some lamp oil","Take some rope","Take some bombs","Go through to the front","Inspect the letter"])
     if query == "1":
         print2("You take some rubies.")
-        getRuby(9000)
+        game_state.getRuby(9000)
         secret5()
     elif query == "2":
         print2("You take some lamp oil.")
@@ -474,21 +478,418 @@ def townWest():
     print2("There is a large square, with houses all around. There is an alley.")
     query = option(["Go down the alley","Go to the Town Centre"])
     if query == "1":
-        maze1()
+        maze13()
     elif query == "2":
         town3()
     else:
         townWest() 
 
-def maze1():
-    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar. You believe the alley you entered from is to the South.")
+def maze11(): # :(
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
     query = option(["Go north","Go east","Go south","Go west"])
     if query == "1":
-        maze1()
+        maze21()
     elif query == "2":
-        town3()
+        print2("Dead end.")
+        maze11()
+    elif query == "3":
+        print2("Dead end.")
+        maze11()
+    elif query == "4":
+        print2("Dead end.")
+        maze11()
     else:
-        townWest() 
+        maze11() 
+
+def maze12(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze22()
+    elif query == "2":
+        maze13()
+    elif query == "3":
+        print2("Dead end.")
+        maze12()
+    elif query == "4":
+        print2("Dead end.")
+        maze12()
+    else:
+        maze12() 
+
+def maze13(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze23()
+    elif query == "2":
+        maze14()
+    elif query == "3":
+        townWest()
+    elif query == "4":
+        maze12()
+    else:
+        maze13() 
+
+def maze14(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze24()
+    elif query == "2":
+        print2("Dead end.")
+        maze14()
+    elif query == "3":
+        print2("Dead end.")
+        maze14()
+    elif query == "4":
+        maze13()
+    else:
+        maze14() 
+
+def maze15(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze25()
+    elif query == "2":
+        print2("Dead end.")
+        maze15()
+    elif query == "3":
+        print2("Dead end.")
+        maze15()
+    elif query == "4":
+        print2("Dead end.")
+        maze15()
+    else:
+        maze15() 
+
+def maze21(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze21()
+    elif query == "2":
+        maze22()
+    elif query == "3":
+        maze11()
+    elif query == "4":
+        print2("Dead end.")
+        maze21()
+    else:
+        maze21() 
+
+def maze22(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze22()
+    elif query == "2":
+        maze23()
+    elif query == "3":
+        maze12()
+    elif query == "4":
+        maze21()
+    else:
+        maze22() 
+
+def maze23(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze23()
+    elif query == "2":
+        maze24()
+    elif query == "3":
+        maze13()
+    elif query == "4":
+        maze22()
+    else:
+        maze23() 
+
+def maze24(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze34()
+    elif query == "2":
+        print2("Dead end.")
+        maze24()
+    elif query == "3":
+        maze14()
+    elif query == "4":
+        maze23()
+    else:
+        maze24() 
+
+def maze25(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze35()
+    elif query == "2":
+        print2("Dead end.")
+        maze25()
+    elif query == "3":
+        maze15()
+    elif query == "4":
+        print2("Dead end.")
+        maze25()
+    else:
+        maze25() 
+
+def maze31(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze41()
+    elif query == "2":
+        print2("Dead end.")
+        maze31()
+    elif query == "3":
+        print2("Dead end.")
+        maze31()
+    elif query == "4":
+        print2("Dead end.")
+        maze31()
+    else:
+        maze31() 
+
+def maze32(): 
+    if game_state.caveOpened == True:
+        print2("You are in a maze of twisty little alleys, all alike. There is a cave opening here. Something about this seems familiar.")
+        query = option(["Go north","Go east","Go south","Go west","Go into the cave"])
+    else:
+        print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+        query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze32()
+    elif query == "2":
+        maze33()
+    elif query == "3":
+        print2("Dead end.")
+        maze32()
+    elif query == "4":
+        print2("Dead end.")
+        maze32()
+    elif query == "5" and game_state.caveOpened == True:
+        cave9()
+    else:
+        maze32() 
+
+def maze33(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze43()
+    elif query == "2":
+        print2("Dead end.")
+        maze33()
+    elif query == "3":
+        print2("Dead end.")
+        maze33()
+    elif query == "4":
+        maze32()
+    else:
+        maze33() 
+
+def maze34(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze34()
+    elif query == "2":
+        maze35()
+    elif query == "3":
+        maze24()
+    elif query == "4":
+        print2("Dead end.")
+        maze34()
+    else:
+        maze34() 
+
+def maze35(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze45()
+    elif query == "2":
+        print2("Dead end.")
+        maze35()
+    elif query == "3":
+        maze25()
+    elif query == "4":
+        maze34()
+    else:
+        maze35() 
+
+def maze41(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze51()
+    elif query == "2":
+        maze42()
+    elif query == "3":
+        maze31()
+    elif query == "4":
+        print2("Dead end.")
+        maze41()
+    else:
+        maze41() 
+
+def maze42(): 
+    if "Amber Necklace" not in game_state.inventory.keyItems:
+        print2("You see, on the ground, a beautiful necklace.")
+        game_state.inventory.getKeyItem("Amber Necklace")
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze42()
+    elif query == "2":
+        print2("Dead end.")
+        maze42()
+    elif query == "3":
+        print2("Dead end.")
+        maze42()
+    elif query == "4":
+        maze41()
+    else:
+        maze42() 
+
+def maze43(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze53()
+    elif query == "2":
+        print2("Dead end.")
+        maze43()
+    elif query == "3":
+        maze33()
+    elif query == "4":
+        print2("Dead end.")
+        maze43()
+    else:
+        maze43() 
+
+def maze44(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze44()
+    elif query == "2":
+        maze45()
+    elif query == "3":
+        print2("Dead end.")
+        maze44()
+    elif query == "4":
+        print2("Dead end.")
+        maze44()
+    else:
+        maze44() 
+
+def maze45(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        maze55()
+    elif query == "2":
+        print2("Dead end.")
+        maze45()
+    elif query == "3":
+        maze35()
+    elif query == "4":
+        print2("Dead end.")
+        maze45()
+    else:
+        maze45() 
+
+def maze51(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze51()
+    elif query == "2":
+        maze52()
+    elif query == "3":
+        maze41()
+    elif query == "4":
+        print2("Dead end.")
+        maze51()
+    else:
+        maze51()
+
+def maze52(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze52()
+    elif query == "2":
+        maze53()
+    elif query == "3":
+        print2("Dead end.")
+        maze52()
+    elif query == "4":
+        maze51()
+    else:
+        maze52() 
+
+def maze53(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze53()
+    elif query == "2":
+        maze54()
+    elif query == "3":
+        maze43()
+    elif query == "4":
+        maze52()
+    else:
+        maze53() 
+
+def maze54(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze54()
+    elif query == "2":
+        maze55()
+    elif query == "3":
+        print2("Dead end.")
+        maze54()
+    elif query == "4":
+        maze53()
+    else:
+        maze54() 
+
+def maze55(): 
+    print2("You are in a maze of twisty little alleys, all alike. Something about this seems familiar.")
+    query = option(["Go north","Go east","Go south","Go west"])
+    if query == "1":
+        print2("Dead end.")
+        maze55()
+    elif query == "2":
+        print2("Dead end.")
+        maze55()
+    elif query == "3":
+        maze45()
+    elif query == "4":
+        maze53()
+    else:
+        maze55() 
 
 
 def shop():
@@ -517,11 +918,12 @@ def shop():
           print2("\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m")
         shop()
     elif query == "4":
-        cursedItems = len({"Rusted Sword","Amber Necklace","Golden Idol"}) & set(game_state.inventory.keyItems)
+        cursedItems = len({"Rusted Sword","Amber Necklace","Golden Idol"} & set(game_state.inventory.keyItems))
         if cursedItems == 3:
           print2("\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'")
-          time.sleep(0.25)
+          time.sleep(0.75)
           print2("\033[33m'Oh, and just one more thing: thank you.'\033[0m")
+          time.sleep(1.5)
           ending("Good")
         elif cursedItems > 0:
           print2(f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m")
@@ -1005,7 +1407,7 @@ def cave29():
     print2("You are within the cave. It is difficult to see. There is a path to your east and west.")
     query = option(["Go east","Go west"])
     if query == "1":
-        if "Golden Idol" in game_state.inventory.keyItems:
+        if "Golden Idol" not in game_state.inventory.keyItems:
             print2("You see a Golden Idol on the floor of the cave.")
             game_state.inventory.getKeyItem("Golden Idol")
         cave30()
@@ -1156,7 +1558,7 @@ def action3():
 ##
 
 def debug():
-    query = option(["ShopkeeperQuote","ShopkeeperQuoteExit","Rusted Sword","Win the game","Secret ending","Get all items","Debug ending code","SHM Ending","Warp to pond","Warp to Golden Idol","Warp to rubble"])
+    query = option(["ShopkeeperQuote","ShopkeeperQuoteExit","Rusted Sword","Win the game","Secret ending","Get all items","Debug ending code","SHM Ending","Warp to pond","Warp to Golden Idol","Warp to rubble","Warp to end of maze","Warp to starting area","Give over 9000 rubies"])
     if query == "1": print(random.choice(ShopkeeperQuotes))
     elif query == "2": print(random.choice(ShopkeeperQuotesExit))
     elif query == "3": game_state.inventory.getKeyItem("Rusted Sword")
@@ -1196,6 +1598,12 @@ def debug():
         cave29()
     elif query == "11":
         cave9()
+    elif query == "12":
+        maze41()
+    elif query == "13":
+        field()
+    elif query == "14":
+        game_state.getRuby(9001)
 
 
 ##
