@@ -13,5 +13,5 @@ Inspired by:
 
 ## Usage and Requirements
 
-Requires Python 3.7+
-To run the game, you simply run the Python file with whatever your Python executable is named. It's a simple Python script, really.
+- Requires Python 3.7+.
+- To run the game, you simply run `game.py` with your installation of Python (e.g. `python3 game.py` on Debian, and many others; doesn't matter). It's a simple Python script, really.
