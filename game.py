@@ -42,14 +42,18 @@ def lose(text):
 
 
 ShopkeeperQuotesExit = [
-    "Remember, tomorrow is another day.", "Be seeing you.",
-    "I wish you the best of luck.", "I give you my grace.",
-    "I wish you luck on your quest.", "I'll get started on my tea.",
+    "Remember, tomorrow is another day.",
+    "Be seeing you.",
+    "I wish you the best of luck.",
+    "I give you my grace.",
+    "I wish you luck on your quest.",
+    "I'll get started on my tea.",
     "May all the spirits be with you."
 ]
 
 ShopkeeperQuotes = [
-    "Welcome!", "Sit down, my friend. Stay a while.",
+    "Welcome!",
+    "Sit down, my friend. Stay a while.",
     "You'll always be welcome here in my shop.",
     "Have a look at my wares. They could prove to be useful.",
     "Sorry I can't give discounts - I have a business to run, and I must make my money somehow.",
@@ -103,11 +107,9 @@ class Inventory:
             return "Your inventory is empty"
         output = []
         if self.items:
-            output.append("Items:\n" + "\n".join(f"- {item}"
-                                                 for item in self.items))
+            output.append("Items:\n" + "\n".join(f"- {item}"for item in self.items))
         if self.keyItems:
-            output.append("Key Items:\n" +
-                          "\n".join(f"- {item}" for item in self.keyItems))
+            output.append("Key Items:\n" + "\n".join(f"- {item}" for item in self.keyItems))
         return "\n".join(output)
 
 
@@ -125,8 +127,7 @@ class gameState:
     def getRuby(self, obtained: int):
         print2("\nYou got \033[1m" + str(obtained) + "\033[0m Rubies!")
         self.rubies += obtained
-        print2("\033[0m You currently have \033[1m" + str(self.rubies) +
-               "\033[0m Rubies.\n")
+        print2("\033[0m You currently have \033[1m" + str(self.rubies) + "\033[0m Rubies.\n")
 
 
 game_state = gameState(inventory=Inventory(items=[]))
