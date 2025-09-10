@@ -1,7 +1,7 @@
 # The Shopkeeper's Quest
 
-An adventure game created for a school project.
-Based on [Steamed Hams: The Game Plus!](https://github.com/SolidLamp/Steamed-Hams)
+An adventure game created for a school project.<br>
+Based on [Steamed Hams: The Game Plus!](https://github.com/SolidLamp/Steamed-Hams)<br>
 
 Inspired by:
 
