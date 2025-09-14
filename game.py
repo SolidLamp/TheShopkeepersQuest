@@ -4,25 +4,7 @@ import random
 import shm
 
 print2 = shm.print2
-
-
-def option(choice, Inventory=True):
-    print()
-    for i, options in enumerate(choice, start=1):
-        print2(f"{i}. {options}")
-    if Inventory:
-        print2("i. Inventory")
-    query = input(">>> ")
-    if query == "i" and Inventory:
-        print(game_state.inventory)
-    if query == "xyzzy":
-        print(game_state)
-        debug()
-    if query == "q":
-        exit()
-    print()
-    return query
-
+option = shm.option
 
 def ending(end):
     print2(endingCustomText[end].replace("|", end), pauseAtNewline=0.65)
