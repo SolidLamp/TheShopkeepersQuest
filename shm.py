@@ -49,8 +49,10 @@ def option(choice, Inventory=True):
     print()
     return query
 
-def gameLoop(): 
+def gameLoop(starting_room=False): 
     global roomID
+    if starting_room:
+        roomID = starting_room
     room = rooms[roomID]
     if "Requirements" in room and not room["Requirements"]():
         print2(room["AlternateText"])
@@ -72,6 +74,6 @@ def gameLoop():
     if "Script" in room:
         room["Script"]()
     history.append(roomID)
-    if len(history) > 5:
+    if len(history) > 10:
         history.pop(0)
 
