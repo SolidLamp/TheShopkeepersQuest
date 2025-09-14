@@ -25,9 +25,7 @@ def option(choice, Inventory=True):
 
 
 def ending(end):
-    if end in endingsWithCustomText:
-        index = endingsWithCustomText.index(end)
-        print2(endingCustomText[index].replace("|", end), pauseAtNewline=0.65)
+    print2(endingCustomText[end].replace("|", end), pauseAtNewline=0.65)
     print("\n\n")
     print2(defaultEndingText.replace("|", end), pauseAtNewline=0.65)
     time.sleep(2.5)
@@ -66,12 +64,11 @@ ShopkeeperQuotes = [
     "Have you seen the nearby forest? There's been some monkey sightings there.",
 ]
 
-endingsWithCustomText = ["Good", "Secret", "SHM"]
-endingCustomText = [
-    "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
-    "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
-    "You achieved the\n|\nEnding.\nTry Again?",
-]
+endingCustomText = {
+    "Good": "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
+    "Secret": "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
+    "SHM": "You achieved the\n|\nEnding.\nTry Again?",
+}
 defaultEndingText = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
 
 mysticalRocks = {
