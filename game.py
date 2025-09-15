@@ -349,6 +349,14 @@ rooms = {
         "Inventory": False,
         "Automove": 38,
     },
+    34: {
+        "Text": "Dead end.",
+        "Automove": history[-2],
+    },
+    35: {
+        "Text": "Dead end.",
+        "Automove": history[-2],
+    },
     38: {
         "Text": "You cannot go back now.",
         "Script": lambda: exit(),
@@ -359,495 +367,146 @@ rooms = {
     39: {
         "Text": "There is a large square, with houses all around. There is an alley.",
         "Options": ["Go down the alley", "Go to the Town Centre"],
-        "Move": [42,12],
+        "Move": [43,12],
     },
+    40: {
+        "Text": "Dead end.",
+        "Automove": history[-2],
+    },
+    41: { # :(
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [46,40,34,35],
+    },
+    42: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [47,43,34,35],
+    },
+    43: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [48,44,39,42],
+    },
+    44: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [49,40,35,43],
+    },
+    45: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [50,40,34,35],
+    },
+    46: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,47,41,35],
+    },
+    47: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,48,42,46],
+    },
+    48: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,49,43,47],
+    },
+    49: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [54,40,44,48],
+    },
+    50: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [55,40,45,35],
+    },
+    51: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [56,40,35,36],
+    },
+    52: {
+        "Text": "You are in a maze of twisty little alleys, all alike. There is a cave opening here. Something about this seems familiar.",
+        "Requirements": lambda: game_state.caveOpened,
+        "AlternateText": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west","Go into the cave"],
+        "Option4Requirements": lambda: game_state.caveOpened,
+        "Move": [40,53,35,36,66],
+    },
+    53: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [58,40,35,52],
+    },
+    54: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,55,49,35],
+    },
+    55: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [60,40,50,54],
+    },
+    56: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [61,57,51,40],
+    },
+    57: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Item": "Golden Idol",
+        "ItemRequirement": lambda: "Golden Idol" in inventory,
+        "ItemText": "You see, on the ground, a beautiful \033[47mAmber Necklace\033[0m.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,35,36,56],
+    },
+    58: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [63,40,53,35],
+    },
+    59: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,60,35,36],
+    },
+    60: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [65,40,55,35],
+    },
+    61: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,62,56,35],
+    },
+    62: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,63,35,61],
+    },
+    63: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,64,58,62],
+    },
+    64: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,65,35,63],
+    },
+    65: {
+        "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
+        "Options": ["Go north", "Go east", "Go south", "Go west"],
+        "Move": [40,35,60,63],
+    },
+
+
 }
-
-def maze11():  # :(
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze21()
-    elif query == "2":
-        print2("Dead end.")
-        maze11()
-    elif query == "3":
-        print2("Dead end.")
-        maze11()
-    elif query == "4":
-        print2("Dead end.")
-        maze11()
-    else:
-        maze11()
-
-
-def maze12():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze22()
-    elif query == "2":
-        maze13()
-    elif query == "3":
-        print2("Dead end.")
-        maze12()
-    elif query == "4":
-        print2("Dead end.")
-        maze12()
-    else:
-        maze12()
-
-
-def maze13():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze23()
-    elif query == "2":
-        maze14()
-    elif query == "3":
-        townWest()
-    elif query == "4":
-        maze12()
-    else:
-        maze13()
-
-
-def maze14():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze24()
-    elif query == "2":
-        print2("Dead end.")
-        maze14()
-    elif query == "3":
-        print2("Dead end.")
-        maze14()
-    elif query == "4":
-        maze13()
-    else:
-        maze14()
-
-
-def maze15():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze25()
-    elif query == "2":
-        print2("Dead end.")
-        maze15()
-    elif query == "3":
-        print2("Dead end.")
-        maze15()
-    elif query == "4":
-        print2("Dead end.")
-        maze15()
-    else:
-        maze15()
-
-
-def maze21():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze21()
-    elif query == "2":
-        maze22()
-    elif query == "3":
-        maze11()
-    elif query == "4":
-        print2("Dead end.")
-        maze21()
-    else:
-        maze21()
-
-
-def maze22():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze22()
-    elif query == "2":
-        maze23()
-    elif query == "3":
-        maze12()
-    elif query == "4":
-        maze21()
-    else:
-        maze22()
-
-
-def maze23():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze23()
-    elif query == "2":
-        maze24()
-    elif query == "3":
-        maze13()
-    elif query == "4":
-        maze22()
-    else:
-        maze23()
-
-
-def maze24():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze34()
-    elif query == "2":
-        print2("Dead end.")
-        maze24()
-    elif query == "3":
-        maze14()
-    elif query == "4":
-        maze23()
-    else:
-        maze24()
-
-
-def maze25():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze35()
-    elif query == "2":
-        print2("Dead end.")
-        maze25()
-    elif query == "3":
-        maze15()
-    elif query == "4":
-        print2("Dead end.")
-        maze25()
-    else:
-        maze25()
-
-
-def maze31():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze41()
-    elif query == "2":
-        print2("Dead end.")
-        maze31()
-    elif query == "3":
-        print2("Dead end.")
-        maze31()
-    elif query == "4":
-        print2("Dead end.")
-        maze31()
-    else:
-        maze31()
-
-
-def maze32():
-    if game_state.caveOpened:
-        print2(
-            "You are in a maze of twisty little alleys, all alike. There is a cave opening here. Something about this seems familiar."
-        )
-        query = option(
-            ["Go north", "Go east", "Go south", "Go west", "Go into the cave"]
-        )
-    else:
-        print2(
-            "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-        )
-        query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze32()
-    elif query == "2":
-        maze33()
-    elif query == "3":
-        print2("Dead end.")
-        maze32()
-    elif query == "4":
-        print2("Dead end.")
-        maze32()
-    elif query == "5" and game_state.caveOpened:
-        cave9()
-    else:
-        maze32()
-
-
-def maze33():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze43()
-    elif query == "2":
-        print2("Dead end.")
-        maze33()
-    elif query == "3":
-        print2("Dead end.")
-        maze33()
-    elif query == "4":
-        maze32()
-    else:
-        maze33()
-
-
-def maze34():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze34()
-    elif query == "2":
-        maze35()
-    elif query == "3":
-        maze24()
-    elif query == "4":
-        print2("Dead end.")
-        maze34()
-    else:
-        maze34()
-
-
-def maze35():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze45()
-    elif query == "2":
-        print2("Dead end.")
-        maze35()
-    elif query == "3":
-        maze25()
-    elif query == "4":
-        maze34()
-    else:
-        maze35()
-
-
-def maze41():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze51()
-    elif query == "2":
-        maze42()
-    elif query == "3":
-        maze31()
-    elif query == "4":
-        print2("Dead end.")
-        maze41()
-    else:
-        maze41()
-
-
-def maze42():
-    if "Amber Necklace" not in game_state.inventory.keyItems:
-        print2("You see, on the ground, a beautiful necklace.")
-        game_state.inventory.getKeyItem("Amber Necklace")
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze42()
-    elif query == "2":
-        print2("Dead end.")
-        maze42()
-    elif query == "3":
-        print2("Dead end.")
-        maze42()
-    elif query == "4":
-        maze41()
-    else:
-        maze42()
-
-
-def maze43():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze53()
-    elif query == "2":
-        print2("Dead end.")
-        maze43()
-    elif query == "3":
-        maze33()
-    elif query == "4":
-        print2("Dead end.")
-        maze43()
-    else:
-        maze43()
-
-
-def maze44():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze44()
-    elif query == "2":
-        maze45()
-    elif query == "3":
-        print2("Dead end.")
-        maze44()
-    elif query == "4":
-        print2("Dead end.")
-        maze44()
-    else:
-        maze44()
-
-
-def maze45():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        maze55()
-    elif query == "2":
-        print2("Dead end.")
-        maze45()
-    elif query == "3":
-        maze35()
-    elif query == "4":
-        print2("Dead end.")
-        maze45()
-    else:
-        maze45()
-
-
-def maze51():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze51()
-    elif query == "2":
-        maze52()
-    elif query == "3":
-        maze41()
-    elif query == "4":
-        print2("Dead end.")
-        maze51()
-    else:
-        maze51()
-
-
-def maze52():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze52()
-    elif query == "2":
-        maze53()
-    elif query == "3":
-        print2("Dead end.")
-        maze52()
-    elif query == "4":
-        maze51()
-    else:
-        maze52()
-
-
-def maze53():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze53()
-    elif query == "2":
-        maze54()
-    elif query == "3":
-        maze43()
-    elif query == "4":
-        maze52()
-    else:
-        maze53()
-
-
-def maze54():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze54()
-    elif query == "2":
-        maze55()
-    elif query == "3":
-        print2("Dead end.")
-        maze54()
-    elif query == "4":
-        maze53()
-    else:
-        maze54()
-
-
-def maze55():
-    print2(
-        "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
-    )
-    query = option(["Go north", "Go east", "Go south", "Go west"])
-    if query == "1":
-        print2("Dead end.")
-        maze55()
-    elif query == "2":
-        print2("Dead end.")
-        maze55()
-    elif query == "3":
-        maze45()
-    elif query == "4":
-        maze53()
-    else:
-        maze55()
-
 
 def shop():
     print2("\033[33m'" + random.choice(ShopkeeperQuotes) + "'\033[0m")
