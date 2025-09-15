@@ -2,8 +2,9 @@ import time
 from dataclasses import dataclass
 import random
 from game import game_state
-from example import rooms
+from game import rooms
 import game
+
 if game.game_state:
     from game import game_state
 
@@ -14,11 +15,12 @@ if __name__ == "__main__":
         sys.argv[1]
     else:
         print(
-            "SHM Engine 0.7.1\n2025-09-15\nhttps://github.com/solidlamp\nThis release: The Shopkeeper's Quest Experimental - 2025-09-15"
+            "SHM Engine 0.7.2\n2025-09-15\nhttps://github.com/solidlamp\nThis release: The Shopkeeper's Quest Experimental - 2025-09-15"
         )
 
 roomID = 1
 history = []
+
 
 def print2(text, newline=True, pauseAtNewline=0.0, endingChar=False):
     for char in text:
@@ -28,6 +30,7 @@ def print2(text, newline=True, pauseAtNewline=0.0, endingChar=False):
         time.sleep(0.01)
     if newline:
         print()
+
 
 def option(choice, Inventory=True):
     print()
@@ -41,31 +44,36 @@ def option(choice, Inventory=True):
     if query == "xyzzy":
         print(game_state)
         debug()
-    if query == "q":
+    if query.casefold() == "q!".casefold():
+        exit()
+    if query.casefold() == "q".casefold():
         print2("Are you sure you want to quit?")
         query = input(">>> ")
         if query.casefold() == "y".casefold():
             exit()
         else:
-            query = 255
+            query = "255"
     print()
     return query
 
+
 def ending(end):
-  print2(game.endingText[end].replace("|", end), pauseAtNewline=0.65)
-  print("\n\n")
-  print2(game.defaultEnding.replace("|", end), pauseAtNewline=0.65)
-  time.sleep(2.5)
+    print2(game.endingText[end].replace("|", end), pauseAtNewline=0.65)
+    print("\n\n")
+    print2(game.defaultEnding.replace("|", end), pauseAtNewline=0.65)
+    time.sleep(2.5)
+
 
 def lose(text):
-  print("\n\n")
-  time.sleep(0.25)
-  print("\033[31m\033[1mYou died!\033[0m")
-  print("'" + text + "'")
-  time.sleep(0.5)
-  print("\n\n\nTry again?")
-  
-def gameLoop(starting_room=False): 
+    print("\n\n")
+    time.sleep(0.25)
+    print("\033[31m\033[1mYou died!\033[0m")
+    print("'" + text + "'")
+    time.sleep(0.5)
+    print("\n\n\nTry again?")
+
+
+def gameLoop(starting_room=False):
     global roomID
     if starting_room:
         roomID = starting_room
@@ -83,13 +91,17 @@ def gameLoop(starting_room=False):
             OptionRequirements = "Option" + str(room["Move"].index(i)) + "Requirements"
             if OptionRequirements not in room or room[OptionRequirements]():
                 OptionsIndex.append(i)
-                Options.append(room["Options"][room["Move"].index(i)]) 
-        query = option(Options)
+                Options.append(room["Options"][room["Move"].index(i)])
+        if "Inventory" in room and inventory in game_state and not room["Inventory"]:
+            query = option(Options, Inventory=False)
+        else:
+            query = option(Options)
         if query.isdigit() and int(query) <= len(Options):
             roomID = OptionsIndex[int(query) - 1]
     if "Script" in room:
         room["Script"]()
+    #if "Item" in room:
+#
     history.append(roomID)
     if len(history) > 10:
         history.pop(0)
-

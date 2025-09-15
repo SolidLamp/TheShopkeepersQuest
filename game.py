@@ -1,12 +1,13 @@
 import time
 from dataclasses import dataclass
 import random
-#import shm
 
-#print2 = shm.print2
-#option = shm.option
-#ending = shm.ending
-#lose = shm.lose
+# import shm
+
+# print2 = shm.print2
+# option = shm.option
+# ending = shm.ending
+# lose = shm.lose
 
 ShopkeeperQuotesExit = [
     "Remember, tomorrow is another day.",
@@ -33,10 +34,8 @@ ShopkeeperQuotes = [
 ]
 
 endingText = {
-    "Good":
-    "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
-    "Secret":
-    "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
+    "Good": "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
+    "Secret": "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
     "SHM": "You achieved the\n|\nEnding.\nTry Again?",
 }
 defaultEnding = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
@@ -85,11 +84,11 @@ class Inventory:
             return "Your inventory is empty"
         output = []
         if self.items:
-            output.append("Items:\n" + "\n".join(f"- {item}"
-                                                 for item in self.items))
+            output.append("Items:\n" + "\n".join(f"- {item}" for item in self.items))
         if self.keyItems:
-            output.append("Key Items:\n" +
-                          "\n".join(f"- {item}" for item in self.keyItems))
+            output.append(
+                "Key Items:\n" + "\n".join(f"- {item}" for item in self.keyItems)
+            )
         return "\n".join(output)
 
 
@@ -106,8 +105,11 @@ class gameState:
     def getRuby(self, obtained: int):
         print2("\nYou got \033[1m" + str(obtained) + "\033[0m Rubies!")
         self.rubies += obtained
-        print2("\033[0m You currently have \033[1m" + str(self.rubies) +
-               "\033[0m Rubies.\n")
+        print2(
+            "\033[0m You currently have \033[1m"
+            + str(self.rubies)
+            + "\033[0m Rubies.\n"
+        )
 
 
 game_state = gameState(inventory=Inventory(items=[]))
@@ -130,76 +132,69 @@ rooms = {
         "Move": [2, 3],
     },
     1: {
-        "Text":
-        "You are standing in a field. There is a road to the north, leading to a village, a forest to the east, a cave to the south, a shop and bazaar to the west, and there are some bushes nearby.",
+        "Text": "You are standing at the outskirts of the village. There is a road to the north, leading to the main parts of the village, a forest to the east, a cave to the south, a shop and bazaar to the west, and there are some bushes nearby.",
         "Options": [
-            "Go to the forest", "Follow the road to the village",
+            "Go to the forest",
+            "Follow the road to the village",
             "Explore the cave",
             "Go to " + game_state.shopkeeperName + "'s shop",
-            "Go to the bazaar"
+            "Go to the bazaar",
         ],
-        "Move": [3, 9, 3, 3, 3],
+        "Move": [3, 9, 4, 5, 6],
     },
     2: {
-        "Text":
-        "You are standing in a field.",
+        "Text": "You are standing at the outskirts of the village.",
         "Options": [
-            "Go to the forest", "Follow the road to the village",
+            "Go to the forest",
+            "Follow the road to the village",
             "Explore the cave",
             "Go to " + game_state.shopkeeperName + "'s shop",
-            "Go to the bazaar"
+            "Go to the bazaar",
         ],
-        "Move": [3, 9, 3, 3, 3],
+        "Move": [3, 9, 4, 5, 6],
     },
     3: {
-        "Text":
-        "You come to the opening of the forest. The forest is vast and the trees tower over you.",
+        "Text": "You come to the opening of the forest. The forest is vast and the trees tower over you.",
         "Options": ["Go further in", "Leave"],
         "Move": [4, 2],
     },
     4: {
         "Text": "You are deep in the forest. It is dim, and difficult to see.",
         "Options": ["Go further in", "Leave"],
-        "Option1Requirements":
-        lambda: "Rusted Sword" in game_state.inventory.keyItems,
+        "Option1Requirements": lambda: "Rusted Sword" in game_state.inventory.keyItems,
         "Move": [5, 3],
     },
     5: {
-        "Text":
-        "You come to a clearing, deep in the forest. There is a bonobo sitting, facing you.",
+        "Text": "You come to a clearing, deep in the forest. There is a bonobo sitting, facing you.",
         "Options": ["Fight the bonobo", "Fight the bonobo", "Leave"],
-        "Option1Requirements":
-        lambda: "Bow and Arrow" not in game_state.inventory.keyItems,
-        "Option2Requirements":
-        lambda: "Bow and Arrow" in game_state.inventory.keyItems,
+        "Option1Requirements": lambda: "Bow and Arrow"
+        not in game_state.inventory.keyItems,
+        "Option2Requirements": lambda: "Bow and Arrow" in game_state.inventory.keyItems,
         "Move": [6, 7, 8],
     },
     6: {
-        "Text":
-        "You attempt to fight the bonobo, but it easily overpowers you. You are killed.",
+        "Text": "You attempt to fight the bonobo, but it easily overpowers you. You are killed.",
         "Script": lambda: lose("What did you think was going to happen?"),
         "Automove": 1,
     },
     7: {
-        "Text":
-        "You manage to defeat the bonobo, using your weapon.\nYou manage to find a chest, containing the \033[47mRusted Sword\033[0m.",
+        "Text": "You manage to defeat the bonobo, using your weapon.\nYou manage to find a chest, containing the \033[47mRusted Sword\033[0m.",
         "Script": lambda: game_state.inventory.getKeyItem("Rusted Sword"),
         "Options": ["Fight the bonobo", "Fight the bonobo", "Leave"],
         "Automove": 4,
     },
     8: {
-        "Text":
-        "You attempt to leave, but the bonobo catches you. You are killed.",
+        "Text": "You attempt to leave, but the bonobo catches you. You are killed.",
         "Script": lambda: lose("Bonobos are quite agressive."),
         "Options": ["Fight the bonobo", "Fight the bonobo", "Leave"],
         "Automove": 1,
     },
     9: {
-        "Text":
-        "You follow the road to the village. It seems barren and no one is there.",
+        "Text": "You are standing within the village. It seems barren and no one is there.",
         "Options": [
-            "Follow the High Steet", "Sit on a bench for a while",
-            "Return to the field"
+            "Follow the High Steet",
+            "Sit on a bench for a while",
+            "Return to the outskirts of the village",
         ],
         "Move": [11, 10, 2],
     },
@@ -208,256 +203,165 @@ rooms = {
         "Automove": 9,
     },
     11: {
-        "Text":
-        "You are in the high steet of the village. The village centre is to your north, and the way back to the village outskirts is to.",
-        "Options":
-        ["Go towards the high street", "Go towards the village outskirts"],
+        "Text": "You are in the high steet of the village. The village centre is to your north, and the way back to the village outskirts is to your south.",
+        "Options": ["Go towards the high street", "Go towards the village outskirts"],
         "Move": [12, 9],
     },
+    12: {
+        "Text": "You are in the centre of the village. There are paths each direction, with a fountain in the middle.",
+        "Options": ["Go North", "Go East", "Go South", "Go West", "Go to the Fountain"],
+        "Move": [18,16,11,39,13],
+    },
+    13: {
+        "Text": "You are at the fountain in the village centre.",
+        "Options": ["Admire it", "Throw a ruby in for good luck", "Go back"],
+        "Option1Requirements": lambda: game_state.rubies > 0,
+        "Move": [14,15,12],
+    },
+    14: {
+        "Text": "You admire the fountain.",
+        "Automove": 13,
+    },
+    15: {
+        "Text": "You throw a ruby into the fountain for good luck.",
+        "Script": lambda: setattr(game_state, 'rubies', game_state.rubies - 1),
+        "Item": "Ancient Key",
+        "ItemRequirement": lambda: "Ancient Key" not in inventory,
+        "ItemText": "Out of the fountain, a \033[47mkey\033[0m rises to the surface of the water.",
+        "Automove": 13,
+    },
+    16: {
+        "Text": "There is a note on the floor.",
+        "Options": ["Read the note", "Return"],
+        "Move": [17,12],
+    },
+    17: {
+        "Text": "You read the note. It reads, 'None can stop me now. At 38, they will know. North, North, South, South, West, East, West, East.'",
+        "Options": ["Read the note again", "Place it back down"],
+        "Move": [17,16],
+    },
+    18: {
+        "Text": "You find yourself amongst an empty street of market stalls. A northern route leads to a smaller street.",
+        "Options": ["Go down the smaller street", "Go to the Village Centre."],
+        "Move": [19,12],
+    },
+    19: {
+        "Text": "You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?",
+        "Options": ["Unlock the door with the \033[47mAncient Key\033[0m", "Attempt to turn the handle", "Go back"],
+        "Option0Requirements": lambda: "Ancient Key" in game_state.inventory.keyItems,
+        "Move": [21,20,18],
+    },
+    20: {
+        "Text": "You attempt to turn the handle, but it does not budge.",
+        "Options": ["Try Again", "Go Back"],
+        "Move": [20,19],
+    },
+    21: {
+        "Text": "You cannot go back now.",
+        "Requirements": lambda: 21 in history,
+        "AlternateText": "You unlock the mysterious door with the \033[47mAncient Key\033[0m.",
+        "Options": ["Continue"],
+        "Inventory": False,
+        "Move": 22,
+    },
+    22: {
+        "Text": "You cannot go back now.",
+        "Requirements": lambda: 22 in history,
+        "AlternateText": "You go through the door. It is pitch-black. You feel that you can no longer control yourself.",
+        "Options": ["Continue"],
+        "Inventory": False,
+        "Move": 23,
+    },
+    23: {
+        "Text": "You cannot go back now.",
+        "Requirements": lambda: 23 in history,
+        "AlternateText": "As you continue, the tunnel around you appears to be darker than what you thought possible.",
+        "Options": ["Continue"],
+        "Inventory": False,
+        "Move": 24,
+    },
+    24: {
+        "Text": "You cannot go back now.",
+        "Requirements": lambda: 24 in history,
+        "AlternateText": "As you continue, you see a light at the end.",
+        "Options": ["Continue"],
+        "Inventory": False,
+        "Move": 22,
+    },
+    25: {
+        "Text": "You cannot go back now.",
+        "Requirements": lambda: 25 in history,
+        "AlternateText": "Eventually, you get to the end, and can go through the illuminated exit.",
+        "Options": ["Continue"],
+        "Inventory": False,
+        "Move": 26,
+    },
+    26: {
+        "Text": "It is the back room of " + game_state.shopkeeperName + "'s shop. It is full of rubies and products. There is a letter on a nearby desk.",
+        "Options":         [
+            "Take some rubies",
+            "Take some lamp oil",
+            "Take some rope",
+            "Take some bombs",
+            "Go through to the front",
+            "Inspect the letter",
+        ],
+        "Inventory": False,
+        "Move": [27,28,29,30,32,31],
+    },
+    27: {
+        "Text": "You take some rubies.",
+        "Script": lambda: game_state.getRuby(9000),
+        "Automove": 26,
+    },
+    28: {
+        "Text": "You take some lamp oil.",
+        "Item": "Lamp Oil",
+        "Automove": 26,
+    },
+    29: {
+        "Text": "You take some rope.",
+        "Item": "Rope",
+        "Automove": 26,
+    },
+    30: {
+        "Text": "You take some bombs.",
+        "Item": "Bomb",
+        "Automove": 26,
+    },
+    31: {
+        "Text": "The envelope is sealed with a luxurious seal. The letter is addressed to 'The Overseer', and has the number 38 written on it. There is no letter inside the envelope.",
+        "Automove": 26,
+    },
+    32: {
+        "Text": "You cannot go back now.",
+        "Requirements": lambda: 32 in history,
+        "AlternateText": "You are in the front room of " + game_state.shopkeeperName + "'s shop.",
+        "Options": ["Become " + game_state.shopkeeperName],
+        "Inventory": False,
+        "Move": [33],
+    },
+    33: {
+        "Text": "You cannot go back now.",
+        "Requirements": lambda: 33 in history,
+        "AlternateText": "You become " + game_state.shopkeeperName + ".",
+        "Script": lambda: ending("Secret"),
+        "Inventory": False,
+        "Automove": 38,
+    },
+    38: {
+        "Text": "You cannot go back now.",
+        "Script": lambda: exit(),
+        "Options": ["You cannot."],
+        "Inventory": False,
+        "Automove": 38,
+    },
+    39: {
+        "Text": "There is a large square, with houses all around. There is an alley.",
+        "Options": ["Go down the alley", "Go to the Town Centre"],
+        "Move": [42,12],
+    },
 }
-
-
-def town2():
-    print2(
-        "You are in the high street of the village. The village centre is to your north."
-    )
-    query = option(["Go to the village centre", "Go South"])
-    if query == "1":
-        town3()
-    elif query == "2":
-        town()
-    else:
-        town2()
-
-
-def town3():
-    print2(
-        "You are in the centre of the village. There are paths each direction, with a fountain in the middle."
-    )
-    query = option(
-        ["Go North", "Go East", "Go South", "Go West", "Go to the Fountain"])
-    if query == "1":
-        townNorth()
-    elif query == "2":
-        townEast()
-    elif query == "3":
-        town2()
-    elif query == "4":
-        townWest()
-    elif query == "5":
-        fountain()
-    else:
-        town3()
-
-
-def fountain():
-    print2("You are at the fountain in the village centre.")
-    query = option(["Admire it", "Throw a ruby in for good luck", "Go back"])
-    if query == "1":
-        print2("You admire the fountain.")
-        fountain()
-    elif query == "2":
-        print2("You throw a ruby in for good luck.")
-        game_state.rubies = game_state.rubies - 1
-        print2("Out of the fountain, a key rises to the surface of the water.")
-        game_state.inventory.getKeyItem("Ancient Key")
-        fountain()
-    elif query == "3":
-        town3()
-    else:
-        fountain()
-
-
-def townEast():
-    print2("There is a note on the floor.")
-    query = option(["Read the note", "Return"])
-    if query == "1":
-        note()
-    elif query == "2":
-        town3()
-    else:
-        townEast()
-
-
-def note():
-    print2(
-        "You read the note. It reads, 'None can stop me now. At 38, they will know. North, North, South, South, West, East, West, East.'"
-    )
-    query = option(["Read the note again", "Place it back down"])
-    if query == "1":
-        note()
-    elif query == "2":
-        townEast()
-    else:
-        note()
-
-
-def townNorth():
-    print2(
-        "You enter an empty street of market stalls. A northern route leads to a smaller street."
-    )
-    query = option(["Go down the smaller street", "Go to the Village Centre."])
-    if query == "1":
-        door()
-    elif query == "2":
-        town3()
-    else:
-        townNorth()
-
-
-def door():
-    print(
-        "You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?"
-    )
-    if "Ancient Key" in game_state.inventory.keyItems:
-        query = option([
-            "Attempt to turn the handle",
-            "Go back",
-            "Unlock the door with the Ancient Key",
-        ])
-    else:
-        query = option(["Attempt to turn the handle", "Go back"])
-    if query == "1":
-        lock()
-    elif query == "3":
-        if "Ancient Key" in game_state.inventory.keyItems:
-            unlock()
-    elif query == "2":
-        town3()
-    else:
-        door()
-
-
-def lock():
-    print2("You attempt to turn the handle, but it does not budge.")
-    query = option(["Try Again", "Go Back"])
-    if query == "1":
-        lock()
-    elif query == "2":
-        door()
-    else:
-        lock()
-
-
-def unlock():
-    print2("You unlock the mysterious door with the Ancient Key.")
-    query = option(["Continue"], Inventory=False)
-    if query == "1":
-        secret()
-    else:
-        print2("You cannot go back now.")
-        secret()
-
-
-def secret():
-    print2("You go through the door. It is pitch-black.")
-    query = option(["Continue"], Inventory=False)
-    if query == "1":
-        secret2()
-    else:
-        print2("You cannot go back now.")
-        secret2()
-
-
-def secret2():
-    print2("As you continue, everything goes pitch-black.")
-    query = option(["Continue"], Inventory=False)
-    if query == "1":
-        secret3()
-    else:
-        print2("You cannot go back now.")
-        secret3()
-
-
-def secret3():
-    print2("As you continue, you see a light at the end.")
-    query = option(["Continue"], Inventory=False)
-    if query == "1":
-        secret4()
-    else:
-        print2("You cannot go back now.")
-        secret4()
-
-
-def secret4():
-    print2(
-        "Eventually, you get to the end, and can go through the illuminated exit."
-    )
-    query = option(["Continue"], Inventory=False)
-    if query == "1":
-        secret5()
-    else:
-        print2("You cannot go back now.")
-        secret5()
-
-
-def secret5():
-    print2(
-        "It is the back room of " + game_state.shopkeeperName +
-        "'s shop. It is full of rubies and products. There is a letter on a nearby desk."
-    )
-    query = option([
-        "Take some rubies",
-        "Take some lamp oil",
-        "Take some rope",
-        "Take some bombs",
-        "Go through to the front",
-        "Inspect the letter",
-    ])
-    if query == "1":
-        print2("You take some rubies.")
-        game_state.getRuby(9000)
-        secret5()
-    elif query == "2":
-        print2("You take some lamp oil.")
-        game_state.inventory.getItem("Lamp Oil")
-        secret5()
-    elif query == "3":
-        print2("You take some rope.")
-        game_state.inventory.getItem("Rope")
-        secret5()
-    elif query == "4":
-        print2("You take some bombs.")
-        game_state.inventory.getItem("Bomb")
-        secret5()
-    elif query == "5":
-        secret6()
-    elif query == "6":
-        print2(
-            "The envelope is sealed with a luxurious seal. The letter is addressed to 'The Overseer', and has the number 38 written on it. There is no letter inside the envelope."
-        )
-        secret5()
-    else:
-        print2("You cannot go back now.")
-        secret5()
-
-
-def secret6():
-    print2("You are in the front room of " + game_state.shopkeeperName +
-           "'s shop.")
-    query = option(["Become " + game_state.shopkeeperName], Inventory=False)
-    if query == "1":
-        print2(
-            "You become " + game_state.shopkeeperName +
-            ". The people eventually return. You begin selling your wares again, and you finally understand the full circumstances of these events."
-        )
-        ending("Secret")
-    else:
-        print2("You cannot go back now.")
-        secret6()
-
-
-def townWest():
-    print2(
-        "There is a large square, with houses all around. There is an alley.")
-    query = option(["Go down the alley", "Go to the Town Centre"])
-    if query == "1":
-        maze13()
-    elif query == "2":
-        town3()
-    else:
-        townWest()
-
 
 def maze11():  # :(
     print2(
@@ -672,7 +576,8 @@ def maze32():
             "You are in a maze of twisty little alleys, all alike. There is a cave opening here. Something about this seems familiar."
         )
         query = option(
-            ["Go north", "Go east", "Go south", "Go west", "Go into the cave"])
+            ["Go north", "Go east", "Go south", "Go west", "Go into the cave"]
+        )
     else:
         print2(
             "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
@@ -946,15 +851,20 @@ def maze55():
 
 def shop():
     print2("\033[33m'" + random.choice(ShopkeeperQuotes) + "'\033[0m")
-    print2("Current Rubies:" + str(game_state.rubies) +
-           "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies")
-    query = option([
-        "Purchase lamp oil",
-        "Purchase rope",
-        "Purchase bomb",
-        "Ask about quest",
-        "Leave",
-    ])
+    print2(
+        "Current Rubies:"
+        + str(game_state.rubies)
+        + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies"
+    )
+    query = option(
+        [
+            "Purchase lamp oil",
+            "Purchase rope",
+            "Purchase bomb",
+            "Ask about quest",
+            "Leave",
+        ]
+    )
     if query == "1":
         if game_state.rubies >= 15:
             game_state.rubies = game_state.rubies - 15
@@ -983,8 +893,10 @@ def shop():
             )
         shop()
     elif query == "4":
-        cursedItems = len({"Rusted Sword", "Amber Necklace", "Golden Idol"}
-                          & set(game_state.inventory.keyItems))
+        cursedItems = len(
+            {"Rusted Sword", "Amber Necklace", "Golden Idol"}
+            & set(game_state.inventory.keyItems)
+        )
         if cursedItems == 3:
             print2(
                 "\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'"
@@ -1012,12 +924,14 @@ def bazaar():
     print2(
         "You are in the bazaar. There is not many attended stalls around. There appears to be a fisherman at a stall, a fletcher, and a mineral collector."
     )
-    query = option([
-        "Go to the fisherman",
-        "Go to the fletcher",
-        "Go to the mineral collector",
-        "Go to the field",
-    ])
+    query = option(
+        [
+            "Go to the fisherman",
+            "Go to the fletcher",
+            "Go to the mineral collector",
+            "Go back to the village outskirts",
+        ]
+    )
     if query == "1":
         fishermanStall()
     elif query == "2":
@@ -1036,28 +950,29 @@ def bazaar():
 
 def fishermanStall():
     print2(
-        "Current Rubies:" + str(game_state.rubies) +
-        "\nFillet of Cod - 2 rubies\nFillet of Salmon - 2 rubies\nSmoked Trout - 9 rubies\nJar of Tuna - 3 rubies\nFillet of Smoked Haddock - 6 rubies"
+        "Current Rubies:"
+        + str(game_state.rubies)
+        + "\nFillet of Cod - 2 rubies\nFillet of Salmon - 2 rubies\nSmoked Trout - 9 rubies\nJar of Tuna - 3 rubies\nFillet of Smoked Haddock - 6 rubies"
     )
     print2("\033[36m'What are you here to buy?'\033[0m")
-    query = option([
-        "Purchase a fillet of cod",
-        "Purchase a fillet of salmon",
-        "Purchase smoked trout",
-        "Purchase a jar of tuna",
-        "Purchase a fillet of smoked haddock",
-        "Talk",
-        "Leave",
-    ])
+    query = option(
+        [
+            "Purchase a fillet of cod",
+            "Purchase a fillet of salmon",
+            "Purchase smoked trout",
+            "Purchase a jar of tuna",
+            "Purchase a fillet of smoked haddock",
+            "Talk",
+            "Leave",
+        ]
+    )
     if query == "1":
         if game_state.rubies >= 2:
             game_state.rubies = game_state.rubies - 2
             game_state.inventory.getItem("Fillet of Cod")
             fishermanStall()
         else:
-            print2(
-                "\033[36m'If you aren't here to buy anything, then get out.'\033[0m"
-            )
+            print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
             bazaar()
     elif query == "2":
         if game_state.rubies >= 2:
@@ -1065,9 +980,7 @@ def fishermanStall():
             game_state.inventory.getItem("Fillet of Salmon")
             fishermanStall()
         else:
-            print2(
-                "\033[36m'If you aren't here to buy anything, then get out.'\033[0m"
-            )
+            print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
             bazaar()
     elif query == "3":
         if game_state.rubies >= 9:
@@ -1075,9 +988,7 @@ def fishermanStall():
             game_state.inventory.getItem("Smoked Trout")
             fishermanStall()
         else:
-            print2(
-                "\033[36m'If you aren't here to buy anything, then get out.'\033[0m"
-            )
+            print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
             bazaar()
     elif query == "4":
         if game_state.rubies >= 3:
@@ -1085,9 +996,7 @@ def fishermanStall():
             game_state.inventory.getItem("Jar of Tuna")
             fishermanStall()
         else:
-            print2(
-                "\033[36m'If you aren't here to buy anything, then get out.'\033[0m"
-            )
+            print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
             bazaar()
     elif query == "5":
         if game_state.rubies >= 6:
@@ -1095,19 +1004,19 @@ def fishermanStall():
             game_state.inventory.getItem("Fillet of Smoked Haddock")
             fishermanStall()
         else:
-            print2(
-                "\033[36m'If you aren't here to buy anything, then get out.'\033[0m"
-            )
+            print2("\033[36m'If you aren't here to buy anything, then get out.'\033[0m")
             bazaar()
     elif query == "6":
-        fishBought = len({
-            "Fillet of Cod",
-            "Fillet of Salmon",
-            "Smoked Trout",
-            "Jar of Tuna",
-            "Fillet of Smoked Haddock",
-        }
-                         & set(game_state.inventory.keyItems))
+        fishBought = len(
+            {
+                "Fillet of Cod",
+                "Fillet of Salmon",
+                "Smoked Trout",
+                "Jar of Tuna",
+                "Fillet of Smoked Haddock",
+            }
+            & set(game_state.inventory.keyItems)
+        )
         if fishBought >= 1 and "Fishing Rod" not in game_state.inventory.keyItems:
             print2(
                 "\033[36m'You know, I recently got a new fishing rod. Say, you can have my old one, since you bought something.'\033[0m"
@@ -1174,8 +1083,9 @@ def mineralStall():
             )
         else:
             for item in [
-                    item for item in list(game_state.inventory.items)
-                    if item in list(mysticalRocks)
+                item
+                for item in list(game_state.inventory.items)
+                if item in list(mysticalRocks)
             ]:  # This is not that readable but it does stuff basically]
                 value = mysticalRocks[item]
                 game_state.getRuby(value)
@@ -1190,10 +1100,9 @@ def mineralStall():
         mineralStall()
 
 
-def cave(
-):  # This is the worst and most fustrating part of the game. Have fun :)
+def cave():  # This is the worst and most fustrating part of the game. Have fun :)
     print2("You are at the cave's entrance.")
-    query = option(["Enter the cave", "Go back to the open field"])
+    query = option(["Enter the cave", "Go back to the village outskirts"])
     if query == "1":
         cave1()
     elif query == "2":
@@ -1331,8 +1240,7 @@ def cave9():
     if game_state.caveOpened:
         query = option(["Go northeast", "Go south", "Go northwest"])
     elif "Bomb" in game_state.inventory.items:
-        query = option(
-            ["Go northeast", "Go south", "Destroy the rubble with a bomb"])
+        query = option(["Go northeast", "Go south", "Destroy the rubble with a bomb"])
     else:
         query = option(["Go northeast", "Go south"])
     if query == "1":
@@ -1747,9 +1655,11 @@ def cave37():
     elif query == "2":
         cave38()
     elif query == "3":
-        if ("Fishing Rod" in game_state.inventory.keyItems
-                and not "Silver Amulet" not in game_state.inventory.keyItems
-                and game_state.fletcherOpen):
+        if (
+            "Fishing Rod" in game_state.inventory.keyItems
+            and not "Silver Amulet" not in game_state.inventory.keyItems
+            and game_state.fletcherOpen
+        ):
             print2("You fish in the fishing pond and find a silver amulet.")
             game_state.inventory.getKeyItem("Silver Amulet")
         elif "Fishing Rod" in game_state.inventory.keyItems:
@@ -1812,22 +1722,24 @@ def action3():
 
 
 def debug():
-    query = option([
-        "ShopkeeperQuote",
-        "ShopkeeperQuoteExit",
-        "Rusted Sword",
-        "Win the game",
-        "Secret ending",
-        "Get all items",
-        "Debug ending code",
-        "SHM Ending",
-        "Warp to pond",
-        "Warp to Golden Idol",
-        "Warp to rubble",
-        "Warp to end of maze",
-        "Warp to starting area",
-        "Give over 9000 rubies",
-    ])
+    query = option(
+        [
+            "ShopkeeperQuote",
+            "ShopkeeperQuoteExit",
+            "Rusted Sword",
+            "Win the game",
+            "Secret ending",
+            "Get all items",
+            "Debug ending code",
+            "SHM Ending",
+            "Warp to pond",
+            "Warp to Golden Idol",
+            "Warp to rubble",
+            "Warp to end of maze",
+            "Warp to starting area",
+            "Give over 9000 rubies",
+        ]
+    )
     if query == "1":
         print(random.choice(ShopkeeperQuotes))
     elif query == "2":
@@ -1882,7 +1794,3 @@ def debug():
 
 
 ##
-
-while True:
-    intro()
-exit

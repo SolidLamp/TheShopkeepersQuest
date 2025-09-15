@@ -3,8 +3,8 @@ from shm import print2
 from shm import option
 
 print(
-        "\033[36m\033[40m"
-        + r"""
+    "\033[36m\033[40m"
+    + r"""
 ___ _  _ ____ 
  |  |__| |___ 
  |  |  | |___ 
@@ -17,7 +17,7 @@ ____ _  _ ____ ____ ___
 |  | |  | |___ [__   |  
 |_\| |__| |___ ___]  |  
                         """
-        + "\033[0m"
+    + "\033[0m"
 )
 print2("Use the numbers to choose options, or press 'Q' to quit at any time")
 query = option(["Begin", "Skip Intro", "Quit"], Inventory=False)
