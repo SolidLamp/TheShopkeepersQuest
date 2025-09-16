@@ -2,6 +2,8 @@ import time
 from dataclasses import dataclass
 import random
 
+history = []
+
 # import shm
 
 # print2 = shm.print2
@@ -121,6 +123,26 @@ def caveItem():
         print2("On the ground, you find " + foundRock)
         game_state.inventory.getItem(foundRock)
 
+def itemEvalulation():
+    cursedItems = len(
+        {"Rusted Sword", "Amber Necklace", "Golden Idol"}
+        & set(game_state.inventory.keyItems)
+    )
+    if cursedItems == 3:
+        print2(
+            "\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'"
+        )
+        time.sleep(0.75)
+        print2("\033[33m'Oh, and just one more thing: thank you.'\033[0m")
+        time.sleep(1.5)
+        ending("Good")
+    elif cursedItems > 0:
+        print2(
+            f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m"
+        )
+    print2(
+        "\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m"
+    )
 
 ##
 # altar uuddlrlrba
@@ -140,7 +162,7 @@ rooms = {
             "Go to " + game_state.shopkeeperName + "'s shop",
             "Go to the bazaar",
         ],
-        "Move": [3, 9, 4, 5, 6],
+        "Move": [3, 9, 4, 66, 6],
     },
     2: {
         "Text": "You are standing at the outskirts of the village.",
@@ -151,7 +173,7 @@ rooms = {
             "Go to " + game_state.shopkeeperName + "'s shop",
             "Go to the bazaar",
         ],
-        "Move": [3, 9, 4, 5, 6],
+        "Move": [3, 9, 4, 66, 6],
     },
     3: {
         "Text": "You come to the opening of the forest. The forest is vast and the trees tower over you.",
@@ -220,13 +242,16 @@ rooms = {
     },
     14: {
         "Text": "You admire the fountain.",
+        "Item": "Ancient Key",
+        "ItemRequirement": lambda: history == [18,19,18,12,39,12,39,12,13,14],
+        "ItemText": "Out of the fountain, a \033[47mkey\033[0m rises to the surface of the water.",
         "Automove": 13,
     },
-    15: {
+    15: { #uuddlrlr
         "Text": "You throw a ruby into the fountain for good luck.",
         "Script": lambda: setattr(game_state, 'rubies', game_state.rubies - 1),
         "Item": "Ancient Key",
-        "ItemRequirement": lambda: "Ancient Key" not in inventory,
+        "ItemRequirement": lambda: history == [18,19,18,12,39,12,39,12,13,15],
         "ItemText": "Out of the fountain, a \033[47mkey\033[0m rises to the surface of the water.",
         "Automove": 13,
     },
@@ -351,11 +376,11 @@ rooms = {
     },
     34: {
         "Text": "Dead end.",
-        "Automove": history[-2],
+        "Automove": (history,-2),
     },
     35: {
         "Text": "Dead end.",
-        "Automove": history[-2],
+        "Automove": (history,-2),
     },
     38: {
         "Text": "You cannot go back now.",
@@ -371,7 +396,7 @@ rooms = {
     },
     40: {
         "Text": "Dead end.",
-        "Automove": history[-2],
+        "Automove": (history,-2),
     },
     41: { # :(
         "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
@@ -504,80 +529,60 @@ rooms = {
         "Options": ["Go north", "Go east", "Go south", "Go west"],
         "Move": [40,35,60,63],
     },
+    66: {
+        "Text": "",
+        "Script": lambda: print2("\033[33m'" + random.choice(ShopkeeperQuotes)
+        + "'\033[0m\nCurrent Rubies:"
+        + str(game_state.rubies)
+        + "Lamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies"),
+        "Options": [
+            "Purchase Lamp Oil",
+            "Purchase Rope",
+            "Purchase Bomb",
+            "Haggle",
+            "Ask about quest",
+            "Leave",
+        ],
+        "Option0Requirements": lambda: game_state.rubies >= 15,
+        "Option1Requirements": lambda: game_state.rubies >= 20,
+        "Option2Requirements": lambda: game_state.rubies >= 30,
+        "Option3Requirements": lambda: game_state.rubies < 30,
+        "Move": [67,68,69,72,70,71],
+    },
+    67: {
+        "Text": "You purchased some Lamp Oil. [15 Rubies]",
+        "Script": lambda: setattr(game_state, 'rubies', game_state.rubies - 15),
+        "Item": "Lamp Oil",
+        "Automove": 66,
+    },
+    68: {
+        "Text": "You purchased some Rope. [20 Rubies]",
+        "Script": lambda: setattr(game_state, 'rubies', game_state.rubies - 20),
+        "Item": "Rope",
+        "Automove": 66,
+    },
+    69: {
+        "Text": "You purchased a Bomb. [30 Rubies]",
+        "Script": lambda: setattr(game_state, 'rubies', game_state.rubies - 30),
+        "Item": "Bomb",
+        "Automove": 66,
+    },
+    70: {
+        "Text":  "",
+        "Script": lambda: itemEvaluation(),
+        "Automove": 66,
+    },
+    71: {
+        "Text": "\033[33m'" + random.choice(ShopkeeperQuotesExit) + "'\033[0m",
+        "Automove": 2,
+    },
+    72: {
+        "Text": "\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m",
+        "Automove": 66,
+    },
 
 
 }
-
-def shop():
-    print2("\033[33m'" + random.choice(ShopkeeperQuotes) + "'\033[0m")
-    print2(
-        "Current Rubies:"
-        + str(game_state.rubies)
-        + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies"
-    )
-    query = option(
-        [
-            "Purchase lamp oil",
-            "Purchase rope",
-            "Purchase bomb",
-            "Ask about quest",
-            "Leave",
-        ]
-    )
-    if query == "1":
-        if game_state.rubies >= 15:
-            game_state.rubies = game_state.rubies - 15
-            game_state.inventory.getItem("Lamp Oil")
-        else:
-            print2(
-                "\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m"
-            )
-        shop()
-    elif query == "2":
-        if game_state.rubies >= 20:
-            game_state.rubies = game_state.rubies - 20
-            game_state.inventory.getItem("Rope")
-        else:
-            print2(
-                "\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m"
-            )
-        shop()
-    elif query == "3":
-        if game_state.rubies >= 30:
-            game_state.rubies = game_state.rubies - 30
-            game_state.inventory.getItem("Bomb")
-        else:
-            print2(
-                "\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\033[0m"
-            )
-        shop()
-    elif query == "4":
-        cursedItems = len(
-            {"Rusted Sword", "Amber Necklace", "Golden Idol"}
-            & set(game_state.inventory.keyItems)
-        )
-        if cursedItems == 3:
-            print2(
-                "\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'"
-            )
-            time.sleep(0.75)
-            print2("\033[33m'Oh, and just one more thing: thank you.'\033[0m")
-            time.sleep(1.5)
-            ending("Good")
-        elif cursedItems > 0:
-            print2(
-                f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m"
-            )
-        print2(
-            "\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m"
-        )
-        shop()
-    elif query == "5":
-        print2("\033[33m'" + random.choice(ShopkeeperQuotesExit) + "'\033[0m")
-        field()
-    else:
-        shop()
-
 
 def bazaar():
     print2(
@@ -759,7 +764,7 @@ def mineralStall():
         mineralStall()
 
 
-def cave():  # This is the worst and most fustrating part of the game. Have fun :)
+def cave():  # This is the worst and most fustrating part of the  Have fun :)
     print2("You are at the cave's entrance.")
     query = option(["Enter the cave", "Go back to the village outskirts"])
     if query == "1":

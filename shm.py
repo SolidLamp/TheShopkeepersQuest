@@ -7,6 +7,7 @@ import game
 
 if game.game_state:
     from game import game_state
+history = game.history
 
 if __name__ == "__main__":
     import sys
@@ -15,11 +16,10 @@ if __name__ == "__main__":
         sys.argv[1]
     else:
         print(
-            "SHM Engine 0.7.2\n2025-09-15\nhttps://github.com/solidlamp\nThis release: The Shopkeeper's Quest Experimental - 2025-09-15"
+            "SHM Engine 0.7b\n2025-09-16\nhttps://github.com/solidlamp\nThis release: The Shopkeeper's Quest Experimental - 2025-09-16"
         )
 
 roomID = 1
-history = []
 
 
 def print2(text, newline=True, pauseAtNewline=0.0, endingChar=False):
@@ -82,8 +82,13 @@ def gameLoop(starting_room=False):
         print2(room["AlternateText"])
     else:
         print2(room["Text"])
+    if "Script" in room:
+        room["Script"]()
     if "Automove" in room:
-        roomID = room["Automove"]
+        if isinstance(room["Automove"], tuple) and room["Automove"][0] == "history":
+            roomID = history[room["Automove"][1]]
+        elif isinstance(room["Automove"], int):
+            roomID = room["Automove"]
     else:
         OptionsIndex = []
         Options = []
@@ -98,10 +103,6 @@ def gameLoop(starting_room=False):
             query = option(Options)
         if query.isdigit() and int(query) <= len(Options):
             roomID = OptionsIndex[int(query) - 1]
-    if "Script" in room:
-        room["Script"]()
-    #if "Item" in room:
-#
     history.append(roomID)
     if len(history) > 10:
         history.pop(0)
