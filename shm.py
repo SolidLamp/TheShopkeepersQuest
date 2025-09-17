@@ -1,12 +1,8 @@
 import time
-from dataclasses import dataclass
-import random
-from game import game_state
-from game import rooms
+from game import game_state, rooms
 import game
 
-if game.game_state:
-    from game import game_state
+game_state = game_state
 history = game.history
 
 if __name__ == "__main__":
@@ -16,7 +12,7 @@ if __name__ == "__main__":
         sys.argv[1]
     else:
         print(
-            "SHM Engine 0.7b\n2025-09-16\nhttps://github.com/solidlamp\nThis release: The Shopkeeper's Quest Experimental - 2025-09-16"
+            "SHM Engine 0.8\n2025-09-17\nhttps://github.com/solidlamp\nThis release: The Shopkeeper's Quest Project Edition"
         )
 
 roomID = 1
@@ -43,7 +39,9 @@ def option(choice, Inventory=True):
         print(game_state.inventory)
     if query == "xyzzy":
         print(game_state)
-        debug()
+        query = input(">>> ")
+        global roomID
+        roomID = int(query)
     if query.casefold() == "q!".casefold():
         exit()
     if query.casefold() == "q".casefold():
@@ -57,23 +55,9 @@ def option(choice, Inventory=True):
     return query
 
 
-def ending(end):
-    print2(game.endingText[end].replace("|", end), pauseAtNewline=0.65)
-    print("\n\n")
-    print2(game.defaultEnding.replace("|", end), pauseAtNewline=0.65)
-    time.sleep(2.5)
-
-
-def lose(text):
-    print("\n\n")
-    time.sleep(0.25)
-    print("\033[31m\033[1mYou died!\033[0m")
-    print("'" + text + "'")
-    time.sleep(0.5)
-    print("\n\n\nTry again?")
-
-
 def gameLoop(starting_room=False):
+    if game.complevel != 1:
+        exit()
     global roomID
     if starting_room:
         roomID = starting_room
@@ -84,6 +68,18 @@ def gameLoop(starting_room=False):
         print2(room["Text"])
     if "Script" in room:
         room["Script"]()
+    if "Item" in room:
+        if (
+            "ItemRequirements" in room
+            and room["ItemRequirements"]()
+            or "ItemRequirements" not in room
+        ):
+            if "ItemText" in room:
+                print2(room["ItemText"])
+            if game_state.inventory and game.keyItems and room["Item"] in game.keyItems:
+                game_state.inventory.getKeyItem(room["Item"])
+            elif game_state.inventory:
+                game_state.inventory.getItem(room["Item"])
     if "Automove" in room:
         if isinstance(room["Automove"], tuple) and room["Automove"][0] == "history":
             roomID = history[room["Automove"][1]]
@@ -97,7 +93,7 @@ def gameLoop(starting_room=False):
             if OptionRequirements not in room or room[OptionRequirements]():
                 OptionsIndex.append(i)
                 Options.append(room["Options"][room["Move"].index(i)])
-        if "Inventory" in room and inventory in game_state and not room["Inventory"]:
+        if "Inventory" in room and game_state.inventory and not room["Inventory"]:
             query = option(Options, Inventory=False)
         else:
             query = option(Options)
