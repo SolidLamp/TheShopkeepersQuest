@@ -1,6 +1,7 @@
 import time
 from game import game_state, rooms
 import game
+import sys
 
 game_state = game_state
 history = game.history
@@ -43,12 +44,12 @@ def option(choice, Inventory=True):
         global roomID
         roomID = int(query)
     if query.casefold() == "q!".casefold():
-        exit()
+        sys.exit()
     if query.casefold() == "q".casefold():
         print2("Are you sure you want to quit?")
         query = input(">>> ")
         if query.casefold() == "y".casefold():
-            exit()
+            sys.exit()
         else:
             query = "255"
     print()
@@ -56,8 +57,9 @@ def option(choice, Inventory=True):
 
 
 def gameLoop(starting_room=False):
-    if game.complevel != 1:
-        exit()
+    if game.complevel != 0:
+        print("This game is not compatible with this version of the SHM Engine.")
+        sys.exit(1)
     global roomID
     if starting_room:
         roomID = starting_room

@@ -2,7 +2,7 @@ import time
 from dataclasses import dataclass
 import random
 
-complevel = 1
+complevel = 0
 history = []
 
 ShopkeeperQuotesExit = [
@@ -437,7 +437,7 @@ rooms = {
     },
     38: {
         "Text": "You cannot go back now.",
-        "Script": lambda: exit(),
+        "Script": lambda: sys.exit(),
         "Options": ["You cannot."],
         "Inventory": False,
         "Automove": 38,

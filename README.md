@@ -1,6 +1,6 @@
 # The Shopkeeper's Quest
 
-An adventure game created for a school project.<br>
+The Shopkeeper's Quest is a text-based adventure game written in Python. It is licensed under MIT and it is free for anyone to play and modify.<br>
 Based on [Steamed Hams: The Game Plus!](https://github.com/SolidLamp/Steamed-Hams)<br>
 
 Inspired by:
@@ -15,4 +15,4 @@ Inspired by:
 ## Usage and Requirements
 
 - Requires Python 3.7+.
-- To run the game, you simply run `game.py` with your installation of Python (e.g. `python3 game.py` on Debian and many others; doesn't matter). It's a simple Python script, really.
+- To run the game, you simply run `TheShopKeepersQuest.py` with your installation of Python (e.g. `python3 TheShopKeepersQuest.py` on Debian and many others; doesn't matter). It's a simple Python script, really.
