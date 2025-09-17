@@ -1,6 +1,7 @@
 import time
 from dataclasses import dataclass
 import random
+import sys
 
 complevel = 0
 history = []
