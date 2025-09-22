@@ -2,13 +2,14 @@ import time
 from game import game_state, rooms
 import game
 import sys
+import platform
+if platform.system() == "Linux":
+    import curses
 
 game_state = game_state
 history = game.history
 
 if __name__ == "__main__":
-    import sys
-
     if len(sys.argv) > 1:
         sys.argv[1]
     else:

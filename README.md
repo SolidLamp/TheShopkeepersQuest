@@ -15,4 +15,5 @@ Inspired by:
 ## Usage and Requirements
 
 - Requires Python 3.7+.
+- Requires ncurses (Linux/MacOS/*BSD/*nix). Windows users will have to wait until I actually finish.
 - To run the game, you simply run `TheShopKeepersQuest.py` with your installation of Python (e.g. `python3 TheShopKeepersQuest.py` on Debian and many others; doesn't matter). It's a simple Python script, really.
