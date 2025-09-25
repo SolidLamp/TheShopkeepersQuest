@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import time
 from game import game_state, rooms
 import game
@@ -58,7 +59,7 @@ def option(choice, Inventory=True):
 
 
 def gameLoop(starting_room=False):
-    if game.complevel != 0:
+    if game.gameInfo["complevel"] != 0:
         print("This game is not compatible with this version of the SHM Engine.")
         sys.exit(1)
     global roomID
