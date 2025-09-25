@@ -13,17 +13,16 @@ value = 0
 #win.refresh()
 
 
-def print3(win, text):
-  colorcode = 0
+def print3(win, text, colorcode=0, speed=0.01):
   for char in text:
     if char == "\n":
       newline(win)
     elif char == "\033":
       win.addstr("DD")
     else:
-      win.addstr(char)
+      win.addstr(char, curses.color_pair(colorcode))
       win.refresh()
-      time.sleep(0.01)
+      time.sleep(speed)
 
 
 def newline(win):
@@ -56,7 +55,7 @@ def option(win, text, options):
       win.addstr(" ")
       if options.index(option) == value:
         win.addstr("> ")
-        win.addstr(str(option), curses.color_pair(3))
+        win.addstr(str(option), curses.color_pair(8))
       else:
         win.addstr(str(option))
     #win.getch()

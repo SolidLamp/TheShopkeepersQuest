@@ -236,7 +236,7 @@ rooms = {
     4: {
         "Text": "You are deep in the forest. It is dim, and difficult to see.",
         "Options": ["Go further in", "Leave"],
-        "Option0Requirements": lambda: "Rusted Sword" in game_state.inventory.keyItems,
+        "Option0Requirements": lambda: "Rusted Sword" not in game_state.inventory.keyItems,
         "Move": [5, 3],
     },
     5: {
