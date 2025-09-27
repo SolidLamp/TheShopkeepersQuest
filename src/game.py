@@ -548,7 +548,7 @@ def get_rooms(win):
         57: {
             "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
             "Item": "Golden Idol",
-            "ItemRequirements": lambda: "Golden Idol" in game_state.inventory.keyItems,
+            "ItemRequirements": lambda: "Golden Idol" not in game_state.inventory.keyItems,
             "ItemText": "You see, on the ground, a beautiful \033[47mAmber Necklace\033[0m.",
             "Options": ["Go north", "Go east", "Go south", "Go west"],
             "Move": [40, 35, 36, 56],
@@ -743,9 +743,8 @@ def get_rooms(win):
             "Text": "\033[35m'You did it! I can't believe it! That's really it! That's my mother's \033[47mSilver Amulet\033[0m\033[35m! I can't thank you enough! Here, have this bow, no charge! Thank you, thank you!",
             "Requirements": lambda: "Silver Amulet" in game_state.inventory.keyItems,
             "AlternateText": "\033[35m'Hey, do you think you could do something for me? Since everyone disappeared last night, I miss my mother. Do you think you could see if you could find her \033[47mSilver Amulet\033[0m\033[35m? I'd give you the bow for free if you did.'\033[0m",
-            "Item": "Silver Amulet",
-            "ItemRequirements": lambda: "Silver Amulet"
-            not in game_state.inventory.keyItems,
+            "Item": "Bow and Arrow",
+            "ItemRequirements": lambda: "Silver Amulet" in game_state.inventory.keyItems,
             "Automove": 82,
         },
         85: {
