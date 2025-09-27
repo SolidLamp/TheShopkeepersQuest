@@ -2,7 +2,7 @@
 import time
 import sys
 import game
-from game import game_state, rooms
+from game import game_state, get_rooms
 import tui
 from tui import print3
 
@@ -33,6 +33,7 @@ def option(win, text, options, Inventory=True):
 
 
 def gameLoop(win, starting_room=0):
+    rooms = game.get_rooms(win)
     win.clear()
     if game.gameInfo["complevel"] != 0:
         print3(win, "ERROR: This game is not compatible with this version of the SHM Engine.", 1, 0)

@@ -23,7 +23,7 @@ def colorsetup(win):
   curses.init_pair(37, curses.COLOR_WHITE, curses.COLOR_BLACK)
   curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
-def print3(win, text, colorcode=0, delay=0.01):
+def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0):
   #colorsetup(win)
   i = 0
   ansi = int(colorcode)
@@ -31,6 +31,7 @@ def print3(win, text, colorcode=0, delay=0.01):
     char = text[i]
     if char == "\n":
       newline(win)
+      time.sleep(pauseAtNewline)
     elif char == "\033": #\033[xm \033[xxm
       if text[i+1] == "[" and text[i+3].isdigit():
         ansi = int(text[i+2] + text[i+3])
