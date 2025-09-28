@@ -41,10 +41,10 @@ ShopkeeperQuotes = [
 
 endingText = {
     "Good": "And so, overnight, all the people returned to the village, as if they had never left.\nSoon after, the village was lifted into high spirits as the harvest had been the best in almost thirty years.\nDespite the prospering village, you decided to leave.\nYou had no desire to stay after the events you just experienced, and you would rather leave than stay to make some money.",
-    "Secret": "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided te stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
+    "Secret": "And so, overnight, you became the new shopkeeper, but nothing really changed in the end.\nThe villagers never returned, but many travellers came, hearing about what happened.\nMany decided to stay after a plentiful harvest brought good omens to the village.\nThis, however, would not be the last of it...\n...and you knew that.",
     "SHM": "You achieved the\n|\nEnding.\nTry Again?",
 }
-defaultEnding = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\n and RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
+defaultEnding = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\nand RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
 
 mysticalRocks = {
     "What you think is an Emerald": 80,
@@ -66,33 +66,6 @@ keyItems = [
     "Fishing Rod",
 ]
 
-
-def print2(text, newline=True, pauseAtNewline=0.0, endingChar=False):
-    for char in text:
-        if char == "\n":
-            time.sleep(pauseAtNewline)
-        print(char, end="", flush=True)
-        time.sleep(0.01)
-    if newline:
-        print()
-
-
-def lose(text):
-    print("\n\n")
-    time.sleep(0.25)
-    print("\033[31m\033[1mYou died!\033[0m")
-    print("'" + text + "'")
-    time.sleep(0.5)
-    print("\n\n\nTry again?")
-
-
-def ending(win, end):
-    print3(win, endingText[end].replace("|", end), 0, 0.01, 0.65)
-    print("\n\n")
-    print3(win, defaultEnding.replace("|", end), 0, 0.01, 0.65)
-    time.sleep(2.5)
-
-
 @dataclass
 class Inventory:
     items: list[str] = None
@@ -103,12 +76,16 @@ class Inventory:
         self.keyItems = [] if self.keyItems is None else self.keyItems
 
     def getItem(self, item: str, win):
-        print3(win, "\nYou got \033[1m" + str(item) + "\033[0m!")
+        print3(win, "\nYou got \033[1m" + str(item) + "\033[0m!\n")
         self.items.append(item)
+        print3(win, "Press any button to continue...")
+        win.getch()
 
     def getKeyItem(self, item: str, win):
-        print3(win, "\nYou got \033[1m\033[47m" + str(item) + "\033[0m!")
+        print3(win, "\nYou got \033[1m\033[47m" + str(item) + "\033[0m!\n")
         self.keyItems.append(item)
+        print3(win, "Press any button to continue...")
+        win.getch()
 
     def __str__(self):
         if not self.items and not self.keyItems:
@@ -137,34 +114,39 @@ class gameState:
         print3(win, "\nYou got \033[1m" + str(obtained) + "\033[0m Rubies!")
         self.rubies += obtained
         print3(win,
-            "\033[0m You currently have \033[1m"
+            "\033[0m\n You currently have \033[1m"
             + str(self.rubies)
             + "\033[0m Rubies.\n"
         )
+        print3(win, "Press any button to continue...")
+        win.getch()
 
 
 game_state = gameState(inventory=Inventory(items=[]))
 
 
-def itemEvaluation(win):
+def itemEvaluation():
     cursedItems = len(
         {"Rusted Sword", "Amber Necklace", "Golden Idol"}
         & set(game_state.inventory.keyItems)
     )
-    if cursedItems == 3:
-        print3(win,
+    return cursedItems
+
+def ShopkeeperFinalSpeech(win):
+    print3(win,
             "\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'"
         )
-        time.sleep(0.75)
-        print3(win, "\033[33m'Oh, and just one more thing: thank you.'\033[0m")
-        time.sleep(1.5)
-        ending(win, "Good")
-    elif cursedItems > 0:
-        print3(win,
-            f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m"
-        )
+    time.sleep(0.75)
+    print3(win, "\033[33m\n'Oh, and just one more thing: thank you.'\033[0m")
+    time.sleep(1.5)
+
+def ShopkeeperAffirmations(win):
+    cursedItems = len(
+        {"Rusted Sword", "Amber Necklace", "Golden Idol"}
+        & set(game_state.inventory.keyItems)
+    )
     print3(win,
-        "\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m"
+            f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m"
     )
 
 
@@ -201,13 +183,29 @@ def mineralEvaluation(win):
         "\033[32m'Thank you so much. These will be excellent to add to my collection.'\033[0m"
     )
 
+def debug(win):
+    game_state.inventory.getKeyItem("Rusted Sword", win)
+    game_state.inventory.getKeyItem("Amber Necklace", win)
+    game_state.inventory.getKeyItem("Golden Idol", win)
+    game_state.inventory.getKeyItem("Ancient Key", win)
+    game_state.inventory.getKeyItem("Fishing Rod", win)
+    game_state.inventory.getKeyItem("Bow and Arrow", win)
+    game_state.inventory.getKeyItem("Silver Amulet", win)
+    game_state.inventory.getItem("Lamp Oil", win)
+    game_state.inventory.getItem("Lamp Oil", win)
+    game_state.inventory.getItem("Rope", win)
+    game_state.inventory.getItem("Bomb", win)
+    game_state.inventory.getItem("Bomb", win)
+    game_state.getRuby(9001, win)
 
 def get_rooms(win):
     rooms = {
         0: {
             "Text": "\033[32m[Debug] This is the Debug Room.\033[0m",
+            "Script": lambda: debug(win),
             "Options": ["Go to 2", "Go to 3"],
             "Move": [2, 3],
+            "Lose": "you fail",
         },
         1: {
             "Text": "You are standing at the outskirts of the village. There is a road to the north, leading to the main parts of the village, a forest to the east, a cave to the south, a shop and bazaar to the west.",
@@ -252,8 +250,7 @@ def get_rooms(win):
         },
         6: {
             "Text": "You attempt to fight the bonobo, but it easily overpowers you. You are killed.",
-            "Script": lambda: lose("What did you think was going to happen?"),
-            "Automove": 1,
+            "Lose": "What did you think was going to happen?"
         },
         7: {
             "Text": "You manage to defeat the bonobo, using your weapon.\nYou manage to find a chest, containing the \033[47mRusted Sword\033[0m.",
@@ -263,9 +260,7 @@ def get_rooms(win):
         },
         8: {
             "Text": "You attempt to leave, but the bonobo catches you. You are killed.",
-            "Script": lambda: lose("Bonobos are quite agressive."),
-            "Options": ["Fight the bonobo", "Fight the bonobo", "Leave"],
-            "Automove": 1,
+            "Lose": "Bonobos are quite aggressive."
         },
         9: {
             "Text": "You are standing within the village. It seems barren and no one is there.",
@@ -329,7 +324,7 @@ def get_rooms(win):
         19: {
             "Text": "You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?",
             "Options": [
-                "Unlock the door with the \033[47mAncient Key\033[0m",
+                "Unlock the door with the Ancient Key",
                 "Attempt to turn the handle",
                 "Go back",
             ],
@@ -342,44 +337,34 @@ def get_rooms(win):
             "Move": [20, 19],
         },
         21: {
-            "Text": "You cannot go back now.",
-            "Requirements": lambda: 21 in history,
-            "AlternateText": "You unlock the mysterious door with the \033[47mAncient Key\033[0m.",
+            "Text": "You unlock the mysterious door with the \033[47mAncient Key\033[0m.",
             "Options": ["Continue"],
             "Inventory": False,
-            "Move": 22,
+            "Move": [22],
         },
         22: {
-            "Text": "You cannot go back now.",
-            "Requirements": lambda: 22 in history,
-            "AlternateText": "You go through the door. It is pitch-black. You feel that you can no longer control yourself.",
+            "Text": "You go through the door. It is pitch-black. You feel that you can no longer control yourself.",
             "Options": ["Continue"],
             "Inventory": False,
-            "Move": 23,
+            "Move": [23],
         },
         23: {
-            "Text": "You cannot go back now.",
-            "Requirements": lambda: 23 in history,
-            "AlternateText": "As you continue, the tunnel around you appears to be darker than what you thought possible.",
+            "Text": "As you continue, the tunnel around you appears to be darker than what you thought possible.",
             "Options": ["Continue"],
             "Inventory": False,
-            "Move": 24,
+            "Move": [24],
         },
         24: {
-            "Text": "You cannot go back now.",
-            "Requirements": lambda: 24 in history,
-            "AlternateText": "As you continue, you see a light at the end.",
+            "Text": "As you continue, you see a light at the end.",
             "Options": ["Continue"],
             "Inventory": False,
-            "Move": 22,
+            "Move": [25],
         },
         25: {
-            "Text": "You cannot go back now.",
-            "Requirements": lambda: 25 in history,
-            "AlternateText": "Eventually, you get to the end, and can go through the illuminated exit.",
+            "Text": "Eventually, you get to the end, and can go through the illuminated exit.",
             "Options": ["Continue"],
             "Inventory": False,
-            "Move": 26,
+            "Move": [26],
         },
         26: {
             "Text": "It is the back room of "
@@ -421,9 +406,7 @@ def get_rooms(win):
             "Automove": 26,
         },
         32: {
-            "Text": "You cannot go back now.",
-            "Requirements": lambda: 32 in history,
-            "AlternateText": "You are in the front room of "
+            "Text": "You are in the front room of "
             + game_state.shopkeeperName
             + "'s shop.",
             "Options": ["Become " + game_state.shopkeeperName],
@@ -431,13 +414,9 @@ def get_rooms(win):
             "Move": [33],
         },
         33: {
-            "Text": "You cannot go back now.",
-            "Requirements": lambda: 33 in history,
-            "AlternateText": "You become " + game_state.shopkeeperName + ".",
-            "Script": lambda: ending(win, "Secret"),
+            "Text": "You become " + game_state.shopkeeperName + ".",
             "Inventory": False,
-            "Automove": 38,
-        },
+            "Ending": "Secret",
         34: {
             "Text": "Dead end.",
             "Automove": (history, -2),
@@ -606,13 +585,18 @@ def get_rooms(win):
                 "Purchase Bomb",
                 "Haggle",
                 "Ask about quest",
+                "Ask about quest",
+                "Ask about quest",
                 "Leave",
             ],
             "Option0Requirements": lambda: game_state.rubies >= 15,
             "Option1Requirements": lambda: game_state.rubies >= 20,
             "Option2Requirements": lambda: game_state.rubies >= 30,
             "Option3Requirements": lambda: game_state.rubies < 30,
-            "Move": [67, 68, 69, 72, 70, 71],
+            "Option4Requirements": lambda: itemEvaluation() == 3,
+            "Option5Requirements": lambda: itemEvaluation() > 1,
+            "Option6Requirements": lambda: itemEvaluation() == 0,
+            "Move": [67, 68, 69, 72, 70, 130, 131, 71],
         },
         67: {
             "Text": "You purchased some Lamp Oil. [15 Rubies]",
@@ -634,8 +618,8 @@ def get_rooms(win):
         },
         70: {
             "Text": "",
-            "Script": lambda: itemEvaluation(win),
-            "Automove": 66,
+            "Script": lambda: ShopkeeperFinalSpeech(win),
+            "Ending": "Good"
         },
         71: {
             "Text": "\033[33m'" + random.choice(ShopkeeperQuotesExit) + "'\033[0m",
@@ -1003,7 +987,7 @@ def get_rooms(win):
             "Item": "A Stone that looks kind of like a face",
             "ItemRequirements": lambda: "A Stone that looks kind of like a face"
             not in game_state.inventory.items,
-            "ItemText": "On the ground, you find a stond that looks kind of like a face.",
+            "ItemText": "On the ground, you find a stone that looks kind of like a face.",
             "Options": ["Go north", "Go south"],
             "Move": [127, 125],
         },
@@ -1027,6 +1011,15 @@ def get_rooms(win):
             "Options": ["Go east", "Go south"],
             "Move": [128, 100],
         },
-    }
+        130: {
+            "Text": "",
+            "Script": lambda: ShopkeeperFinalSpeech(win),
+            "Automove": 66,
+        },
+        131: {
+            "Text": "\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m",
+            "Automove": 66,
+        },
+    }} #I have no idea why there needs to be two, or why it suddenly wants two now but not before, but it doesn't work without it.
     return rooms
 ##
