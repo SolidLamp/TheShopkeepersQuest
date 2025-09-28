@@ -80,7 +80,7 @@ def option(win, text, options):
       win.addstr(" ")
       if options.index(option) == value:
         win.addstr("> ")
-        win.addstr(str(option), curses.color_pair(8))
+        win.addstr(str(option), curses.color_pair(47))
       else:
         win.addstr(str(option))
     #win.getch()

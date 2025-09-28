@@ -417,6 +417,7 @@ def get_rooms(win):
             "Text": "You become " + game_state.shopkeeperName + ".",
             "Inventory": False,
             "Ending": "Secret",
+        },
         34: {
             "Text": "Dead end.",
             "Automove": (history, -2),
@@ -1020,6 +1021,6 @@ def get_rooms(win):
             "Text": "\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m",
             "Automove": 66,
         },
-    }} #I have no idea why there needs to be two, or why it suddenly wants two now but not before, but it doesn't work without it.
+    } #I figured it out
     return rooms
 ##
