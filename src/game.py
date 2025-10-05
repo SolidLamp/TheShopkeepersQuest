@@ -7,7 +7,7 @@ print3 = tui.print3
 
 
 gameInfo = {
-    "complevel": 0,
+    "complevel": 1,
     "abbr": "TSQ",
     "title": "The Shopkeeper's Quest",
     "desc": "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident.",
@@ -45,6 +45,12 @@ endingText = {
     "SHM": "You achieved the\n|\nEnding.\nTry Again?",
 }
 defaultEnding = "\033[1mThe Shopkeeper's Quest\033[0m\n\nSchool Project Edition\n\nWith inspiration from:\nColossal Cave Adventure, by Will Crowther and Don Woods;\nKing's Quest, by Sierra On-Line;\nHenry Stickmin, by Puffballs United;\nMinecraft: Story Mode, by Telltale Games;\nand RTX Morshu: The Game, by koshkamatew\nWith special thanks to\n\033[1m\033[33mYOU\033[0m\nfor playing the game,\nfor if a tree falls and no one hears it, does it make a noise?"
+
+loseText = {
+    "SHM": "You achieved the\n|\nEnding.\nTry Again?",
+}
+
+defaultLose = "\n\n\033[31m\033[1mYou died!\033[0m\n'|'\n\n\n"
 
 mysticalRocks = {
     "What you think is an Emerald": 80,

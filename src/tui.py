@@ -21,6 +21,12 @@ def colorsetup(win):
   curses.init_pair(35, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
   curses.init_pair(36, curses.COLOR_CYAN, curses.COLOR_BLACK)
   curses.init_pair(37, curses.COLOR_WHITE, curses.COLOR_BLACK)
+  curses.init_pair(41, curses.COLOR_BLACK, curses.COLOR_RED)
+  curses.init_pair(42, curses.COLOR_BLACK, curses.COLOR_GREEN)
+  curses.init_pair(43, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+  curses.init_pair(44, curses.COLOR_BLACK, curses.COLOR_BLUE)
+  curses.init_pair(45, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+  curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
   curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
 def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0):
@@ -80,7 +86,7 @@ def option(win, text, options):
       win.addstr(" ")
       if options.index(option) == value:
         win.addstr("> ")
-        win.addstr(str(option), curses.color_pair(47))
+        win.addstr(str(option), curses.A_STANDOUT)
       else:
         win.addstr(str(option))
     #win.getch()
