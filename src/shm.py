@@ -14,7 +14,7 @@ if __name__ == "__main__":
     #if len(sys.argv) > 1:
         #sys.argv[1]
     print(
-        "SHM Engine 1.0\n2025-10-05\nhttps://github.com/solidlamp\nThis release: 'Steamed Hams: The Game Plus! Edition 2025-10-05'"
+        "SHM Engine 1.0\n2025-10-05\nhttps://github.com/solidlamp\nThis release: 'The Shopkeeper's Quest 1.0.1'"
     )
 
 roomID = 1
