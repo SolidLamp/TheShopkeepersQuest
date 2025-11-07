@@ -100,6 +100,8 @@ def option(win, text, options):
       value -= 1
     elif key == "KEY_DOWN" and value < (len(options) - 1):
       value += 1
+    elif key == "d":
+      return("d")
     elif key == "q":
       return("q")
       print3(win, "Are you sure you want to quit?", 0, 0)

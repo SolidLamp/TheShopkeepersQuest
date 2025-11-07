@@ -426,11 +426,15 @@ def get_rooms(win):
         },
         34: {
             "Text": "Dead end.",
-            "Automove": (history, -2),
+            "Automove": ("history", -2),
         },
         35: {
             "Text": "Dead end.",
-            "Automove": (history, -2),
+            "Automove": ("history", -2),
+        },
+        36: {
+            "Text": "Dead end.",
+            "Automove": ("history", -2),
         },
         38: {
             "Text": "You cannot go back now.",
@@ -446,7 +450,7 @@ def get_rooms(win):
         },
         40: {
             "Text": "Dead end.",
-            "Automove": (history, -2),
+            "Automove": ("history", -2),
         },
         41: {  # :(
             "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",

@@ -8,20 +8,21 @@ from tui import print3
 
 game_state = game_state
 history = game.history
+globaldebug = False
 
 if __name__ == "__main__":
 
     #if len(sys.argv) > 1:
         #sys.argv[1]
     print(
-        "SHM Engine 1.0\n2025-10-05\nhttps://github.com/solidlamp\nThis release: 'Steamed Hams: The Game Plus! Edition 2025-10-05'"
+        "SHM Engine 1.1 beta\n2025-11-07\nhttps://github.com/solidlamp\nThis release: 'The Shopkeeper's Quest 1.1 Experimental'"
     )
 
 roomID = 1
 
 def option(win, text, options, Inventory=True):
     if not hasattr(game_state, 'inventory'):
-        Inventory=False
+        Inventory = False
     query = 0
     choices = options
     if Inventory and hasattr(game_state, 'inventory'):
@@ -32,13 +33,16 @@ def option(win, text, options, Inventory=True):
         if query == 0 or query == "q":
             sys.exit()
         else:
-            query = option(win, text, options, Inventory=True)
+            query = option(win, text, options, Inventory)
+    elif query == "d":
+        debug(win)
+        query = option(win, text, options, Inventory)
     elif Inventory and query == choices.index("Inventory"):
         win.clear()
         print3(win, "\n" + str(game_state.inventory))
         print3(win, "\nPress any key to exit inventory.")
         win.getch()
-        query = option(win, text, options, Inventory=True)
+        query = option(win, text, options, Inventory)
     return query
 
 def ending(win, end):
@@ -64,6 +68,33 @@ def lose(win, lose):
     else:
         return 1
 
+def debug(win):
+    query = tui.option(win, "SHM Engine Debug Menu", ["Test room IDs"])
+    match query:
+        case 0:
+            text = ""
+            rooms = game.get_rooms(win)
+            for roomno in rooms:
+                room = rooms[roomno]
+                if "Move" in room:
+                    for idno in room["Move"]:
+                        win.addstr(str(idno))
+                        if isinstance(idno, int) and idno not in rooms:
+                            text += f"Warning: Invalid ID {idno} in {roomno}!\n"
+                if "Automove" in room:
+                    automove = room["Automove"]
+                    win.addstr(str(automove))
+                    #win.getch()
+                    if isinstance(automove, int) and automove not in rooms:
+                        text += f"Warning: Invalid ID {automove} in {roomno}!\n"
+            win.clear()
+            if text:
+                print3(win, text, 33, 0)
+            else:
+                print3(win, "Success! No errors found.", 36, 0)
+            print3(win, "\nPress any key to exit Debug Menu...", 0, 0)
+            win.getch()
+
 def gameLoop(win, starting_room=0):
     rooms = game.get_rooms(win)
     win.clear()
@@ -76,7 +107,17 @@ def gameLoop(win, starting_room=0):
     global roomID
     if starting_room:
         roomID = starting_room
-    room = rooms[roomID]
+    if roomID in rooms:
+        room = rooms[roomID]
+    else:
+        print3(win, f"Non-critical Error: Invalid RoomID: {roomID})", 33, 0)
+        query = option(win, text, ["Open Debug Menu", "Quit Game"], False)
+        if query == 0:
+            debug(win)
+            sys.exit(2)
+        if query == 1:
+            sys.exit(2)
+        print3(win, "\nPress any key to exit...", 0, 0)
     text = ""
     if "Requirements" in room and not room["Requirements"]():
         print3(win, room["AlternateText"])
@@ -84,6 +125,8 @@ def gameLoop(win, starting_room=0):
     else:
         print3(win, room["Text"])
         text = room["Text"]
+    if globaldebug:
+        text += "\nRoomID: " + str(roomID) + "\nHistory: " + str(history)
     if "Script" in room:
         room["Script"]()
     if "Ending" in room:
@@ -116,7 +159,10 @@ def gameLoop(win, starting_room=0):
             OptionRequirements = "Option" + str(room["Move"].index(i)) + "Requirements"
             if OptionRequirements not in room or room[OptionRequirements]():
                 OptionsIndex.append(i)
-                Options.append(room["Options"][room["Move"].index(i)])
+                if globaldebug:
+                    Options.append(room["Options"][room["Move"].index(i)] + " - RoomID: " + str(i))
+                else:
+                    Options.append(room["Options"][room["Move"].index(i)])
         if "Inventory" in room and game_state.inventory and not room["Inventory"]:
             query = option(win, text, Options, Inventory=False)
         else:
