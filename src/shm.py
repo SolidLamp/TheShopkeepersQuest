@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time
 import sys
+from datetime import datetime
 import game
 from game import game_state
 import tui
@@ -15,7 +16,7 @@ if __name__ == "__main__":
     #if len(sys.argv) > 1:
         #sys.argv[1]
     print(
-        "SHM Engine 1.1 beta\n2025-11-07\nhttps://github.com/solidlamp\nThis release: 'The Shopkeeper's Quest 1.1 Experimental'"
+        "SHM Engine 1.1\n2025-11-07\nhttps://github.com/solidlamp\nThis release: 'The Shopkeeper's Quest 1.1'"
     )
 
 roomID = 1
@@ -95,12 +96,18 @@ def debug(win):
             print3(win, "\nPress any key to exit Debug Menu...", 0, 0)
             win.getch()
 
+def log_error(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0):
+    with open("error.log", "a") as log:
+        timestamp = datetime.now().strftime("[%Y-%m-%dT%l:%M:%S%z]")
+        log.write(f"{timestamp} {text}\n")
+    print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0)
+
 def gameLoop(win, starting_room=0):
     rooms = game.get_rooms(win)
     win.clear()
     if game.gameInfo["complevel"] != 1:
         complevel = game.gameInfo["complevel"]
-        print3(win, f"ERROR: This game (complevel {complevel}) is not compatible with this version of the SHM Engine (1.0 / complevel 1).", 31, 0)
+        log_error(win, f"ERROR: This game (complevel {complevel}) is not compatible with this version of the SHM Engine (1.0 / complevel 1).", 31, 0)
         print3(win, "\nPress any key to exit...", 0, 0)
         win.getch()
         sys.exit(1)
@@ -110,8 +117,8 @@ def gameLoop(win, starting_room=0):
     if roomID in rooms:
         room = rooms[roomID]
     else:
-        print3(win, f"Non-critical Error: Invalid RoomID: {roomID})", 33, 0)
-        query = option(win, text, ["Open Debug Menu", "Quit Game"], False)
+        log_error(win, f"Non-critical Error: Invalid RoomID: {roomID}", 33, 0)
+        query = option(win, "Non-critical Error: Invalid RoomID", ["Open Debug Menu", "Quit Game"], False)
         if query == 0:
             debug(win)
             sys.exit(2)

@@ -233,7 +233,7 @@ def get_rooms(win):
                 "Go to " + game_state.shopkeeperName + "'s shop",
                 "Go to the bazaar",
             ],
-            "Move": [3, 9, 88, 66, 73],
+            "Move": [3, 9, 288, 266, 273],
         },
         3: {
             "Text": "You come to the opening of the forest. The forest is vast and the trees tower over you.",
