@@ -1,17 +1,51 @@
 import sys
-import tui
-from shm import gameLoop
+import tomllib
+import time
 try:
     import curses
 except ImportError as e:
     print(f"The curses module was not found. If you are running Windows, please install windows-curses with pip.\nError: {e}")
     sys.exit(1)
+import tui
+from shm import gameLoop
+import game
+import tomlconverter
+import toml_reader
+
+def toml_test():
+    with open("game.toml", "rb") as f:
+        gamedata = tomllib.load(f)
+        print(gamedata)
+        rooms = game.get_rooms("w")
+        print(rooms[1])
+        sys.exit(0)
+
+
+def show_256_colors(stdscr):
+    curses.start_color()
+    curses.use_default_colors()
+    stdscr.clear()
+    stdscr.addstr("256-Color Palette (Scroll to view all):\n\n")
+    curses.init_color(2, 28, 40, 250)
+   # curses.init_pair(28, curses.2, curses.COLOR_BLACK)
+    stdscr.addstr("the word:\n\n", curses.color_pair(28))
+    stdscr.addstr("the word:\n\n", curses.color_pair(28))
+    stdscr.addstr("the word:\n\n", curses.color_pair(28))
+    stdscr.getch()
+    stdscr.getch()
+    stdscr.getch()
+
+#curses.wrapper(show_256_colors)
 
 def main(win):
-    win.clear()
     curses.curs_set(0)
     win.scrollok(True)
     tui.colorsetup(win)
+    curses.cbreak()
+    #tomlconverter.doit(win)
+    #win.getch()
+    #time.sleep(99)
+    #win.getch()
     win.addstr(r"""
         ___ _  _ ____
          |  |__| |___
@@ -44,6 +78,9 @@ def main(win):
         win.addstr(str(loop))
 
 def title():
-    print("If you can read this, the game is not displaying. The most likely scenario is that you have closed the game.")
+    #toml_test()
+    #toml_reader.read_toml()
+    #print(toml_reader.read_toml())
+    print("[The Shopkeeper's Quest]\nxyzzy")
     while 1:
         curses.wrapper(main)

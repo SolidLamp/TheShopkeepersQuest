@@ -10,16 +10,17 @@ from tui import print3
 game_state = game_state
 history = game.history
 globaldebug = False
+roomID = 1
 
 if __name__ == "__main__":
 
     #if len(sys.argv) > 1:
         #sys.argv[1]
     print(
-        "SHM Engine 1.1\n2025-11-07\nhttps://github.com/solidlamp\nThis release: 'The Shopkeeper's Quest 1.1'"
+        """SHM Engine 1.1a\n2025-12-12\nhttps://github.com/solidlamp\
+        This release: 'The Shopkeeper's Quest Experimental'"""
     )
 
-roomID = 1
 
 def option(win, text, options, Inventory=True):
     if not hasattr(game_state, 'inventory'):
@@ -102,6 +103,49 @@ def log_error(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0):
         log.write(f"{timestamp} {text}\n")
     print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0)
 
+def roomIDerror(win, rooms: dict):
+    log_error(win, f"Non-critical Error: Invalid RoomID: {roomID}", 33, 0)
+    query = option(win, "Non-critical Error: Invalid RoomID", ["Open Debug Menu", "Quit Game"], False)
+    if query == 0:
+        debug(win)
+        sys.exit(2)
+    if query == 1:
+        sys.exit(2)
+    print3(win, "\nPress any key to exit...", 0, 0)
+
+def itemHandler(win, room: dict):
+    if (
+        "ItemRequirements" in room
+        and room["ItemRequirements"]()
+        or "ItemRequirements" not in room
+    ):
+        if "ItemText" in room:
+            print3(win, "\n" + room["ItemText"])
+        if hasattr(game_state, 'inventory') and game.keyItems and room["Item"] in game.keyItems:
+            game_state.inventory.getKeyItem(room["Item"], win)
+        elif hasattr(game_state, 'inventory'):
+            game_state.inventory.getItem(room["Item"], win)
+        win.getch()
+
+def mainRoomHandler(win, room: dict, text: str):
+    OptionsIndex = []
+    Options = []
+    for i in room["Move"]:
+        OptionRequirements = "Option" + str(room["Move"].index(i)) + "Requirements"
+        if OptionRequirements not in room or room[OptionRequirements]():
+            OptionsIndex.append(i)
+            optionText = room["Options"][room["Move"].index(i)]
+            if globaldebug:
+                Options.append(optionText + " - RoomID: " + str(i))
+            else:
+                Options.append(optionText)
+    if "Inventory" in room and game_state.inventory and not room["Inventory"]:
+        query = option(win, text, Options, Inventory=False)
+    else:
+        query = option(win, text, Options)
+    roomID = OptionsIndex[query]
+    return roomID
+
 def gameLoop(win, starting_room=0):
     rooms = game.get_rooms(win)
     win.clear()
@@ -117,14 +161,8 @@ def gameLoop(win, starting_room=0):
     if roomID in rooms:
         room = rooms[roomID]
     else:
-        log_error(win, f"Non-critical Error: Invalid RoomID: {roomID}", 33, 0)
-        query = option(win, "Non-critical Error: Invalid RoomID", ["Open Debug Menu", "Quit Game"], False)
-        if query == 0:
-            debug(win)
-            sys.exit(2)
-        if query == 1:
-            sys.exit(2)
-        print3(win, "\nPress any key to exit...", 0, 0)
+        room = rooms[1]
+        roomIDerror(win, rooms)
     text = ""
     if "Requirements" in room and not room["Requirements"]():
         print3(win, room["AlternateText"])
@@ -141,18 +179,7 @@ def gameLoop(win, starting_room=0):
         roomID = 1
         return 1
     if "Item" in room:
-        if (
-            "ItemRequirements" in room
-            and room["ItemRequirements"]()
-            or "ItemRequirements" not in room
-        ):
-            if "ItemText" in room:
-                print3(win, "\n" + room["ItemText"])
-            if hasattr(game_state, 'inventory') and game.keyItems and room["Item"] in game.keyItems:
-                game_state.inventory.getKeyItem(room["Item"], win)
-            elif hasattr(game_state, 'inventory'):
-                game_state.inventory.getItem(room["Item"], win)
-            win.getch()
+        itemHandler(win, room)
     if "Automove" in room:
         if isinstance(room["Automove"], tuple) and room["Automove"][0] == "history":
             roomID = history[room["Automove"][1]]
@@ -160,21 +187,7 @@ def gameLoop(win, starting_room=0):
             roomID = room["Automove"]
         time.sleep(1)
     elif "Move" in room:
-        OptionsIndex = []
-        Options = []
-        for i in room["Move"]:
-            OptionRequirements = "Option" + str(room["Move"].index(i)) + "Requirements"
-            if OptionRequirements not in room or room[OptionRequirements]():
-                OptionsIndex.append(i)
-                if globaldebug:
-                    Options.append(room["Options"][room["Move"].index(i)] + " - RoomID: " + str(i))
-                else:
-                    Options.append(room["Options"][room["Move"].index(i)])
-        if "Inventory" in room and game_state.inventory and not room["Inventory"]:
-            query = option(win, text, Options, Inventory=False)
-        else:
-            query = option(win, text, Options)
-        roomID = OptionsIndex[query]
+        roomID = mainRoomHandler(win, room, text)
     history.append(roomID)
     if len(history) > 10:
         history.pop(0)
