@@ -30,15 +30,18 @@ def colorsetup(win):
   curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
 def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0):
-  #colorsetup(win)
+  y, x = win.getyx()
+  if y == 0:
+    win.move(1, 0)
   i = 0
   ansi = int(colorcode)
   while i < len(text):
     char = text[i]
     if char == "\n":
       newline(win)
-      time.sleep(pauseAtNewline)
-    elif char == "\033": #\033[xm \033[xxm
+      if pauseAtNewline:
+        time.sleep(pauseAtNewline)
+    elif char == "\033":
       if text[i+1] == "[" and text[i+3].isdigit():
         ansi = int(text[i+2] + text[i+3])
         i += 4
@@ -52,7 +55,8 @@ def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0):
     else:
       win.addstr(char, curses.color_pair(ansi))
       win.refresh()
-      time.sleep(delay)
+      if delay:
+        time.sleep(delay)
     i += 1
 
 
@@ -89,7 +93,6 @@ def option(win, text, options):
         win.addstr(str(option), curses.A_STANDOUT)
       else:
         win.addstr(str(option))
-    #win.getch()
     try:
       key = win.getkey()
     except Exception:
@@ -104,26 +107,35 @@ def option(win, text, options):
       return("d")
     elif key == "q":
       return("q")
-      print3(win, "Are you sure you want to quit?", 0, 0)
-      sys.exit()
     win.refresh()
 
-
-#def main(win):
-#  #win.nodelay(False)
-#  key = ""
-#  while 1:
-#    try:
-#      key = win.getkey()
-#      win.clear()
-#      win.addstr("\n")
-#      win.addstr("Detected key:")
-#      win.addstr(str(key))
-#      value = option(win, key, ["Option 0","Option 1"])
-#      if key == os.linesep:
-#        return(value)
-#    except Exception:
-#      pass
-
-#value = curses.wrapper(main)
-#print(value)
+def draw_titlebar(win):
+  win.scrollok(False)
+  string = "SHM Engine 1.1c 2026-01-23 - 'The Shopkeeper's Quest'"
+  max_y, max_x = win.getmaxyx()
+  win.move(0, 0)
+  for y in range(0, max_y - 1):
+      win.move(y, 0)
+      win.addstr("║")
+  for y in range(0, max_y - 1):
+      win.move(y, max_x - 1)
+      win.addstr("║")
+  for x in range(0, max_x):
+      win.move(max_y - 2, x)
+      win.addstr("═")
+  for x in range(0, max_x):
+      win.move(0, x)
+      win.addstr("═")
+  win.move(0, 0)
+  win.addstr("╔")
+  win.move(0, max_x - 1)
+  win.addstr("╗")
+  win.move(max_y - 2, 0)
+  win.addstr("╚")
+  win.move(max_y - 2, max_x - 1)
+  win.addstr("╝")
+  centre = (max_x - len(string)) // 2
+  win.move(0, centre)
+  win.addstr(string, curses.color_pair(47))
+  win.scrollok(True)
+  win.refresh()

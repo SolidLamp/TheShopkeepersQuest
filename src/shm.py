@@ -16,7 +16,23 @@ class mainHandler:
         self.history = game.history
         self.roomID = starting_room
         self.starting_room = starting_room
-        self.stdscr = win
+        self.fullscr = win
+        self.stdscr = win #curses.newwin(1, 1, 13, 16) #win #curses.newwin(10,10,10,20) #win.subwin(0, 0) #curses.newpad(100, 100)#win# curses.newwin(10, 20, 3, 6)
+        #self.setup_stdscr()
+        self.setup_stdscr()
+
+    def setup_stdscr(self) -> None:
+        max_y, max_x = self.fullscr.getmaxyx()
+        if max_y < 5 or max_x < 5:
+            return
+        begin_x = 1
+        begin_y = 1
+        height = (max_y - 3)
+        width = (max_x - 2)
+        self.stdscr = curses.newwin(height, width, begin_y, begin_x)
+        self.stdscr.scrollok(True)
+        self.stdscr.keypad(True)
+        tui.colorsetup(self.stdscr)
 
     def db_debug(self) -> None:
         query = tui.option(self.stdscr, "SHM Engine Debug Menu", ["Test room IDs"])
@@ -66,6 +82,9 @@ class mainHandler:
             sys.exit(2)
         print3(self.stdscr, "\nPress any key to exit...", 0, 0)
 
+    def ui_drawtitlebar(self) -> None:
+        tui.draw_titlebar(self.fullscr)
+
     def ui_ending(self, end: str) -> None:
         if hasattr(game, "endingText") and end in game.endingText:
             print3(
@@ -96,6 +115,7 @@ class mainHandler:
             self.roomID = 1
 
     def ui_option(self, text: str, options: list, Inventory: bool = True) -> int | str:
+        tui.draw_titlebar(self.fullscr)
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
         query = 0
@@ -105,7 +125,7 @@ class mainHandler:
         query = tui.option(self.stdscr, text, choices)
         if query == "q":
             query = tui.option(
-                self.stdscr, "Are you sure you want to quit?", ["Yes", "No"]
+                self.stdscr, "Are you sure you want to quit?", ["Quit Game", "Return to Game"]
             )
             if query == 0 or query == "q":
                 sys.exit()
@@ -161,6 +181,7 @@ class mainHandler:
     def fn_gameLoop(self) -> None:
         rooms = game.get_rooms(self.stdscr)
         self.stdscr.clear()
+        self.ui_drawtitlebar()
         if game.gameInfo["complevel"] != 1:
             complevel = game.gameInfo["complevel"]
             self.db_log_error(
@@ -184,7 +205,7 @@ class mainHandler:
             print3(self.stdscr, room["Text"])
             text = room["Text"]
         if self.globaldebug:
-            text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(history)
+            text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(self.history)
         if "Script" in room:
             room["Script"]()
         if "Ending" in room:
@@ -216,6 +237,7 @@ def run(win: curses.window, starting_room: int) -> None:
     win.scrollok(True)
     tui.colorsetup(win)
     curses.cbreak()
+    curses.noecho()
     main = mainHandler(win, starting_room)
     main.fn_looper()
 
