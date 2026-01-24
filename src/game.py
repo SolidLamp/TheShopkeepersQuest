@@ -233,7 +233,7 @@ def get_rooms(win):
                 "Go to " + game_state.shopkeeperName + "'s shop",
                 "Go to the bazaar",
             ],
-            "Move": [3, 9, 288, 266, 273],
+            "Move": [3, 9, 88, 66, 73],
         },
         3: {
             "Text": "You come to the opening of the forest. The forest is vast and the trees tower over you.",
@@ -532,14 +532,13 @@ def get_rooms(win):
         },
         56: {
             "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
-            "Options": ["Go north", "Go east", "Go south", "Go west"],
-            "Move": [61, 57, 51, 40],
+            "Options": ["Go north", "Go east", "Go east", "Go south", "Go west"],
+            "Option1Requirements": lambda: "Amber Necklace" in game_state.inventory.keyItems,
+            "Option2Requirements": lambda: "Amber Necklace" not in game_state.inventory.keyItems,
+            "Move": [61, 57, 133, 51, 40],
         },
         57: {
             "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar.",
-            "Item": "Golden Idol",
-            "ItemRequirements": lambda: "Golden Idol" not in game_state.inventory.keyItems,
-            "ItemText": "You see, on the ground, a beautiful \033[47mAmber Necklace\033[0m.",
             "Options": ["Go north", "Go east", "Go south", "Go west"],
             "Move": [40, 35, 36, 56],
         },
@@ -721,17 +720,15 @@ def get_rooms(win):
                 + "\n\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies.",
             "Options": ["Purchase the bow", "Talk", "Talk", "Leave"],
             "Option0Requirements": lambda: "Bow and Arrow"
-            not in game_state.inventory.keyItems,
+            not in game_state.inventory.keyItems and game_state.rubies < 75,
             "Option1Requirements": lambda: "Bow and Arrow"
+            not in game_state.inventory.keyItems and game_state.rubies >= 75,
+            "Option2Requirements": lambda: "Bow and Arrow"
             not in game_state.inventory.keyItems,
-            "Move": [83, 84, 73],
+            "Move": [83, 134, 84, 73],
         },
         83: {
-            "Text": "Be seeing you around. I'm going home to pack my stuff - there's nothing left for me here.",
-            "Requirements": game_state.rubies >= 75,
-            "AlternateText": "\033[35m'Sorry, that's not really enough. I'd let it go for 75 rubies, maybe.'\033[0m",
-            "Item": "Bow and Arrow",
-            "ItemRequirements": game_state.rubies >= 75,
+            "Text": "\033[35m'Sorry, that's not really enough. I'd let it go for 75 rubies, maybe.'\033[0m",
             "Automove": 82,
         },
         84: {
@@ -777,14 +774,9 @@ def get_rooms(win):
         },
         90: {
             "Text": "You fish in the fishing pond and find a \033[47mSilver Amulet\033[0m.",
-            "Requirements": lambda: "Fishing Rod" in game_state.inventory.keyItems
-            and "Silver Amulet" not in game_state.inventory.keyItems
-            and "Bow and Arrow" not in game_state.inventory.keyItems,
+            "Script": lambda: game_state.inventory.getKeyItem("Silver Amulet", win),
             "AlternateText": "You fish in the fishing pond but you find nothing.",
             "Items": "Silver Amulet",
-            "ItemRequirements": lambda: "Fishing Rod" in game_state.inventory.keyItems
-            and "Silver Amulet" not in game_state.inventory.keyItems
-            and "Bow and Arrow" not in game_state.inventory.keyItems,
             "Automove": 127,
         },
         91: {
@@ -953,14 +945,13 @@ def get_rooms(win):
         },
         119: {
             "Text": "You are within the cave. It is difficult to see. There is a path to your east and west.",
-            "Options": ["Go east", "Go west"],
-            "Move": [120, 118],
+            "Options": ["Go east", "Go east", "Go west"],
+            "Option0Requirements": lambda: "Golden Idol" in game_state.inventory.keyItems,
+            "Option1Requirements": lambda: "Golden Idol" not in game_state.inventory.keyItems,
+            "Move": [120, 132, 118],
         },
         120: {
             "Text": "You are within the cave. It is a dead-end. The only path is back where you came.",
-            "Item": "Golden Idol",
-            "ItemRequirements": lambda: "Golden Idol" not in game_state.inventory.keyItems,
-            "ItemText": "You see a \033[47mGolden Idol\033[0m on the floor of the cave.",
             "Options": ["Go back"],
             "Move": [119],
         },
@@ -1005,7 +996,7 @@ def get_rooms(win):
         127: {
             "Text": "You are within the cave. It is difficult to see. There is a path to your south and west. You can make out a small pond in front of you.",
             "Options": ["Go north", "Go south", "Fish in the pond"],
-            "Option2Requirements": lambda: "Fishing Rod" in game_state.inventory.keyItems,
+            "Option2Requirements": lambda: "Fishing Rod" in game_state.inventory.keyItems and "Silver Amulet" not in game_state.inventory.keyItems,
             "Move": [126, 128, 90],
         },
         128: {
@@ -1030,6 +1021,23 @@ def get_rooms(win):
         131: {
             "Text": "\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\033[0m",
             "Automove": 66,
+        },
+        132: {
+            "Text": "You are within the cave. It is a dead-end. The only path is back where you came.\nYou see a \033[47mGolden Idol\033[0m on the floor of the cave.",
+            "Script": lambda: game_state.inventory.getKeyItem("Golden Idol", win),
+            "Options": ["Go back"],
+            "Move": [119],
+        },
+        133: {
+            "Text": "You are in a maze of twisty little alleys, all alike. Something about this seems familiar. You see, on the ground, a beautiful \033[47mAmber Necklace\033[0m.",
+            "Script": lambda: game_state.inventory.getKeyItem("Amber Necklace", win),
+            "Options": ["Go north", "Go east", "Go south", "Go west"],
+            "Move": [40, 35, 36, 56],
+        },
+        134: {
+            "Text": "Be seeing you around. I'm going home to pack my stuff - there's nothing left for me here.",
+            "Script": lambda: game_state.inventory.getKeyItem("Bow and Arrow", win),
+            "Automove": 82,
         },
     } #I figured it out
     return rooms
