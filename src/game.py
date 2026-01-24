@@ -13,6 +13,7 @@ gameInfo = {
     "abbr": "TSQ",
     "title": "The Shopkeeper's Quest",
     "desc": "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident.",
+    "starting_room": 1,
 }
 
 history = []

@@ -4,22 +4,24 @@ from datetime import datetime
 import time
 import sys
 import game
-from game import game_state
 import save_handler
 import tui
 from tui import print3
 
 
 class mainHandler:
-    def __init__(self, win: curses.window, starting_room: int = 1) -> None:
-        self.game_state = game_state
+    def __init__(self, win: curses.window, starting_room: int = 1, saveFile: dict = {}) -> None:
+        self.gameInfo = game.gameInfo
+        self.game_state = game.game_state
         self.globaldebug = False
         self.history = game.history
         self.roomID = starting_room
-        self.starting_room = starting_room
+        self.starting_room = self.gameInfo.get("starting_room", 1)
         self.stdscr = win
         self.win = win
         self.setup_stdscr()
+        if saveFile:
+            self.setup_loadSave(saveFile)
 
     def setup_stdscr(self) -> None:
         padding = 1
@@ -27,10 +29,19 @@ class mainHandler:
         padx2 = 0
         pady1 = 0
         pady2 = 1
-        self.win = tui.create_newwin(
-            self.stdscr, padding, padx1, padx2, pady1, pady2
-            )
+        self.win = tui.create_newwin(self.stdscr, padding, padx1, padx2, pady1, pady2)
 
+    def setup_loadSave(self, saveFile) -> None:
+        if saveFile["Game"] != self.gameInfo["title"]:
+            return
+        for item in saveFile["game_state"]:
+            setattr(self.game_state, item, saveFile["game_state"][item])
+        if hasattr(self.game_state, "inventory"):
+            for item in saveFile["inventory"]["items"]:
+                self.game_state.inventory.items.append(item)
+            for item in saveFile["inventory"]["keyItems"]:
+                self.game_state.inventory.keyItems.append(item)
+ 
     def db_debug(self) -> None:
         query = tui.option(self.win, "SHM Engine Debug Menu", ["Test room IDs"])
         match query:
@@ -84,6 +95,7 @@ class mainHandler:
         tui.draw_titlebar(self.stdscr, string)
 
     def ui_ending(self, end: str) -> None:
+        save_handler.write_save(self.game_state, self.gameInfo, self.roomID)
         if hasattr(game, "endingText") and end in game.endingText:
             print3(
                 self.win,
@@ -110,9 +122,9 @@ class mainHandler:
         if query == 1 or query == "q":
             sys.exit()
         else:
-            self.roomID = 1
+            self.roomID = self.starting_room
 
-    def ui_option(self, text: str, options: list, Inventory: bool = True) -> int | str:
+    def ui_option(self, text: str, options: list, Inventory: bool = True) -> int:
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
         query = 0
@@ -123,24 +135,24 @@ class mainHandler:
         if query == "q":
             max_y, max_x = self.win.getmaxyx()
             padding = 0
-            padx1 = (max_x // 2 - 20)
-            padx2 = (max_x // 2 - 20)
-            pady1 = (max_y // 2 - 5)
-            pady2 = (max_y // 2 - 5)
+            padx1 = max_x // 2 - 20
+            padx2 = max_x // 2 - 20
+            pady1 = max_y // 2 - 5
+            pady2 = max_y // 2 - 5
             quitborder = tui.create_newwin(
-            self.win, padding, padx1, padx2, pady1, pady2
+                self.win, padding, padx1, padx2, pady1, pady2
             )
             padding = 1
             pady2 += 1
-            quitwin = tui.create_newwin(
-            self.win, padding, padx1, padx2, pady1, pady2
-            )
-            tui.draw_titlebar(quitborder, '')
+            quitwin = tui.create_newwin(self.win, padding, padx1, padx2, pady1, pady2)
+            tui.draw_titlebar(quitborder, "")
             query = tui.option(
-                quitwin, "Are you sure you want to quit?", ["Save and Quit", "Quit without Saving", "Return to Game"]
+                quitwin,
+                "Are you sure you want to quit?",
+                ["Save and Quit", "Quit without Saving", "Return to Game"],
             )
             if query == 0:
-                save_handler.write_save(game_state)
+                save_handler.write_save(self.game_state, self.gameInfo, self.roomID)
                 sys.exit()
             if query == 1:
                 sys.exit()
@@ -149,11 +161,15 @@ class mainHandler:
         elif query == "d":
             self.db_debug()
             query = self.ui_option(text, options, Inventory)
-        elif Inventory and query == choices.index("Inventory"):
+        elif Inventory and (
+            query == choices.index("Inventory") or query == "i"
+        ):
             self.win.clear()
             print3(self.win, "\n" + str(self.game_state.inventory))
             print3(self.win, "\nPress any key to exit inventory.")
             self.win.getch()
+            query = self.ui_option(text, options, Inventory)
+        if not isinstance(query, int):
             query = self.ui_option(text, options, Inventory)
         return query
 
@@ -247,13 +263,16 @@ class mainHandler:
             self.fn_gameLoop()
 
 
-def run(win: curses.window, starting_room: int) -> None:
+def run(win: curses.window, starting_room: int, saveFile: dict = {}) -> None:
     curses.curs_set(0)
     win.scrollok(True)
     tui.colorsetup(win)
     curses.cbreak()
     curses.noecho()
-    main = mainHandler(win, starting_room)
+    if saveFile:
+        main = mainHandler(win, saveFile["RoomID"], saveFile)
+    else:
+        main = mainHandler(win, starting_room)
     main.fn_looper()
 
 

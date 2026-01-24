@@ -90,14 +90,19 @@ def option(win, text, options):
       key = "KEY_UP"
     if key == os.linesep:
       return (value)
+    finalOption = (len(options) - 1)
     if key == "KEY_UP" and value > 0:
       value -= 1
-    elif key == "KEY_DOWN" and value < (len(options) - 1):
+    elif key == "KEY_UP" and value <= 0:
+      value = finalOption
+    elif key == "KEY_DOWN" and value < finalOption:
       value += 1
-    elif key == "d":
-      return("d")
-    elif key == "q":
-      return("q")
+    elif key == "KEY_DOWN" and value >= finalOption:
+      value = 0
+    elif isinstance(key, str) and len(key) == 1 and not key.isnumeric():
+      return(key)
+    elif key.isnumeric() and int(key) < len(options) and int(key) > 0:
+      return(int(key) - 1)
     win.refresh()
 
 def draw_titlebar(win: curses.window, string: str) -> None:
