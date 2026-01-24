@@ -1,16 +1,7 @@
 import curses
 import os
 import time
-#import math
 import sys
-
-value = 0
-
-#def uutime(win):
-#while 1:
-#win.clear()
-#win.addstr(str(math.floor(time.time())))
-#win.refresh()
 
 def colorsetup(win):
   curses.start_color() #curses.A_NORMAL | curses.A_BOLD
@@ -29,10 +20,10 @@ def colorsetup(win):
   curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
   curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
-def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0):
+def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0, speedUp: bool = True):
   y, x = win.getyx()
   if y == 0:
-    win.move(1, 0)
+    win.move(0, 0)
   i = 0
   ansi = int(colorcode)
   while i < len(text):
@@ -109,33 +100,53 @@ def option(win, text, options):
       return("q")
     win.refresh()
 
-def draw_titlebar(win):
-  win.scrollok(False)
-  string = "SHM Engine 1.1c 2026-01-23 - 'The Shopkeeper's Quest'"
-  max_y, max_x = win.getmaxyx()
-  win.move(0, 0)
-  for y in range(0, max_y - 1):
-      win.move(y, 0)
-      win.addstr("║")
-  for y in range(0, max_y - 1):
-      win.move(y, max_x - 1)
-      win.addstr("║")
-  for x in range(0, max_x):
-      win.move(max_y - 2, x)
-      win.addstr("═")
-  for x in range(0, max_x):
-      win.move(0, x)
-      win.addstr("═")
-  win.move(0, 0)
-  win.addstr("╔")
-  win.move(0, max_x - 1)
-  win.addstr("╗")
-  win.move(max_y - 2, 0)
-  win.addstr("╚")
-  win.move(max_y - 2, max_x - 1)
-  win.addstr("╝")
-  centre = (max_x - len(string)) // 2
-  win.move(0, centre)
-  win.addstr(string, curses.color_pair(47))
-  win.scrollok(True)
-  win.refresh()
+def draw_titlebar(win: curses.window, string: str) -> None:
+    win.scrollok(False)
+    max_y, max_x = win.getmaxyx()
+    win.move(0, 0)
+    for y in range(0, max_y - 1):
+        win.move(y, 0)
+        win.addstr("║")
+    for y in range(0, max_y - 1):
+        win.move(y, max_x - 1)
+        win.addstr("║")
+    for x in range(0, max_x):
+        win.move(max_y - 2, x)
+        win.addstr("═")
+    for x in range(0, max_x):
+        win.move(0, x)
+        win.addstr("═")
+    win.move(0, 0)
+    win.addstr("╔")
+    win.move(0, max_x - 1)
+    win.addstr("╗")
+    win.move(max_y - 2, 0)
+    win.addstr("╚")
+    win.move(max_y - 2, max_x - 1)
+    win.addstr("╝")
+    centre = (max_x - len(string)) // 2
+    win.move(0, centre)
+    win.addstr(string, curses.color_pair(47))
+    win.scrollok(True)
+    win.refresh()
+
+def create_newwin(
+    win: curses.window,
+    padding: int = 1,
+    padx1: int = 0,
+    padx2: int = 0,
+    pady1: int = 0,
+    pady2: int = 0
+    ) -> curses.window:
+    max_y, max_x = win.getmaxyx()
+    if max_y < 5 or max_x < 5:
+        return(win)
+    begin_x = (padx1 + padding)
+    begin_y = (pady1 + padding)
+    height = (max_y - (1 + pady2 + padding) - begin_y)
+    width = (max_x - (1 + padx2 + padding) - begin_x)
+    newwin = curses.newwin(height, width, begin_y, begin_x)
+    newwin.scrollok(True)
+    newwin.keypad(True)
+    colorsetup(newwin)
+    return(newwin)

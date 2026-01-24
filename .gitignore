@@ -1,6 +1,7 @@
 __pycache__/
-*.zip
 *.tar.gz
 *.tar.xz
+*.zip
+*.sav
 **/error.log
 
