@@ -1,9 +1,8 @@
 import json
-import os
-import game
+import os.path
 
 
-def write_save(game_state: game.gameState, gameInfo: dict, room: int) -> None:
+def write_save(game_state, gameInfo: dict, room: int, gameName: str = "game") -> None:
     dictionary = {"Game": gameInfo["title"]}
     dictionary.update({"game_state": game_state.__dict__.copy()})
     if "inventory" in dictionary["game_state"]:
@@ -15,18 +14,20 @@ def write_save(game_state: game.gameState, gameInfo: dict, room: int) -> None:
             {"RoomID": room}
             )
     output = json.dumps(dictionary, indent=4)
-    write_json(output)
+    fileName = gameName + ".sav"
+    write_json(output, fileName)
 
 
-def write_json(output: str) -> None:
-    with open("game.sav", "wt") as f:
+def write_json(output: str, fileName: str = "game.sav") -> None:
+    with open(fileName, "wt") as f:
         f.write(output)
 
 
-def read_save() -> dict:
-    if not os.path.exists("game.sav"):
+def read_save(gameName: str = "game") -> dict:
+    fileName = gameName + ".sav"
+    if not os.path.exists(fileName):
         return {}
     else:
-        with open("game.sav", "rt") as f:
+        with open(fileName, "rt") as f:
             gamedata = json.load(f).copy()
         return gamedata

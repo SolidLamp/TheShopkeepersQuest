@@ -1,20 +1,32 @@
 #!/usr/bin/env python3
 import curses
 from datetime import datetime
-import time
+import importlib.util
+import os.path
 import sys
-import game
+import time
+import types
+
 import save_handler
 import tui
 from tui import print3
 
 
 class mainHandler:
-    def __init__(self, win: curses.window, starting_room: int = 1, saveFile: dict = {}) -> None:
-        self.gameInfo = game.gameInfo
-        self.game_state = game.game_state
+    def __init__(
+        self,
+        win: curses.window,
+        starting_room: int = 1,
+        saveFile: dict = {},
+        gameFile_name: str = "game",
+        gameFile_path: str = "./game.py",
+    ) -> None:
+        self.game = self.setup_gameFile(gameFile_name, gameFile_path)
+        self.gameFile_name = gameFile_name
+        self.gameInfo = self.game.gameInfo
+        self.game_state = self.game.game_state
         self.globaldebug = False
-        self.history = game.history
+        self.history = self.game.history
         self.roomID = starting_room
         self.starting_room = self.gameInfo.get("starting_room", 1)
         self.stdscr = win
@@ -23,13 +35,19 @@ class mainHandler:
         if saveFile:
             self.setup_loadSave(saveFile)
 
-    def setup_stdscr(self) -> None:
-        padding = 1
-        padx1 = 0
-        padx2 = 0
-        pady1 = 0
-        pady2 = 1
-        self.win = tui.create_newwin(self.stdscr, padding, padx1, padx2, pady1, pady2)
+    def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
+        file_path = os.path.abspath(file_path)
+        if file_path[-3:] != ".py":
+            file_path = os.path.join(file_path, module_name)
+            file_path = file_path + ".py"
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        try:
+            module = importlib.util.module_from_spec(spec)
+        except:
+            raise ImportError("Failed to import game file")
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
 
     def setup_loadSave(self, saveFile) -> None:
         if saveFile["Game"] != self.gameInfo["title"]:
@@ -41,13 +59,21 @@ class mainHandler:
                 self.game_state.inventory.items.append(item)
             for item in saveFile["inventory"]["keyItems"]:
                 self.game_state.inventory.keyItems.append(item)
- 
+
+    def setup_stdscr(self) -> None:
+        padding = 1
+        padx1 = 0
+        padx2 = 0
+        pady1 = 0
+        pady2 = 1
+        self.win = tui.create_newwin(self.stdscr, padding, padx1, padx2, pady1, pady2)
+
     def db_debug(self) -> None:
         query = tui.option(self.win, "SHM Engine Debug Menu", ["Test room IDs"])
         match query:
             case 0:
                 text = ""
-                rooms = game.get_rooms(self.win)
+                rooms = self.game.get_rooms(self.win)
                 for roomno in rooms:
                     room = rooms[roomno]
                     if "Move" in room:
@@ -91,30 +117,32 @@ class mainHandler:
         print3(self.win, "\nPress any key to exit...", 0, 0)
 
     def ui_drawtitlebar(self) -> None:
-        string = "SHM Engine 1.1c 2026-01-24 - 'The Shopkeeper's Quest'"
+        string = "SHM Engine 1.1c 2026-01-25 - 'The Shopkeeper's Quest'"
         tui.draw_titlebar(self.stdscr, string)
 
     def ui_ending(self, end: str) -> None:
-        save_handler.write_save(self.game_state, self.gameInfo, self.roomID)
-        if hasattr(game, "endingText") and end in game.endingText:
+        save_handler.write_save(
+            self.game_state, self.gameInfo, self.roomID, self.gameFile_name
+        )
+        if hasattr(game, "endingText") and end in self.game.endingText:
             print3(
                 self.win,
-                "\n" + game.endingText[end].replace("|", end),
+                "\n" + self.game.endingText[end].replace("|", end),
                 0,
                 0.015,
                 0.65,
             )
         time.sleep(1.5)
         self.win.clear()
-        print3(self.win, game.defaultEnding.replace("|", end), 0, 0.015, 0.65)
+        print3(self.win, self.game.defaultEnding.replace("|", end), 0, 0.015, 0.65)
         time.sleep(3.5)
 
     def ui_lose(self, lose: str) -> None:
         time.sleep(0.25)
-        if hasattr(game, "loseText") and lose in game.loseText:
-            printText = "\n" + game.loseText[lose].replace("|", lose)
+        if hasattr(game, "loseText") and lose in self.game.loseText:
+            printText = "\n" + self.game.loseText[lose].replace("|", lose)
         else:
-            printText = game.defaultLose.replace("|", lose)
+            printText = self.game.defaultLose.replace("|", lose)
         print3(self.win, printText, 0, 0.015, 0.65)
         self.win.clear()
         time.sleep(0.5)
@@ -152,7 +180,10 @@ class mainHandler:
                 ["Save and Quit", "Quit without Saving", "Return to Game"],
             )
             if query == 0:
-                save_handler.write_save(self.game_state, self.gameInfo, self.roomID)
+                self.win.clear()
+                save_handler.write_save(
+                    self.game_state, self.gameInfo, self.roomID, self.gameFile_name
+                )
                 sys.exit()
             if query == 1:
                 sys.exit()
@@ -161,9 +192,7 @@ class mainHandler:
         elif query == "d":
             self.db_debug()
             query = self.ui_option(text, options, Inventory)
-        elif Inventory and (
-            query == choices.index("Inventory") or query == "i"
-        ):
+        elif Inventory and (query == choices.index("Inventory") or query == "i"):
             self.win.clear()
             print3(self.win, "\n" + str(self.game_state.inventory))
             print3(self.win, "\nPress any key to exit inventory.")
@@ -183,8 +212,8 @@ class mainHandler:
                 print3(self.win, "\n" + room["ItemText"])
             if (
                 hasattr(self.game_state, "inventory")
-                and game.keyItems
-                and room["Item"] in game.keyItems
+                and self.game.keyItems
+                and room["Item"] in self.game.keyItems
             ):
                 self.game_state.inventory.getKeyItem(room["Item"], self.win)
             elif hasattr(self.game_state, "inventory"):
@@ -210,11 +239,11 @@ class mainHandler:
         self.roomID = OptionsIndex[query]
 
     def fn_gameLoop(self) -> None:
-        rooms = game.get_rooms(self.win)
+        rooms = self.game.get_rooms(self.win)
         self.win.clear()
         self.ui_drawtitlebar()
-        if game.gameInfo["complevel"] != 1:
-            complevel = game.gameInfo["complevel"]
+        if self.game.gameInfo["complevel"] != 1:
+            complevel = self.game.gameInfo["complevel"]
             self.db_log_error(
                 f"ERROR: This game (complevel {complevel}) is not compatible with this version of the SHM Engine (1.0 / complevel 1).",
                 31,
@@ -263,16 +292,26 @@ class mainHandler:
             self.fn_gameLoop()
 
 
-def run(win: curses.window, starting_room: int, saveFile: dict = {}) -> None:
+def run(
+    win: curses.window,
+    starting_room: int,
+    saveFile: dict = {},
+    gameFile_name: str = "game",
+    gameFile_path: str = "./",
+) -> None:
     curses.curs_set(0)
     win.scrollok(True)
     tui.colorsetup(win)
     curses.cbreak()
     curses.noecho()
     if saveFile:
-        main = mainHandler(win, saveFile["RoomID"], saveFile)
+        main = mainHandler(
+            win, saveFile["RoomID"], saveFile, gameFile_name, gameFile_path
+        )
     else:
-        main = mainHandler(win, starting_room)
+        main = mainHandler(
+            win, starting_room, gameFile_name=gameFile_name, gameFile_path=gameFile_path
+        )
     main.fn_looper()
 
 

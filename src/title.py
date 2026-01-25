@@ -9,39 +9,10 @@ except ImportError as e:
         f"The curses module was not found. If you are running Windows, please install windows-curses with pip.\nError: {e}"
     )
     sys.exit(1)
-import game
 import save_handler
 import shm
-import tomlconverter
 import toml_reader
 import tui
-
-
-def toml_test():
-    with open("game.toml", "rb") as f:
-        gamedata = tomllib.load(f)
-        print(gamedata)
-        rooms = game.get_rooms("w")
-        print(rooms[1])
-        sys.exit(0)
-
-
-def show_256_colors(stdscr):
-    curses.start_color()
-    curses.use_default_colors()
-    stdscr.clear()
-    stdscr.addstr("256-Color Palette (Scroll to view all):\n\n")
-    curses.init_color(2, 28, 40, 250)
-    # curses.init_pair(28, curses.2, curses.COLOR_BLACK)
-    stdscr.addstr("the word:\n\n", curses.color_pair(28))
-    stdscr.addstr("the word:\n\n", curses.color_pair(28))
-    stdscr.addstr("the word:\n\n", curses.color_pair(28))
-    stdscr.getch()
-    stdscr.getch()
-    stdscr.getch()
-
-
-# curses.wrapper(show_256_colors)
 
 
 def main(win):
@@ -108,10 +79,10 @@ def main(win):
     elif query == 3 or isinstance(query, str):
         sys.exit()
     if query == 2:
-        saveFile = save_handler.read_save()
-        shm.run(win, 0, saveFile)
+        saveFile = save_handler.read_save("game")
+        shm.run(win, 0, saveFile, "game", "./")
     else:
-        shm.run(win, (query + 1))
+        shm.run(win, (query + 1), gameFile_name="game", gameFile_path="./")
     sys.exit()
 
 
