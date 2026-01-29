@@ -20,7 +20,7 @@ def colorsetup(win):
   curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
   curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
-def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0, speedUp: bool = True):
+def print3(win: curses.window, text: str, colorcode: int = 0, delay: float = 0.01, pauseAtNewline: float = 0.0, speedUp: bool = True) -> None:
   y, x = win.getyx()
   if y == 0:
     win.move(0, 0)
@@ -45,13 +45,14 @@ def print3(win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0, speedUp: bool
         i += 3
     else:
       win.addstr(char, curses.color_pair(ansi))
-      win.refresh()
       if delay:
+        win.refresh()
         time.sleep(delay)
     i += 1
+  win.refresh()
 
 
-def newline(win):
+def newline(win: curses.window) -> None:
   max_y, max_x = win.getmaxyx()
   y, x = win.getyx()
   y += 1
@@ -66,7 +67,7 @@ def newline(win):
   win.refresh()
 
 
-def option(win, text, options):
+def option(win: curses.window, text: str, options: list) -> int | str:
   value = 0
   win.nodelay(False)
   while (1):
@@ -85,6 +86,7 @@ def option(win, text, options):
       else:
         win.addstr(str(option))
     try:
+      curses.flushinp()
       key = win.getkey()
     except Exception:
       key = "KEY_UP"
@@ -101,11 +103,11 @@ def option(win, text, options):
       value = 0
     elif isinstance(key, str) and len(key) == 1 and not key.isnumeric():
       return(key)
-    elif key.isnumeric() and int(key) < len(options) and int(key) > 0:
-      return(int(key) - 1)
+    elif key.isnumeric() and int(key) < len(options) + 1 and int(key) > 0:
+      value = (int(key) - 1)
     win.refresh()
 
-def draw_titlebar(win: curses.window, string: str) -> None:
+def draw_titlebar(win: curses.window, title: str, leftString: str = "", rightString: str = "") -> None:
     win.scrollok(False)
     max_y, max_x = win.getmaxyx()
     win.move(0, 0)
@@ -129,9 +131,13 @@ def draw_titlebar(win: curses.window, string: str) -> None:
     win.addstr("╚")
     win.move(max_y - 2, max_x - 1)
     win.addstr("╝")
-    centre = (max_x - len(string)) // 2
+    centre = (max_x - len(title)) // 2
     win.move(0, centre)
-    win.addstr(string, curses.color_pair(47))
+    win.addstr(title, curses.color_pair(47))
+    win.move(0, 1)
+    win.addstr(leftString, curses.color_pair(47))
+    win.move(0, max_x - len(rightString) - 1)
+    win.addstr(rightString, curses.color_pair(47))
     win.scrollok(True)
     win.refresh()
 

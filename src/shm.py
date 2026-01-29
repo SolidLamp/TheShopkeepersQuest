@@ -124,7 +124,7 @@ class mainHandler:
         save_handler.write_save(
             self.game_state, self.gameInfo, self.roomID, self.gameFile_name
         )
-        if hasattr(game, "endingText") and end in self.game.endingText:
+        if hasattr(self.game, "endingText") and end in self.game.endingText:
             print3(
                 self.win,
                 "\n" + self.game.endingText[end].replace("|", end),
@@ -139,7 +139,7 @@ class mainHandler:
 
     def ui_lose(self, lose: str) -> None:
         time.sleep(0.25)
-        if hasattr(game, "loseText") and lose in self.game.loseText:
+        if hasattr(self.game, "loseText") and lose in self.game.loseText:
             printText = "\n" + self.game.loseText[lose].replace("|", lose)
         else:
             printText = self.game.defaultLose.replace("|", lose)
