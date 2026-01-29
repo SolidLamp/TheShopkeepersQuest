@@ -14,6 +14,7 @@ gameInfo = {
     "title": "The Shopkeeper's Quest",
     "desc": "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident.",
     "starting_room": 1,
+    "default_titlebar_centre": " {abbr} - {desc} ",
 }
 
 history = []
@@ -75,6 +76,7 @@ keyItems = [
     "Fishing Rod",
 ]
 
+
 @dataclass
 class Inventory:
     items: list[str] = None
@@ -122,10 +124,11 @@ class gameState:
     def getRuby(self, obtained: int, win):
         print3(win, "\nYou got \033[1m" + str(obtained) + "\033[0m Rubies!")
         self.rubies += obtained
-        print3(win,
+        print3(
+            win,
             "\033[0m\n You currently have \033[1m"
             + str(self.rubies)
-            + "\033[0m Rubies.\n"
+            + "\033[0m Rubies.\n",
         )
         print3(win, "Press any button to continue...")
         win.getch()
@@ -141,21 +144,25 @@ def itemEvaluation():
     )
     return cursedItems
 
+
 def ShopkeeperFinalSpeech(win):
-    print3(win,
-            "\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'"
-        )
+    print3(
+        win,
+        "\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'",
+    )
     time.sleep(0.75)
     print3(win, "\033[33m\n'Oh, and just one more thing: thank you.'\033[0m")
     time.sleep(1.5)
+
 
 def ShopkeeperAffirmations(win):
     cursedItems = len(
         {"Rusted Sword", "Amber Necklace", "Golden Idol"}
         & set(game_state.inventory.keyItems)
     )
-    print3(win,
-            f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m"
+    print3(
+        win,
+        f"\033[33m'Great! You managed to get {cursedItems} of the items - now we just need {3 - cursedItems} more!'\033[0m",
     )
 
 
@@ -171,13 +178,15 @@ def fishEvaluation(win):
         & set(game_state.inventory.keyItems)
     )
     if fishBought >= 1 and "Fishing Rod" not in game_state.inventory.keyItems:
-        print3(win,
-            "\033[36m'You know, I recently got a new fishing rod. Say, you can have my old one, since you bought something.'\033[0m"
+        print3(
+            win,
+            "\033[36m'You know, I recently got a new fishing rod. Say, you can have my old one, since you bought something.'\033[0m",
         )
         game_state.inventory.getKeyItem("Fishing Rod", win)
     else:
-        print3(win,
-            "\033[36m'You know, I'd be more in the mood to talk if you bought something.'\033[0m"
+        print3(
+            win,
+            "\033[36m'You know, I'd be more in the mood to talk if you bought something.'\033[0m",
         )
 
 
@@ -188,9 +197,11 @@ def mineralEvaluation(win):
         value = mysticalRocks[item]
         game_state.getRuby(value, win)
         game_state.inventory.items.remove(item)
-    print3(win,
-        "\033[32m'Thank you so much. These will be excellent to add to my collection.'\033[0m"
+    print3(
+        win,
+        "\033[32m'Thank you so much. These will be excellent to add to my collection.'\033[0m",
     )
+
 
 def debug(win):
     game_state.inventory.getKeyItem("Rusted Sword", win)
@@ -207,11 +218,13 @@ def debug(win):
     game_state.inventory.getItem("Bomb", win)
     game_state.getRuby(9001, win)
 
+
 def overwrite_rooms(rooms: dict, extrarooms: dict):
     new_rooms = rooms.copy()
-    for key in filter(lambda key: key in rooms.keys(), extrarooms.keys()): #orubt
+    for key in filter(lambda key: key in rooms.keys(), extrarooms.keys()):  # orubt
         new_rooms[key].update(extrarooms[key])
     return new_rooms
+
 
 def get_rooms(win):
     rooms = toml_reader.read_toml()
@@ -220,6 +233,7 @@ def get_rooms(win):
             "Script": lambda: debug(win),
         },
         1: {
+            "Desc": "Outskirts of the Village",
             "Options": [
                 "Go to the forest",
                 "Follow the road to the village",
@@ -229,6 +243,7 @@ def get_rooms(win):
             ],
         },
         2: {
+            "Desc": "Outskirts of the Village",
             "Options": [
                 "Go to the forest",
                 "Follow the road to the village",
@@ -238,12 +253,14 @@ def get_rooms(win):
             ],
         },
         4: {
-            "Option0Requirements": lambda: "Rusted Sword" not in game_state.inventory.keyItems
+            "Option0Requirements": lambda: "Rusted Sword"
+            not in game_state.inventory.keyItems
         },
         5: {
             "Option0Requirements": lambda: "Bow and Arrow"
             not in game_state.inventory.keyItems,
-            "Option1Requirements": lambda: "Bow and Arrow" in game_state.inventory.keyItems,
+            "Option1Requirements": lambda: "Bow and Arrow"
+            in game_state.inventory.keyItems,
         },
         7: {
             "Script": lambda: game_state.inventory.getKeyItem("Rusted Sword", win),
@@ -252,14 +269,17 @@ def get_rooms(win):
             "Option1Requirements": lambda: game_state.rubies > 0,
         },
         14: {
-            "ItemRequirements": lambda: history == [18, 19, 18, 12, 39, 12, 39, 12, 13, 14],
+            "ItemRequirements": lambda: history
+            == [18, 19, 18, 12, 39, 12, 39, 12, 13, 14],
         },
         15: {
             "Script": lambda: setattr(game_state, "rubies", game_state.rubies - 1),
-            "ItemRequirements": lambda: history == [18, 19, 18, 12, 39, 12, 39, 12, 13, 15],
+            "ItemRequirements": lambda: history
+            == [18, 19, 18, 12, 39, 12, 39, 12, 13, 15],
         },
         19: {
-            "Option0Requirements": lambda: "Ancient Key" in game_state.inventory.keyItems,
+            "Option0Requirements": lambda: "Ancient Key"
+            in game_state.inventory.keyItems,
         },
         21: {
             "Inventory": False,
@@ -325,15 +345,15 @@ def get_rooms(win):
             "Option4Requirements": lambda: game_state.caveOpened,
         },
         57: {
-            "ItemRequirements": lambda: "Golden Idol" not in game_state.inventory.keyItems,
+            "ItemRequirements": lambda: "Golden Idol"
+            not in game_state.inventory.keyItems,
         },
         66: {
-            "Text":
-                  "\033[33m'"
-                + random.choice(ShopkeeperQuotes)
-                + "'\033[0m\nCurrent Rubies: "
-                + str(game_state.rubies)
-                + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies",
+            "Text": "\033[33m'"
+            + random.choice(ShopkeeperQuotes)
+            + "'\033[0m\nCurrent Rubies: "
+            + str(game_state.rubies)
+            + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies",
             "Option0Requirements": lambda: game_state.rubies >= 15,
             "Option1Requirements": lambda: game_state.rubies >= 20,
             "Option2Requirements": lambda: game_state.rubies >= 30,
@@ -359,12 +379,13 @@ def get_rooms(win):
         },
         73: {
             "TextRequirements": lambda: game_state.fletcherOpen,
-            "Option1Requirements": lambda: "Bow and Arrow" not in game_state.inventory.keyItems,
+            "Option1Requirements": lambda: "Bow and Arrow"
+            not in game_state.inventory.keyItems,
         },
         74: {
             "Text": "Current Rubies:"
-                + str(game_state.rubies)
-                + "\nFillet of Cod - 2 rubies\nFillet of Salmon - 2 rubies\nSmoked Trout - 9 rubies\nJar of Tuna - 3 rubies\nFillet of Smoked Haddock - 6 rubies\n\033[36m'What are you here to buy?'\033[0m",
+            + str(game_state.rubies)
+            + "\nFillet of Cod - 2 rubies\nFillet of Salmon - 2 rubies\nSmoked Trout - 9 rubies\nJar of Tuna - 3 rubies\nFillet of Smoked Haddock - 6 rubies\n\033[36m'What are you here to buy?'\033[0m",
             "Option0Requirements": lambda: game_state.rubies >= 2,
             "Option1Requirements": lambda: game_state.rubies >= 2,
             "Option2Requirements": lambda: game_state.rubies >= 9,
@@ -392,8 +413,8 @@ def get_rooms(win):
         },
         82: {
             "Text": "Current Rubies:"
-                + str(game_state.rubies)
-                + "\n\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies.",
+            + str(game_state.rubies)
+            + "\n\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies.",
             "Options": ["Purchase the bow", "Talk", "Talk", "Leave"],
             "Option0Requirements": lambda: "Bow and Arrow"
             not in game_state.inventory.keyItems,
@@ -406,15 +427,18 @@ def get_rooms(win):
         },
         84: {
             "Requirements": lambda: "Silver Amulet" in game_state.inventory.keyItems,
-            "ItemRequirements": lambda: "Silver Amulet" in game_state.inventory.keyItems,
+            "ItemRequirements": lambda: "Silver Amulet"
+            in game_state.inventory.keyItems,
         },
         85: {
             "Option0Requirements": lambda: len(
                 set(mysticalRocks) & set(game_state.inventory.items)
-            ) == 0,
+            )
+            == 0,
             "Option1Requirements": lambda: len(
                 set(mysticalRocks) & set(game_state.inventory.items)
-            ) != 0,
+            )
+            != 0,
         },
         87: {
             "Script": lambda: mineralEvaluation(win),
@@ -449,7 +473,8 @@ def get_rooms(win):
             and "Bomb" in game_state.inventory.items,
         },
         109: {
-            "ItemRequirements": lambda: "Some Tourmaline, maybe" not in game_state.inventory.keyItems,
+            "ItemRequirements": lambda: "Some Tourmaline, maybe"
+            not in game_state.inventory.keyItems,
         },
         114: {
             "Text": "You are within the cave. It is difficult to see. There is a path to your northeast and northwest.",
@@ -461,7 +486,8 @@ def get_rooms(win):
             "Move": [113, 109],
         },
         120: {
-            "ItemRequirements": lambda: "Golden Idol" not in game_state.inventory.keyItems,
+            "ItemRequirements": lambda: "Golden Idol"
+            not in game_state.inventory.keyItems,
         },
         122: {
             "ItemRequirements": lambda: "A Chunk of Marble"
@@ -472,7 +498,8 @@ def get_rooms(win):
             not in game_state.inventory.items,
         },
         127: {
-            "Option2Requirements": lambda: "Fishing Rod" in game_state.inventory.keyItems,
+            "Option2Requirements": lambda: "Fishing Rod"
+            in game_state.inventory.keyItems,
         },
         128: {
             "ItemRequirements": lambda: "A beautiful, azure blue rock"
@@ -481,7 +508,9 @@ def get_rooms(win):
         130: {
             "Script": lambda: ShopkeeperFinalSpeech(win),
         },
-    } #I figured it out
+    }  # I figured it out
     rooms = overwrite_rooms(rooms, extrarooms)
     return rooms
+
+
 ##

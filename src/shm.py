@@ -3,6 +3,7 @@ import curses
 from datetime import datetime
 import importlib.util
 import os.path
+import platform
 import sys
 import time
 import types
@@ -10,6 +11,12 @@ import types
 import save_handler
 import tui
 from tui import print3
+
+
+class formatDict(dict):
+    def __missing__(self, key: str) -> str:
+        string = "{" + key + "}"
+        return string
 
 
 class mainHandler:
@@ -28,6 +35,7 @@ class mainHandler:
         self.globaldebug = False
         self.history = self.game.history
         self.roomID = starting_room
+        self.room = {}
         self.starting_room = self.gameInfo.get("starting_room", 1)
         self.stdscr = win
         self.win = win
@@ -54,7 +62,7 @@ class mainHandler:
             return
         for item in saveFile["game_state"]:
             setattr(self.game_state, item, saveFile["game_state"][item])
-        if hasattr(self.game_state, "inventory"):
+        if hasattr(self.game_state, "inventory") and "inventory" in saveFile:
             for item in saveFile["inventory"]["items"]:
                 self.game_state.inventory.items.append(item)
             for item in saveFile["inventory"]["keyItems"]:
@@ -75,14 +83,14 @@ class mainHandler:
                 text = ""
                 rooms = self.game.get_rooms(self.win)
                 for roomno in rooms:
-                    room = rooms[roomno]
-                    if "Move" in room:
-                        for idno in room["Move"]:
+                    self.room = rooms[roomno]
+                    if "Move" in self.room:
+                        for idno in self.room["Move"]:
                             self.win.addstr(str(idno))
                             if isinstance(idno, int) and idno not in rooms:
                                 text += f"Warning: Invalid ID {idno} in {roomno}!\n"
-                    if "Automove" in room:
-                        automove = room["Automove"]
+                    if "Automove" in self.room:
+                        automove = self.room["Automove"]
                         self.win.addstr(str(automove))
                         if isinstance(automove, int) and automove not in rooms:
                             text += f"Warning: Invalid ID {automove} in {roomno}!\n"
@@ -117,8 +125,34 @@ class mainHandler:
         print3(self.win, "\nPress any key to exit...", 0, 0)
 
     def ui_drawtitlebar(self) -> None:
-        string = "SHM Engine 1.1c 2026-01-25 - 'The Shopkeeper's Quest'"
-        tui.draw_titlebar(self.stdscr, string)
+        subDict = {
+            "abbr": self.gameInfo["abbr"],
+            "arch": platform.machine(),
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "engine_info": "SHM Engine 1.1d 2026-01-29",
+            "game_state": self.game_state,
+            "iso_date": datetime.now().isoformat(),
+            "python_implementation": platform.python_implementation(),
+            "python_version": platform.python_version(),
+            "self": self,
+            "system": platform.system(),
+            "time": datetime.now().strftime("%H:%M"),
+            "title": self.gameInfo["title"],
+        }
+        subDict = formatDict(subDict)
+        string = " {abbr} | {desc} "
+        if self.room and "Desc" in self.room:
+            subDict["desc"] = self.room["Desc"]
+        else:
+            string = self.gameInfo["title"]
+        if "default_titlebar_centre" in self.gameInfo:
+            string = self.gameInfo["default_titlebar_centre"]
+        string = string.format_map(subDict)
+        leftString = "F1 - Help"
+        rightString = "Q - Quit"
+        tui.draw_titlebar(
+            self.stdscr, title=string, leftString=leftString, rightString=rightString
+        )
 
     def ui_ending(self, end: str) -> None:
         save_handler.write_save(
@@ -202,37 +236,43 @@ class mainHandler:
             query = self.ui_option(text, options, Inventory)
         return query
 
-    def fn_itemHandler(self, room: dict) -> None:
+    def fn_itemHandler(self) -> None:
         if (
-            "ItemRequirements" in room
-            and room["ItemRequirements"]()
-            or "ItemRequirements" not in room
+            "ItemRequirements" in self.room
+            and self.room["ItemRequirements"]()
+            or "ItemRequirements" not in self.room
         ):
-            if "ItemText" in room:
-                print3(self.win, "\n" + room["ItemText"])
+            if "ItemText" in self.room:
+                print3(self.win, "\n" + self.room["ItemText"])
             if (
                 hasattr(self.game_state, "inventory")
                 and self.game.keyItems
-                and room["Item"] in self.game.keyItems
+                and self.room["Item"] in self.game.keyItems
             ):
-                self.game_state.inventory.getKeyItem(room["Item"], self.win)
+                self.game_state.inventory.getKeyItem(self.room["Item"], self.win)
             elif hasattr(self.game_state, "inventory"):
-                self.game_state.inventory.getItem(room["Item"], self.win)
+                self.game_state.inventory.getItem(self.room["Item"], self.win)
             self.win.getch()
 
-    def fn_mainRoomHandler(self, room: dict, text: str) -> None:
+    def fn_mainRoomHandler(self, text: str) -> None:
         OptionsIndex = []
         Options = []
-        for i in room["Move"]:
-            OptionRequirements = "Option" + str(room["Move"].index(i)) + "Requirements"
-            if OptionRequirements not in room or room[OptionRequirements]():
+        for i in self.room["Move"]:
+            OptionRequirements = (
+                "Option" + str(self.room["Move"].index(i)) + "Requirements"
+            )
+            if OptionRequirements not in self.room or self.room[OptionRequirements]():
                 OptionsIndex.append(i)
-                optionText = room["Options"][room["Move"].index(i)]
+                optionText = self.room["Options"][self.room["Move"].index(i)]
                 if self.globaldebug:
                     Options.append(optionText + " - RoomID: " + str(i))
                 else:
                     Options.append(optionText)
-        if "Inventory" in room and self.game_state.inventory and not room["Inventory"]:
+        if (
+            "Inventory" in self.room
+            and self.game_state.inventory
+            and not self.room["Inventory"]
+        ):
             query = self.ui_option(text, Options, Inventory=False)
         else:
             query = self.ui_option(text, Options)
@@ -242,10 +282,11 @@ class mainHandler:
         rooms = self.game.get_rooms(self.win)
         self.win.clear()
         self.ui_drawtitlebar()
-        if self.game.gameInfo["complevel"] != 1:
+        compatibleComplevels = [1, 2]
+        if self.game.gameInfo["complevel"] not in compatibleComplevels:
             complevel = self.game.gameInfo["complevel"]
             self.db_log_error(
-                f"ERROR: This game (complevel {complevel}) is not compatible with this version of the SHM Engine (1.0 / complevel 1).",
+                f"ERROR: This game (complevel {complevel}) is not compatible with this version of the SHM Engine (1.1 / complevel 1).",
                 31,
                 0,
             )
@@ -253,39 +294,46 @@ class mainHandler:
             self.win.getch()
             sys.exit(1)
         if self.roomID in rooms:
-            room = rooms[self.roomID]
-        else:
-            room = rooms[1]
+            self.room = rooms[self.roomID]
+        elif self.starting_room in rooms:
+            self.room = rooms[self.starting_room]
             self.db_roomIDerror(rooms)
-        text = ""
-        if "Requirements" in room and not room["Requirements"]():
-            print3(self.win, room["AlternateText"])
-            text = room["AlternateText"]
         else:
-            print3(self.win, room["Text"])
-            text = room["Text"]
+            self.room = rooms[1]
+            self.db_roomIDerror(rooms)
+        self.ui_drawtitlebar()
+        text = ""
+        if "Requirements" in self.room and not self.room["Requirements"]():
+            print3(self.win, self.room["AlternateText"])
+            text = self.room["AlternateText"]
+        else:
+            print3(self.win, self.room["Text"])
+            text = self.room["Text"]
         if self.globaldebug:
             text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(self.history)
-        if "Script" in room:
-            room["Script"]()
-        if "Ending" in room:
-            self.ui_ending(room["Ending"])
+        if "Script" in self.room:
+            self.room["Script"]()
+        if "Ending" in self.room:
+            self.ui_ending(self.room["Ending"])
             self.roomID = self.starting_room
-        if "Item" in room:
-            self.fn_itemHandler(room)
-        if "Automove" in room:
-            if isinstance(room["Automove"], tuple) and room["Automove"][0] == "history":
-                self.roomID = self.history[room["Automove"][1]]
-            elif isinstance(room["Automove"], int):
-                self.roomID = room["Automove"]
+        if "Item" in self.room:
+            self.fn_itemHandler()
+        if "Automove" in self.room:
+            if (
+                isinstance(self.room["Automove"], tuple)
+                and self.room["Automove"][0] == "history"
+            ):
+                self.roomID = self.history[self.room["Automove"][1]]
+            elif isinstance(self.room["Automove"], int):
+                self.roomID = self.room["Automove"]
             time.sleep(1)
-        elif "Move" in room:
-            self.fn_mainRoomHandler(room, text)
+        elif "Move" in self.room:
+            self.fn_mainRoomHandler(text)
         self.history.append(self.roomID)
         if len(self.history) > 10:
             self.history.pop(0)
-        if "Lose" in room:
-            self.ui_lose(room["Lose"])
+        if "Lose" in self.room:
+            self.ui_lose(self.room["Lose"])
 
     def fn_looper(self) -> None:
         while 1:
@@ -305,6 +353,8 @@ def run(
     curses.cbreak()
     curses.noecho()
     if saveFile:
+        validSave = save_handler.saveValidifier(saveFile)
+    if saveFile and validSave:
         main = mainHandler(
             win, saveFile["RoomID"], saveFile, gameFile_name, gameFile_path
         )
@@ -312,6 +362,10 @@ def run(
         main = mainHandler(
             win, starting_room, gameFile_name=gameFile_name, gameFile_path=gameFile_path
         )
+    if saveFile and not validSave:
+        # error handling add there
+        raise Exception("DEBUG: Invalid save")
+    # raise Exception(f"saveFile = {saveFile}\nvalidSave = {validSave}")
     main.fn_looper()
 
 
@@ -323,6 +377,6 @@ if __name__ == "__main__":
     # if len(sys.argv) > 1:
     # sys.argv[1]
     print(
-        """SHM Engine 1.1b\n2026-01-16\nhttps://github.com/solidlamp\n
+        """SHM Engine 1.1d\n2026-01-29\nhttps://github.com/solidlamp\n
         This release: 'The Shopkeeper's Quest Experimental'"""
     )

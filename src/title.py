@@ -1,5 +1,4 @@
-import time
-import tomllib
+import os.path
 import sys
 
 try:
@@ -11,7 +10,6 @@ except ImportError as e:
     sys.exit(1)
 import save_handler
 import shm
-import toml_reader
 import tui
 
 
@@ -43,6 +41,15 @@ def main(win):
                                |_\| |__| |___ ___]  |
                                                        """
     )
+    options = [
+        "Play The Shopkeeper's Quest",
+        "Play The Shopkeeper's Quest [Skip Intro]",
+        "Load Save",
+        "Quit",
+    ]
+    savedGame = os.path.exists("game.sav")
+    if not savedGame:
+        options.pop(2)
     query = tui.option(
         newwin,
         "\033[36m\n___ _  _ ____\n |  |__| |___ \n |  |  | |___ \n\n"
@@ -53,18 +60,13 @@ def main(win):
         "                       |  | |  | |___ [__   |  \n"
         "                       |_\| |__| |___ ___]  |  \n"
         "                                               \033[0m",
-        [
-            "Play The Shopkeeper's Quest",
-            "Play The Shopkeeper's Quest [Skip Intro]",
-            "Load Save",
-            "Quit",
-        ],
+        options,
     )
     newwin.clear()
     win.clear()
     win.move(0, 0)
     curses.curs_set(0)
-    tui.draw_titlebar(win, "SHM Engine 1.1c")
+    tui.draw_titlebar(win, "SHM Engine 1.1d")
     if query == 0:
         tui.draw_titlebar(win, "The Shopkeeper's Quest")
         tui.print3(
@@ -76,9 +78,9 @@ def main(win):
         newwin.refresh()
         win.refresh()
         win.getch()
-    elif query == 3 or isinstance(query, str):
+    elif (query == 3 and savedGame) or isinstance(query, str):
         sys.exit()
-    if query == 2:
+    if query == 2 and os.path.exists("game.sav"):
         saveFile = save_handler.read_save("game")
         shm.run(win, 0, saveFile, "game", "./")
     else:
