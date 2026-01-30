@@ -57,7 +57,7 @@ class mainHandler:
         spec.loader.exec_module(module)
         return module
 
-    def setup_loadSave(self, saveFile) -> None:
+    def setup_loadSave(self, saveFile: dict) -> None:
         if saveFile["Game"] != self.gameInfo["title"]:
             return
         for item in saveFile["game_state"]:
@@ -103,12 +103,16 @@ class mainHandler:
                 self.win.getch()
 
     def db_log_error(
-        self, text: str, colorcode=0, delay=0.01, pauseAtNewline=0.0
+        self,
+        text: str,
+        colorcode: int = 0,
+        delay: float = 0.01,
+        pauseAtNewline: float = 0.0,
     ) -> None:
         timestamp = datetime.now().isoformat()
         with open("error.log", "a") as log:
             log.write(f"{timestamp} {text}\n")
-        print3(self.win, text, colorcode=0, delay=0.01, pauseAtNewline=0.0)
+        print3(self.win, text, colorcode, delay, pauseAtNewline)
 
     def db_roomIDerror(self, rooms: dict) -> None:
         self.db_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
@@ -125,31 +129,27 @@ class mainHandler:
         print3(self.win, "\nPress any key to exit...", 0, 0)
 
     def ui_drawtitlebar(self) -> None:
-        subDict = {
-            "abbr": self.gameInfo["abbr"],
-            "arch": platform.machine(),
-            "date": datetime.now().strftime("%Y-%m-%d"),
-            "engine_info": "SHM Engine 1.1d 2026-01-29",
-            "game_state": self.game_state,
-            "iso_date": datetime.now().isoformat(),
-            "python_implementation": platform.python_implementation(),
-            "python_version": platform.python_version(),
-            "self": self,
-            "system": platform.system(),
-            "time": datetime.now().strftime("%H:%M"),
-            "title": self.gameInfo["title"],
-        }
-        subDict = formatDict(subDict)
-        string = " {abbr} | {desc} "
-        if self.room and "Desc" in self.room:
-            subDict["desc"] = self.room["Desc"]
-        else:
-            string = self.gameInfo["title"]
-        if "default_titlebar_centre" in self.gameInfo:
-            string = self.gameInfo["default_titlebar_centre"]
-        string = string.format_map(subDict)
         leftString = "F1 - Help"
         rightString = "Q - Quit"
+        if self.room and "Desc" in self.room:
+            string = " {abbr} | {desc} "
+        else:
+            string = self.gameInfo["title"]
+        if "titlebarCentre" in self.room:
+            string = self.room["titlebarCentre"]
+        elif "default_titlebar_centre" in self.gameInfo:
+            string = self.gameInfo["default_titlebar_centre"]
+        if "titlebarLeft" in self.room:
+            leftString = self.room["titlebarLeft"]
+        elif "default_titlebar_left" in self.gameInfo:
+            leftString = self.gameInfo["default_titlebar_left"]
+        if "titlebarRight" in self.room:
+            rightString = self.room["titlebarRight"]
+        elif "default_titlebar_right" in self.gameInfo:
+            rightString = self.gameInfo["default_titlebar_right"]
+        string = self.ui_format_string(string)
+        leftString = self.ui_format_string(leftString)
+        rightString = self.ui_format_string(rightString)
         tui.draw_titlebar(
             self.stdscr, title=string, leftString=leftString, rightString=rightString
         )
@@ -170,6 +170,27 @@ class mainHandler:
         self.win.clear()
         print3(self.win, self.game.defaultEnding.replace("|", end), 0, 0.015, 0.65)
         time.sleep(3.5)
+
+    def ui_format_string(self, string: str) -> str:
+        subDict = {
+            "abbr": self.gameInfo["abbr"],
+            "arch": platform.machine(),
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "engine_info": "SHM Engine 1.1d 2026-01-29",
+            "game_state": self.game_state,
+            "iso_date": datetime.now().isoformat(),
+            "python_implementation": platform.python_implementation(),
+            "python_version": platform.python_version(),
+            "self": self,
+            "system": platform.system(),
+            "time": datetime.now().strftime("%H:%M"),
+            "title": self.gameInfo["title"],
+        }
+        subDict = formatDict(subDict)
+        if self.room and "Desc" in self.room:
+            subDict["desc"] = self.room["Desc"]
+        string = string.format_map(subDict)
+        return(string)
 
     def ui_lose(self, lose: str) -> None:
         time.sleep(0.25)
@@ -193,6 +214,9 @@ class mainHandler:
         choices = options
         if Inventory and hasattr(self.game_state, "inventory"):
             choices = options + ["Inventory"]
+        for i in range(len(choices)):
+            choices[i] = self.ui_format_string(choices[i])
+        text = self.ui_format_string(text)
         query = tui.option(self.win, text, choices)
         if query == "q":
             max_y, max_x = self.win.getmaxyx()

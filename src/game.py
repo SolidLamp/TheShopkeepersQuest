@@ -14,7 +14,9 @@ gameInfo = {
     "title": "The Shopkeeper's Quest",
     "desc": "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident.",
     "starting_room": 1,
+    "default_titlebar_left": "F1 - Help",
     "default_titlebar_centre": " {abbr} - {desc} ",
+    "default_titlebar_right": "Q - Quit",
 }
 
 history = []
@@ -230,6 +232,10 @@ def get_rooms(win):
     rooms = toml_reader.read_toml()
     extrarooms = {
         0: {
+            "Desc": "Description",
+            "titlebarCentre": "centre",
+            "titlebarLeft": "left",
+            "titlebarRight": "right",
             "Script": lambda: debug(win),
         },
         1: {
@@ -248,7 +254,7 @@ def get_rooms(win):
                 "Go to the forest",
                 "Follow the road to the village",
                 "Explore the cave",
-                "Go to " + game_state.shopkeeperName + "'s shop",
+                "Go to {game_state.shopkeeperName}'s shop",
                 "Go to the bazaar",
             ],
         },
