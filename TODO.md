@@ -5,7 +5,9 @@
 - [x] Import game from other locations and names - put inside class
 
 - [ ] More save slots ? (allow title.py to specify save file)
-- [ ] engine_info.toml (doesn't need to be explained; the name explains itself)
+- [x] engine_info.toml (doesn't need to be explained; the name explains itself)
+- [ ] Fix error handling
+- [ ] Add KeyItem for SHM 1.2
 - [ ] Write documentation for the engien
 - [ ] Ray Tracing
 

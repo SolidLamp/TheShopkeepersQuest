@@ -9,6 +9,7 @@ import time
 import types
 
 import save_handler
+import toml_reader
 import tui
 from tui import print3
 
@@ -28,6 +29,8 @@ class mainHandler:
         gameFile_name: str = "game",
         gameFile_path: str = "./game.py",
     ) -> None:
+        self.compatibleComplevels = [1, 2]
+        self.engineInfo = self.setup_engineInfo()
         self.game = self.setup_gameFile(gameFile_name, gameFile_path)
         self.gameFile_name = gameFile_name
         self.gameInfo = self.game.gameInfo
@@ -42,6 +45,15 @@ class mainHandler:
         self.setup_stdscr()
         if saveFile:
             self.setup_loadSave(saveFile)
+
+    def setup_engineInfo(self) -> dict:
+        engineInfo = toml_reader.read_toml("engine_info.toml")
+        engineInfo = formatDict(engineInfo)
+        if not engineInfo["Patch"] or engineInfo["Patch"][0] == "-":
+            engineInfo["PatchConnector"] = ""
+        else:
+            engineInfo["PatchConnector"] = " "
+        return engineInfo
 
     def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
         file_path = os.path.abspath(file_path)
@@ -104,15 +116,19 @@ class mainHandler:
 
     def db_log_error(
         self,
-        text: str,
+        errorMsg: str,
         colorcode: int = 0,
-        delay: float = 0.01,
+        delay: float = 0.0,
         pauseAtNewline: float = 0.0,
     ) -> None:
         timestamp = datetime.now().isoformat()
         with open("error.log", "a") as log:
-            log.write(f"{timestamp} {text}\n")
-        print3(self.win, text, colorcode, delay, pauseAtNewline)
+            log.write(f"{timestamp} {errorMsg}\n")
+        self.win.refresh()
+        self.ui_drawtitlebar(
+            centreOverride="Error", leftOverride="", rightOverride=""
+        )
+        print3(self.win, errorMsg, colorcode, delay, pauseAtNewline)
 
     def db_roomIDerror(self, rooms: dict) -> None:
         self.db_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
@@ -128,7 +144,12 @@ class mainHandler:
             sys.exit(2)
         print3(self.win, "\nPress any key to exit...", 0, 0)
 
-    def ui_drawtitlebar(self) -> None:
+    def ui_drawtitlebar(
+        self,
+        centreOverride: str | None = None,
+        leftOverride: str | None = None,
+        rightOverride: str | None = None,
+    ) -> None:
         leftString = "F1 - Help"
         rightString = "Q - Quit"
         if self.room and "Desc" in self.room:
@@ -147,6 +168,12 @@ class mainHandler:
             rightString = self.room["titlebarRight"]
         elif "default_titlebar_right" in self.gameInfo:
             rightString = self.gameInfo["default_titlebar_right"]
+        if centreOverride is not None:
+            string = centreOverride
+        if leftOverride is not None:
+            leftString = leftOverride
+        if rightOverride is not None:
+            rightString = rightOverride
         string = self.ui_format_string(string)
         leftString = self.ui_format_string(leftString)
         rightString = self.ui_format_string(rightString)
@@ -176,7 +203,9 @@ class mainHandler:
             "abbr": self.gameInfo["abbr"],
             "arch": platform.machine(),
             "date": datetime.now().strftime("%Y-%m-%d"),
-            "engine_info": "SHM Engine 1.1d 2026-01-29",
+            "engine_info": "{Name} {MajorVersion}{PatchConnector}{Patch}".format_map(
+                self.engineInfo
+            ),
             "game_state": self.game_state,
             "iso_date": datetime.now().isoformat(),
             "python_implementation": platform.python_implementation(),
@@ -190,7 +219,7 @@ class mainHandler:
         if self.room and "Desc" in self.room:
             subDict["desc"] = self.room["Desc"]
         string = string.format_map(subDict)
-        return(string)
+        return string
 
     def ui_lose(self, lose: str) -> None:
         time.sleep(0.25)
@@ -252,9 +281,11 @@ class mainHandler:
             query = self.ui_option(text, options, Inventory)
         elif Inventory and (query == choices.index("Inventory") or query == "i"):
             self.win.clear()
-            print3(self.win, "\n" + str(self.game_state.inventory))
+            self.ui_drawtitlebar(centreOverride="Inventory")
+            print3(self.win, str(self.game_state.inventory))
             print3(self.win, "\nPress any key to exit inventory.")
             self.win.getch()
+            self.ui_drawtitlebar()
             query = self.ui_option(text, options, Inventory)
         if not isinstance(query, int):
             query = self.ui_option(text, options, Inventory)
@@ -306,14 +337,18 @@ class mainHandler:
         rooms = self.game.get_rooms(self.win)
         self.win.clear()
         self.ui_drawtitlebar()
-        compatibleComplevels = [1, 2]
-        if self.game.gameInfo["complevel"] not in compatibleComplevels:
-            complevel = self.game.gameInfo["complevel"]
-            self.db_log_error(
-                f"ERROR: This game (complevel {complevel}) is not compatible with this version of the SHM Engine (1.1 / complevel 1).",
-                31,
-                0,
+        complevel = self.game.gameInfo["complevel"]
+        subDict = self.engineInfo
+        subDict["complevel"] = str(complevel)
+        subDict["complevels"] = str(self.compatibleComplevels)[1:-1]
+        if complevel not in self.compatibleComplevels:
+            string = (
+                "ERROR: This game (complevel {complevel}) is not compatible with this"
+                " version of the {Name} {MajorVersion}.\n{Name} {MajorVersion} is only"
+                " compatible with the following complevels: {complevels}"
             )
+            string = string.format_map(subDict)
+            self.db_log_error(errorMsg=string, colorcode=31, delay=0)
             print3(self.win, "\nPress any key to exit...", 0, 0)
             self.win.getch()
             sys.exit(1)
@@ -400,7 +435,15 @@ if __name__ == "__main__":
 
     # if len(sys.argv) > 1:
     # sys.argv[1]
-    print(
-        """SHM Engine 1.1d\n2026-01-29\nhttps://github.com/solidlamp\n
-        This release: 'The Shopkeeper's Quest Experimental'"""
+    engineInfo = toml_reader.read_toml("engine_info.toml")
+    engineInfo = formatDict(engineInfo)
+    if not engineInfo["Patch"] or engineInfo["Patch"][0] == "-":
+        engineInfo["PatchConnector"] = ""
+    else:
+        engineInfo["PatchConnector"] = " "
+    infoString = (
+        "{Name} {MajorVersion}{PatchConnector}{Patch}"
+        "\n{ReleaseDate}\n{Link}\nThis Release: '{Dist}'"
     )
+    infoString = infoString.format_map(engineInfo)
+    print(infoString)
