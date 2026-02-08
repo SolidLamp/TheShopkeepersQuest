@@ -1,6 +1,6 @@
 - [x] Saving (toml? xml? json? maybe use toml as already used in project, but call .sav. wait no we need to write and toml not supported so probably go with json)
 - [x] Titlebar
-- [ ] Centre choices
+- [x] Centre choices
 - [ ] Fix the text code parser for \033[52;43m or whatever, and don't override bg and fg colour when the other is changed (make more configurable?)
 - [x] Import game from other locations and names - put inside class
 
@@ -8,10 +8,10 @@
 - [x] engine_info.toml (doesn't need to be explained; the name explains itself)
 - [ ] Fix error handling
 - [ ] Add KeyItem for SHM 1.2
+- [x] Allow reference to negative roomIDs be interpreted as history calls, and also allow this for Move, not just Automove
+- [x] Save history to file
+- [ ] update print3 to stop splitting words across lines (unsure if should flick to next line upon reaching edge, or start printing on the next line and leave space; likely the latter, as more attractive and I surmise it to be simpler to code)
+- [ ] Put toml_reader and engine_info together (?)
+- [ ] Put save file info in shared lib for all access, and allow save to different file on saving
 - [ ] Write documentation for the engien
 - [ ] Ray Tracing
-
-## Saving structure
-- Title
-- Date
-- game.game_state.__dict__

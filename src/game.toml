@@ -1022,3 +1022,9 @@ Automove = 66
 [131]
 Text = "\\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\\033[0m"
 Automove = 66
+
+[999]
+Text = "Room"
+Desc = "Desc"
+Item = "Rusted Sword"
+Automove = 1

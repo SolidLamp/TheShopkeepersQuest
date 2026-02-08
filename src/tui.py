@@ -1,7 +1,8 @@
 import curses
+import math
 import os
-import time
 import sys
+import time
 
 
 def colorsetup(win):
@@ -30,9 +31,6 @@ def print3(
     pauseAtNewline: float = 0.0,
     speedUp: bool = True,
 ) -> None:
-    y, x = win.getyx()
-    if y == 0:
-        win.move(0, 0)
     i = 0
     ansi = int(colorcode)
     while i < len(text):
@@ -81,19 +79,35 @@ def option(win: curses.window, text: str, options: list) -> int | str:
     win.nodelay(False)
     while 1:
         win.clear()
-        win.move(0, 0)
+        newline(win)
+        max_y, max_x = win.getmaxyx()
+        y, x = win.getyx()
+        new_x = max((max_x - len(text) - 1) // 2, 0)
+        win.move(y, new_x)
         curses.curs_set(0)
         win.scrollok(True)
-        print3(win, text, 0, 0)
+        print3(win, text, delay=0)
+        newline(win)
         win.refresh()
+        fullLen = max(len(str(option)) for option in options)
+        new_x = max((max_x - fullLen - 1) // 2, 0)
         for option in options:
+            max_y, max_x = win.getmaxyx()
             newline(win)
+            y, x = win.getyx()
+            win.move(y, new_x)
+            padding = (fullLen - len(str(option))) / 2
+            # printstr
+            strToPrint = (
+                " " * math.floor(padding) + str(option) + " " * math.ceil(padding)
+            )
             win.addstr(" ")
             if options.index(option) == value:
+                win.move(y, new_x - 1)
                 win.addstr("> ")
-                win.addstr(str(option), curses.A_STANDOUT)
+                win.addstr(strToPrint, curses.A_STANDOUT)
             else:
-                win.addstr(str(option))
+                win.addstr(strToPrint)
         try:
             curses.flushinp()
             key = win.getkey()

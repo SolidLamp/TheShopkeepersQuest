@@ -8,6 +8,7 @@ import sys
 import time
 import types
 
+import engine_info
 import save_handler
 import toml_reader
 import tui
@@ -28,9 +29,10 @@ class mainHandler:
         saveFile: dict = {},
         gameFile_name: str = "game",
         gameFile_path: str = "./game.py",
+        saveFileName: str = "game",
     ) -> None:
         self.compatibleComplevels = [1, 2]
-        self.engineInfo = self.setup_engineInfo()
+        self.engineInfo = formatDict(toml_reader.read_toml("engine_info.toml"))
         self.game = self.setup_gameFile(gameFile_name, gameFile_path)
         self.gameFile_name = gameFile_name
         self.gameInfo = self.game.gameInfo
@@ -39,21 +41,14 @@ class mainHandler:
         self.history = self.game.history
         self.roomID = starting_room
         self.room = {}
+        self.SHMversion = engine_info.get()
         self.starting_room = self.gameInfo.get("starting_room", 1)
         self.stdscr = win
         self.win = win
         self.setup_stdscr()
         if saveFile:
+            self.saveFileName = saveFileName
             self.setup_loadSave(saveFile)
-
-    def setup_engineInfo(self) -> dict:
-        engineInfo = toml_reader.read_toml("engine_info.toml")
-        engineInfo = formatDict(engineInfo)
-        if not engineInfo["Patch"] or engineInfo["Patch"][0] == "-":
-            engineInfo["PatchConnector"] = ""
-        else:
-            engineInfo["PatchConnector"] = " "
-        return engineInfo
 
     def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
         file_path = os.path.abspath(file_path)
@@ -72,6 +67,7 @@ class mainHandler:
     def setup_loadSave(self, saveFile: dict) -> None:
         if saveFile["Game"] != self.gameInfo["title"]:
             return
+        self.history.extend(saveFile["History"])
         for item in saveFile["game_state"]:
             setattr(self.game_state, item, saveFile["game_state"][item])
         if hasattr(self.game_state, "inventory") and "inventory" in saveFile:
@@ -125,9 +121,7 @@ class mainHandler:
         with open("error.log", "a") as log:
             log.write(f"{timestamp} {errorMsg}\n")
         self.win.refresh()
-        self.ui_drawtitlebar(
-            centreOverride="Error", leftOverride="", rightOverride=""
-        )
+        self.ui_drawtitlebar(centreOverride="Error", leftOverride="", rightOverride="")
         print3(self.win, errorMsg, colorcode, delay, pauseAtNewline)
 
     def db_roomIDerror(self, rooms: dict) -> None:
@@ -183,7 +177,7 @@ class mainHandler:
 
     def ui_ending(self, end: str) -> None:
         save_handler.write_save(
-            self.game_state, self.gameInfo, self.roomID, self.gameFile_name
+            self.game_state, self.gameInfo, self.roomID, self.history, self.saveFileName
         )
         if hasattr(self.game, "endingText") and end in self.game.endingText:
             print3(
@@ -203,9 +197,7 @@ class mainHandler:
             "abbr": self.gameInfo["abbr"],
             "arch": platform.machine(),
             "date": datetime.now().strftime("%Y-%m-%d"),
-            "engine_info": "{Name} {MajorVersion}{PatchConnector}{Patch}".format_map(
-                self.engineInfo
-            ),
+            "engine_info": self.SHMversion,
             "game_state": self.game_state,
             "iso_date": datetime.now().isoformat(),
             "python_implementation": platform.python_implementation(),
@@ -214,6 +206,7 @@ class mainHandler:
             "system": platform.system(),
             "time": datetime.now().strftime("%H:%M"),
             "title": self.gameInfo["title"],
+            "utime": datetime.now().timestamp(),
         }
         subDict = formatDict(subDict)
         if self.room and "Desc" in self.room:
@@ -269,7 +262,11 @@ class mainHandler:
             if query == 0:
                 self.win.clear()
                 save_handler.write_save(
-                    self.game_state, self.gameInfo, self.roomID, self.gameFile_name
+                    self.game_state,
+                    self.gameInfo,
+                    self.roomID,
+                    self.history,
+                    self.saveFileName,
                 )
                 sys.exit()
             if query == 1:
@@ -303,6 +300,7 @@ class mainHandler:
                 hasattr(self.game_state, "inventory")
                 and self.game.keyItems
                 and self.room["Item"] in self.game.keyItems
+                and self.room["Item"] not in self.game_state.inventory.keyItems
             ):
                 self.game_state.inventory.getKeyItem(self.room["Item"], self.win)
             elif hasattr(self.game_state, "inventory"):
@@ -331,7 +329,16 @@ class mainHandler:
             query = self.ui_option(text, Options, Inventory=False)
         else:
             query = self.ui_option(text, Options)
-        self.roomID = OptionsIndex[query]
+        self.fn_roomIDHandler(OptionsIndex[query])
+
+    def fn_roomIDHandler(self, tmpID) -> None:
+        negIDsupport = not (self.game.gameInfo["complevel"] == 1)
+        if isinstance(tmpID, tuple) and tmpID[0] == "history":
+            self.roomID = self.history[tmpID[1]]
+        elif isinstance(tmpID, int) and (tmpID < 0 and negIDsupport):
+            self.roomID = self.history[tmpID]
+        elif isinstance(tmpID, int) and (tmpID >= 0 or not negIDsupport):
+            self.roomID = tmpID
 
     def fn_gameLoop(self) -> None:
         rooms = self.game.get_rooms(self.win)
@@ -361,6 +368,9 @@ class mainHandler:
             self.room = rooms[1]
             self.db_roomIDerror(rooms)
         self.ui_drawtitlebar()
+        self.history.append(self.roomID)
+        if len(self.history) > 10:
+            self.history.pop(0)
         text = ""
         if "Requirements" in self.room and not self.room["Requirements"]():
             print3(self.win, self.room["AlternateText"])
@@ -378,19 +388,10 @@ class mainHandler:
         if "Item" in self.room:
             self.fn_itemHandler()
         if "Automove" in self.room:
-            if (
-                isinstance(self.room["Automove"], tuple)
-                and self.room["Automove"][0] == "history"
-            ):
-                self.roomID = self.history[self.room["Automove"][1]]
-            elif isinstance(self.room["Automove"], int):
-                self.roomID = self.room["Automove"]
+            self.fn_roomIDHandler(self.room["Automove"])
             time.sleep(1)
         elif "Move" in self.room:
             self.fn_mainRoomHandler(text)
-        self.history.append(self.roomID)
-        if len(self.history) > 10:
-            self.history.pop(0)
         if "Lose" in self.room:
             self.ui_lose(self.room["Lose"])
 
@@ -405,6 +406,7 @@ def run(
     saveFile: dict = {},
     gameFile_name: str = "game",
     gameFile_path: str = "./",
+    saveFileName: str = "game",
 ) -> None:
     curses.curs_set(0)
     win.scrollok(True)
@@ -415,7 +417,12 @@ def run(
         validSave = save_handler.saveValidifier(saveFile)
     if saveFile and validSave:
         main = mainHandler(
-            win, saveFile["RoomID"], saveFile, gameFile_name, gameFile_path
+            win,
+            saveFile["RoomID"],
+            saveFile,
+            gameFile_name,
+            gameFile_path,
+            saveFileName,
         )
     else:
         main = mainHandler(
@@ -424,7 +431,6 @@ def run(
     if saveFile and not validSave:
         # error handling add there
         raise Exception("DEBUG: Invalid save")
-    # raise Exception(f"saveFile = {saveFile}\nvalidSave = {validSave}")
     main.fn_looper()
 
 
@@ -435,15 +441,10 @@ if __name__ == "__main__":
 
     # if len(sys.argv) > 1:
     # sys.argv[1]
-    engineInfo = toml_reader.read_toml("engine_info.toml")
-    engineInfo = formatDict(engineInfo)
-    if not engineInfo["Patch"] or engineInfo["Patch"][0] == "-":
-        engineInfo["PatchConnector"] = ""
-    else:
-        engineInfo["PatchConnector"] = " "
-    infoString = (
-        "{Name} {MajorVersion}{PatchConnector}{Patch}"
-        "\n{ReleaseDate}\n{Link}\nThis Release: '{Dist}'"
+    print(
+        engine_info.get(
+            "{Name} {MajorVersion}{PatchConnector}{Patch}\n"
+            "{ReleaseDate}\n{Link}\nThis Release: '{Dist}'"
+        )
     )
-    infoString = infoString.format_map(engineInfo)
-    print(infoString)
+    sys.exit(0)
