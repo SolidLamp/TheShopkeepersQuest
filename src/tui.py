@@ -4,6 +4,7 @@ import os
 import sys
 import time
 
+_TAB_SIZE = 4
 
 def colorsetup(win):
     curses.start_color()  # curses.A_NORMAL | curses.A_BOLD
@@ -31,25 +32,46 @@ def print3(
     pauseAtNewline: float = 0.0,
     speedUp: bool = True,
 ) -> None:
+    r"""Function to print string `text` to the provided curses window using a
+    typewriter effect. Also handles control and escape codes.
+
+    Supported control characters:
+    - `\f` - clear the window
+    - `\n` - start a new line
+    - `\r` - moves the cursor to column 0
+    - `\t` - creates a tab by printing spaces (usually set at 4, configurable)
+    - `\v` - creates new line but keeps the column coordinate constant
+    - `\033` - escape sequences, seperated by `;` and terminated by `m`
+
+    Supported escape sequences:
+    - `0` - clear all formatting
+    - `1` - create bold text with A_STANDOUT
+    - `30`-`37` - change foreground colour
+    - `40`-`47` - change background colour
+    """
     i = 0
     ansi = int(colorcode)
     while i < len(text):
         char = text[i]
-        if char == "\n":
+        if char == "\f":
+            win.clear()
+        elif char == "\n":
             newline(win)
             if pauseAtNewline:
                 time.sleep(pauseAtNewline)
-        elif char == "\033":
-            if text[i + 1] == "[" and text[i + 3].isdigit():
-                ansi = int(text[i + 2] + text[i + 3])
-                i += 4
-            elif text[i + 1] == "[" and text[i + 3] == "m":
-                if text[i + 2] == "0":
-                    win.addstr("", curses.A_NORMAL)
-                    ansi = 0
-                elif text[i + 2] == "1":
-                    win.addstr("", curses.A_BOLD)
-                i += 3
+        elif char == "\r":
+            y, x = win.getyx()
+            win.move(y, 0)
+        elif char == "\t":
+            spaces = "" * _TAB_SIZE
+            win.addstr(spaces)
+        elif char == "\v":
+            x = win.getyx()[1]
+            newline(win)
+            y = win.getyx()[0]
+            win.move(y, x)
+        elif char == "\033" and text[i + 1] == "[":
+            i, ansi = handleCSI(win, text, ansi, textPos = i + 2)
         else:
             win.addstr(char, curses.color_pair(ansi))
             if delay:
@@ -58,8 +80,34 @@ def print3(
         i += 1
     win.refresh()
 
+def handleCSI(win: curses.window, text: str, ansiCode: int, textPos: int):
+    #textPos is the start of the escape code
+    __loopLimit__ = 100
+    code = []
+    i = textPos - 1
+    codePos = 0
+    while text[i] != "m" and i < (__loopLimit__ + textPos) and i < len(text):
+        i += 1
+        if text[i] == ";" or text[i] == "m":
+            code.append(text[textPos:i])
+    textPos = i
+    for item in code:
+        if item == "0":
+            win.addstr("", curses.A_NORMAL)
+            ansiCode = 0
+        elif item == "1":
+            win.addstr("", curses.A_BOLD)
+        elif len(item) == 2 and item[0] == "3":
+            ansiCode = int(item)
+        elif len(item) == 2 and item[0] == "4":
+            ansiCode = int(item)
+    return(textPos, ansiCode)
+
 
 def newline(win: curses.window) -> None:
+    """Move the cursor to the next line, automatically scrolling if needed,
+    to prevent ERR."""
+    win.scrollok(True)
     max_y, max_x = win.getmaxyx()
     y, x = win.getyx()
     y += 1
