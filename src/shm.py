@@ -288,23 +288,23 @@ class mainHandler:
             query = self.ui_option(text, options, Inventory)
         return query
 
-    def fn_itemHandler(self) -> None:
+    def fn_itemHandler(self, attr: str) -> None:
         if (
-            "ItemRequirements" in self.room
-            and self.room["ItemRequirements"]()
-            or "ItemRequirements" not in self.room
+            f"{attr}Requirements" in self.room
+            and self.room[f"{attr}Requirements"]()
+            or f"{attr}Requirements" not in self.room
         ):
             if "ItemText" in self.room:
                 print3(self.win, "\n" + self.room["ItemText"])
             if (
                 hasattr(self.game_state, "inventory")
                 and self.game.keyItems
-                and self.room["Item"] in self.game.keyItems
-                and self.room["Item"] not in self.game_state.inventory.keyItems
+                and self.room[attr] in self.game.keyItems
+                and self.room[attr] not in self.game_state.inventory.keyItems
             ):
-                self.game_state.inventory.getKeyItem(self.room["Item"], self.win)
+                self.game_state.inventory.getKeyItem(self.room[attr], self.win)
             elif hasattr(self.game_state, "inventory"):
-                self.game_state.inventory.getItem(self.room["Item"], self.win)
+                self.game_state.inventory.getItem(self.room[attr], self.win)
             self.win.getch()
 
     def fn_mainRoomHandler(self, text: str) -> None:
@@ -386,7 +386,9 @@ class mainHandler:
             self.ui_ending(self.room["Ending"])
             self.roomID = self.starting_room
         if "Item" in self.room:
-            self.fn_itemHandler()
+            self.fn_itemHandler("Item")
+        if "KeyItem" in self.room:
+            self.fn_itemHandler("KeyItem")
         if "Automove" in self.room:
             self.fn_roomIDHandler(self.room["Automove"])
             time.sleep(1)
