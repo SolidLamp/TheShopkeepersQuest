@@ -6,8 +6,78 @@ import time
 
 _TAB_SIZE = 4
 
+_ENDBYTE_CHARS = [
+    "@",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+    "[",
+    "\\",
+    "]",
+    "^",
+    "_",
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
+    "z",
+    "{",
+    "|",
+    "}",
+    "~",
+]
+
+# 2097152
+
+
 def colorsetup(win):
     curses.start_color()  # curses.A_NORMAL | curses.A_BOLD
+    curses.use_default_colors()
+    curses._use_ansi_colors = True
     curses.init_pair(31, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(32, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(33, curses.COLOR_YELLOW, curses.COLOR_BLACK)
@@ -22,6 +92,18 @@ def colorsetup(win):
     curses.init_pair(45, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
     curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
     curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
+
+
+def _ESCtoRGB(ESC: str | int):
+    """
+    Takes a 8-bit colour escape code, as a string or integer.
+    Returns three ints: r, g, b, representing a 24-bit RGB value.
+    """
+    ESC = int(ESC)
+    r = (ESC - 16) // 36
+    b = (ESC - 16) % 6
+    g = ((ESC - 16) % 36) // 6
+    return (r, g, b)
 
 
 def print3(
@@ -51,6 +133,8 @@ def print3(
     """
     i = 0
     ansi = int(colorcode)
+    fg = curses.COLOR_WHITE
+    bg = curses.COLOR_BLACK
     while i < len(text):
         char = text[i]
         if char == "\f":
@@ -63,7 +147,7 @@ def print3(
             y, x = win.getyx()
             win.move(y, 0)
         elif char == "\t":
-            spaces = "" * _TAB_SIZE
+            spaces = " " * _TAB_SIZE
             win.addstr(spaces)
         elif char == "\v":
             x = win.getyx()[1]
@@ -71,7 +155,7 @@ def print3(
             y = win.getyx()[0]
             win.move(y, x)
         elif char == "\033" and text[i + 1] == "[":
-            i, ansi = handleCSI(win, text, ansi, textPos = i + 2)
+            i, ansi, fg, bg = handleCSI(win, text, ansi, fg, bg, textPos=i + 2)
         else:
             win.addstr(char, curses.color_pair(ansi))
             if delay:
@@ -80,28 +164,61 @@ def print3(
         i += 1
     win.refresh()
 
-def handleCSI(win: curses.window, text: str, ansiCode: int, textPos: int):
-    #textPos is the start of the escape code
-    __loopLimit__ = 100
+
+def handleCSI(
+    win: curses.window, text: str, ansiCode: int, fg: int, bg: int, textPos: int
+):
+    r"""
+    Handles Control Sequence Introducer (CSI) characters ("\x1b[" or "\033[").
+    Send the text to this function and the position after the "[" character.
+    Handles 3-bit, 4-bit and 8-bit Select Graphic Rendition (SGR) colours.
+
+    """
+    # textPos is the start of the escape code
     code = []
     i = textPos - 1
-    codePos = 0
-    while text[i] != "m" and i < (__loopLimit__ + textPos) and i < len(text):
+    while (
+        text[i] != "m"
+        and i < len(text)
+        and (text[i] not in _ENDBYTE_CHARS or i == textPos - 1)
+    ):
         i += 1
-        if text[i] == ";" or text[i] == "m":
+        if text[i] == ";" or text[i] == ":" or text[i] == "m":
             code.append(text[textPos:i])
+            textPos = i + 1
     textPos = i
-    for item in code:
+    i = 0
+    while i < len(code):
+        item = code[i]
         if item == "0":
             win.addstr("", curses.A_NORMAL)
             ansiCode = 0
+            fg = curses.COLOR_WHITE
+            bg = curses.COLOR_BLACK
         elif item == "1":
             win.addstr("", curses.A_BOLD)
-        elif len(item) == 2 and item[0] == "3":
-            ansiCode = int(item)
-        elif len(item) == 2 and item[0] == "4":
-            ansiCode = int(item)
-    return(textPos, ansiCode)
+        elif len(item) == 2 and item[0] == "3" and item[1] < "8":
+            fg = int(item[1])
+        elif item == "38" and code[i + 2 :] and code[i + 1] == "5":
+            fg = int(code[i + 2])
+            i += 2
+        elif len(item) == 2 and item[0] == "4" and item[1] < "8":
+            bg = int(item[1])
+        elif item == "48" and code[i + 2 :] and code[i + 1] == "5":
+            bg = int(code[i + 2])
+            i += 2
+        elif len(item) == 2 and item[0] == "9" and item[1] < "8":
+            fg = int(item[1]) + 8
+        elif len(item) == 3 and item[0:2] == "10" and item[2] < "8":
+            bg = int(item[2]) + 8
+        ansiCode = int(str(fg) + str(bg)) % min((curses.COLOR_PAIRS), 255) + 1
+        # On the above line, I use the magic number 255.
+        # I would use a descriptive name, but I actually have no idea what it
+        # does or why it works but everything breaks without it for some reason
+        # despite the fact that it should actually break at 65536 on my machine
+        curses.init_pair(ansiCode, fg, bg)
+        i += 1
+    return (textPos, ansiCode, fg, bg)
 
 
 def newline(win: curses.window) -> None:
@@ -138,13 +255,14 @@ def option(win: curses.window, text: str, options: list) -> int | str:
         newline(win)
         win.refresh()
         fullLen = max(len(str(option)) for option in options)
-        new_x = max((max_x - fullLen - 1) // 2, 0)
+        new_x = max((max_x - fullLen - 1) // 2 - 1, 0)
         for option in options:
             max_y, max_x = win.getmaxyx()
             newline(win)
             y, x = win.getyx()
             win.move(y, new_x)
             padding = (fullLen - len(str(option))) / 2
+            padding += 1
             # printstr
             strToPrint = (
                 " " * math.floor(padding) + str(option) + " " * math.ceil(padding)
@@ -182,6 +300,8 @@ def option(win: curses.window, text: str, options: list) -> int | str:
 def draw_titlebar(
     win: curses.window, title: str, leftString: str = "", rightString: str = ""
 ) -> None:
+    # curses.init_pair(253, 252, curses.COLOR_BLACK)
+    # curses.init_pair(226, curses.COLOR_BLACK, 252)
     win.scrollok(False)
     max_y, max_x = win.getmaxyx()
     win.move(0, 0)
