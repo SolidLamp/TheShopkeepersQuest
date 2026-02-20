@@ -67,6 +67,7 @@ keyItems = [
     "Silver Amulet",
     "Bow and Arrow",
     "Fishing Rod",
+    "Ancient Key",
 ]
 
 

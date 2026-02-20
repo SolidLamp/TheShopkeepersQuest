@@ -38,7 +38,6 @@ class mainHandler:
         self.game_state = self.game.game_state
         self.globaldebug = False
         self.history = self.game.history
-        self.roomID = starting_room
         self.room = {}
         self.saveFileName = saveFileName
         self.SHMversion = toml_reader.get_engine_info()
@@ -46,13 +45,13 @@ class mainHandler:
         self.stdscr = win
         self.win = win
         self.setup_stdscr()
-        if saveFile:
-            self.setup_loadSave(saveFile)
-
         if starting_room:
             self.roomID = starting_room
         else:
             self.roomID = self.starting_room
+        if saveFile:
+            self.setup_loadSave(saveFile)
+            self.current_saveid = saveFile.get("save_id", None)
 
     def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
         file_path = os.path.abspath(file_path)
@@ -69,7 +68,12 @@ class mainHandler:
         return module
 
     def setup_loadSave(self, saveFile: dict) -> None:
-        if saveFile["Game"] != self.gameInfo["title"]:
+        if (
+            saveFile.get("game_id") != self.gameInfo["game_id"]
+            or saveFile["Game"] != self.gameInfo["title"]
+        ):
+            # put error handling here
+            self.roomID = self.starting_room
             return
         self.history.extend(saveFile["History"])
         for item in saveFile["game_state"]:
@@ -181,7 +185,13 @@ class mainHandler:
 
     def ui_ending(self, end: str) -> None:
         save_handler.write_save(
-            self.game_state, self.gameInfo, self.roomID, self.history, self.saveFileName
+            self.game_state,
+            self.gameInfo,
+            self.roomID,
+            self.history,
+            self.saveFileName,
+            self.gameInfo.get("game_id", None),
+            self.current_saveid,
         )
         if hasattr(self.game, "endingText") and end in self.game.endingText:
             print3(
@@ -271,6 +281,8 @@ class mainHandler:
                     self.roomID,
                     self.history,
                     self.saveFileName,
+                    self.gameInfo.get("game_id", None),
+                    self.current_saveid,
                 )
                 sys.exit()
             if query == 1:
