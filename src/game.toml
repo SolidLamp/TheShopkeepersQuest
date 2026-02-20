@@ -1,3 +1,21 @@
+[game_info]
+Name = "The Shopkeeper's Quest"
+Version = "Experimental"
+ReleaseDate = "2026-02-20"
+Licence = "MIT License"
+Creator = "SolidLamp"
+Link = "https://github.com/solidlamp"
+game_id = "5b64188f-31ce-42cc-ac52-2e6881de3951"
+complevel = 2
+abbr ="TSQ"
+title = "The Shopkeeper's Quest"
+desc = "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident."
+starting_room = 140
+default_titlebar_left = "F1 - Help"
+default_titlebar_centre = " {abbr} - {desc} "
+default_titlebar_right = "Q - Quit"
+
+
 [0]
 Text = "\\033[32m[Debug] This is the Debug Room.\\033[0m"
 Options = [
@@ -1022,6 +1040,12 @@ Automove = 66
 [131]
 Text = "\\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\\033[0m"
 Automove = 66
+
+[140]
+Text = "You are a travelling merchant, approaching a new village to sell your wares in another region.\\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \\nSuddently, a man appears, and walks in your direction.\\nThe man speaks, \\033[93m'Greetings. I'm a local shopkeeper, just on the outskirts of our little village.\\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them.\\nAny that resided within the main parts of the village limits last night have disappeared.'\\033[0m\nThe man grunts and scratches his chin.\\nHe looks back at the village with a longing expression, before turning his gaze back to you. \\n\\033[93m'It worries me, you know?'\\033[0m he continues, \\033[93m'There's an old legend that if all seems to disappear overnight, then it marks a dark path for the world.'\\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \\033[93m'I do have some experience with magic.\\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\\nWith those three items, I believe I can bring everything back to normal.\\nI would get them myself, but my adventuring days are behind me.\\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the main limits of the village.\\nWhen you obtain the items, come see me in my shop.\\nI shall be seeing you, then.'\\033[0m\\nThe man leaves.\\nPress any button to continue..."
+Desc = "Opening Cutscene"
+titlebarCentre = "The Shopkeeper's Quest"
+Automove = 1
 
 [999]
 Text = "Room"

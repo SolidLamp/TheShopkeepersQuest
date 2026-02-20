@@ -36,5 +36,10 @@ def read_save(gameName: str = "game") -> dict:
         return gamedata
 
 
-def saveValidifier(saveFile: dict) -> bool:
-    return "Game" in saveFile and "game_state" in saveFile and "RoomID" in saveFile
+def save_validifier(saveFile: dict) -> bool:
+    return (
+        "Game" in saveFile
+        and "game_state" in saveFile
+        and "RoomID" in saveFile
+        and "History" in saveFile
+    )

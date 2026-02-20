@@ -11,8 +11,10 @@
 - [x] Allow reference to negative roomIDs be interpreted as history calls, and also allow this for Move, not just Automove
 - [x] Save history to file
 - [ ] update print3 to stop splitting words across lines (unsure if should flick to next line upon reaching edge, or start printing on the next line and leave space; likely the latter, as more attractive and I surmise it to be simpler to code)
-- [ ] Put toml_reader and engine_info together (?)
+- [ ] Put toml_reader and engine_info together (yes)
 - [ ] Put save file info in shared lib for all access, and allow save to different file on saving
 - [ ] Write documentation for the engine
-- [ ] Allow for multiple items (?)
 - [ ] Allow choices to have the same name without breaking
+- [ ] Merge game_info.toml and game.toml
+- [ ] Fix starting room to read from game.py from shm.py
+- [ ] Add UUIDs to save files

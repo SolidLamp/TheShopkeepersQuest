@@ -5,9 +5,7 @@ import time
 try:
     import curses
 except ImportError as e:
-    print(
-        f"The curses module was not found. If you are running Windows, please install windows-curses with pip.\nError: {e}"
-    )
+    print(f"The curses module was not found.\nError: {e}")
     sys.exit(1)
 import engine_info
 import save_handler
@@ -15,7 +13,58 @@ import shm
 import tui
 
 
-def main(win):
+class MiniSHM:
+    """
+    MiniSHM is a tiny engine designed to run the title screen and nothing else.
+    It expects a dictionary of 'rooms' with every key is either an int, str or lambda.
+    When the key is an int or str, that option will take you to that room;
+    when the key is a lambda, it is executed. It has ZERO error checking.
+    For more features, use the real SHM Engine.
+    """
+
+    def __init__(
+        self, win: curses.window, options_dict: dict, title_string: str = "SHM Engine"
+    ) -> None:
+        self.options_dict = options_dict
+        self.title_string = title_string
+        self.win = win
+
+    def _option(self, key: int | str = 0) -> None:
+        choices = self.options_dict[key]
+        query = tui.option(self.win, self.title_string, list(choices.keys()))
+        if query == "q":
+            sys.exit(0)
+        return query
+
+    def screen(self, key: int | str = 0) -> None:
+        task = key
+        while isinstance(task, int) or isinstance(task, str):
+            query = self._option(task)
+            choices = self.options_dict[task]
+            task = list(choices.values())[query]
+        task()
+
+
+def handle_save(
+    win: curses.window, game_path: str = "game", save_path: str = "game"
+) -> None:
+    if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
+        save_handler.read_save("game")
+    ):
+        saveFile = save_handler.read_save(save_path)
+        shm.run(
+            win,
+            0,
+            saveFileName=save_path,
+            saveFile=saveFile,
+            gameFile_name=game_path,
+            gameFile_path="./",
+        )
+    else:
+        shm.run(win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./")
+
+
+def main(win: curses.window) -> None:
     curses.curs_set(0)
     win.scrollok(True)
     win.nodelay(True)
@@ -29,9 +78,9 @@ def main(win):
     pady1 = 0
     pady2 = 1
     newwin = tui.create_newwin(win, padding, padx1, padx2, pady1, pady2)
-    theString = (
-        "\033[36m"
-        r"""
+    string = (
+        "\033[38;5;75m"
+        + r"""
         ___ _  _ ____
          |  |__| |___
          |  |  | |___
@@ -44,78 +93,31 @@ def main(win):
                                |  | |  | |___ [__   |
                                |_\| |__| |___ ___]  |
                                                        """
-        "\033[0m"
+        + "\033[0m"
     )
-    options = [
-        "Play The Shopkeeper's Quest",
-        "Play The Shopkeeper's Quest [Skip Intro]",
-        "Load Save",
-        "Quit",
-    ]
-    savedGame = os.path.exists("game.sav")
-    if not savedGame:
-        options.pop(2)
-    query = tui.option(
-        newwin,
-        "\033[38;5;75m\n___ _  _ ____\n |  |__| |___ \n |  |  | |___ \n\n"
-        "____ _  _ ____ ___  _  _ ____ ____ ___  ____ ____ ____ '\n"
-        "[__  |__| |  | |__] |_/  |___ |___ |__] |___ |__/ [__  \n"
-        "___] |  | |__| |    | \_ |___ |___ |    |___ |  \ ___] \n"
-        "\n                       ____ _  _ ____ ____ ___ \n"
-        "                       |  | |  | |___ [__   |  \n"
-        "                       |_\| |__| |___ ___]  |  \n"
-        "                                               \033[0m",
-        options,
-    )
-    newwin.clear()
-    win.clear()
-    win.move(0, 0)
-    curses.curs_set(0)
-    tui.draw_titlebar(win, engineInfo)
-    # example: plan
-    # Play The Shopkeeper's Quest
-    # --
-    # Save 1 -- Last Saved: 2026-02-06
-    # Save 2 -- No Data
-    # Save 3 -- Error Parsing Save
-    # Back
-    # --
-    # Settings
-    # Quit
-    if query == 0:
-        tui.draw_titlebar(win, "The Shopkeeper's Quest")
-        tui.print3(
-            newwin,
-            "You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[93m'Greetings. I'm a local shopkeeper, just on the outskirts of our little village.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them.\nAny that resided within the main parts of the village limits last night have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[93m'It worries me, you know?'\033[0m he continues, \033[93m'There's an old legend that if all seems to disappear overnight, then it marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[93m'I do have some experience with magic.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the main limits of the village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m\nThe man leaves.\n",
-            delay=0.02,
-        )
-        time.sleep(0.2)
-        curses.flushinp()
-        tui.print3(newwin, "Press any key to continue...", delay=0)
-        newwin.refresh()
-        win.refresh()
-        curses.flushinp()
-        win.getch()
-    elif (query == 3 and savedGame) or isinstance(query, str):
-        sys.exit()
-    if query == 2 and os.path.exists("debugSave.sav"):
-        saveFile = save_handler.read_save("debugSave")
-        shm.run(
-            win,
-            0,
-            saveFile,
-            gameFile_name="game",
-            gameFile_path="./",
-            saveFileName="debugSave",
-        )
-    else:
-        shm.run(
-            win, starting_room=(query + 1), gameFile_name="game", gameFile_path="./"
-        )
-    sys.exit()
+    screen_options = {
+        0: {
+            "Play The Shopkeeper's Quest": 1,
+            # "Play The Shopkeeper's Quest [Skip Intro]": lambda: print("ue"),
+            "Quit": lambda: sys.exit(),
+        },
+        1: {
+            "Save 1": lambda: handle_save(win, game_path="game", save_path="game1"),
+            "Save 2": lambda: handle_save(win, game_path="game", save_path="game2"),
+            "Save 3": lambda: handle_save(win, game_path="game", save_path="game3"),
+            "Back": 0,
+        },
+    }
+    title = MiniSHM(newwin, screen_options, string)
+    title.screen(0)
+    sys.exit(0)
 
 
 def title():
     print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)
+
+
+#    options = ["Play The Shopkeeper's Quest", "Play The Shopkeeper's Quest [Skip Intro]", "Load Save", "Quit"]
+#    options = ["Play The Shopkeeper's Quest", "Play The Shopkeeper's Quest [Skip Intro]", "Load Save", "Quit"]

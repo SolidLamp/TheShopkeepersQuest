@@ -9,11 +9,12 @@ print3 = tui.print3
 
 
 gameInfo = {
+    "game_id": "5b64188f-31ce-42cc-ac52-2e6881de3951",
     "complevel": 2,
     "abbr": "TSQ",
     "title": "The Shopkeeper's Quest",
     "desc": "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident.",
-    "starting_room": 1,
+    "starting_room": 140,
     "default_titlebar_left": "F1 - Help",
     "default_titlebar_centre": " {abbr} - {desc} ",
     "default_titlebar_right": "Q - Quit",
@@ -514,6 +515,9 @@ def get_rooms(win):
         130: {
             "Script": lambda: ShopkeeperFinalSpeech(win),
         },
+        140: {
+            "Script": lambda: win.getch(),
+        }
     }  # I figured it out
     rooms = overwrite_rooms(rooms, extrarooms)
     return rooms

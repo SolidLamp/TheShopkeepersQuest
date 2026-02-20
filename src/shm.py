@@ -41,13 +41,13 @@ class mainHandler:
         self.history = self.game.history
         self.roomID = starting_room
         self.room = {}
+        self.saveFileName = saveFileName
         self.SHMversion = engine_info.get()
         self.starting_room = self.gameInfo.get("starting_room", 1)
         self.stdscr = win
         self.win = win
         self.setup_stdscr()
         if saveFile:
-            self.saveFileName = saveFileName
             self.setup_loadSave(saveFile)
 
     def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
@@ -404,19 +404,22 @@ class mainHandler:
 
 def run(
     win: curses.window,
-    starting_room: int,
+    starting_room: int = 1,
+    saveFileName: str = "game",
     saveFile: dict = {},
     gameFile_name: str = "game",
     gameFile_path: str = "./",
-    saveFileName: str = "game",
 ) -> None:
+    """
+    The wrapper to start the SHM Engine.
+    """
     curses.curs_set(0)
     win.scrollok(True)
     tui.colorsetup(win)
     curses.cbreak()
     curses.noecho()
     if saveFile:
-        validSave = save_handler.saveValidifier(saveFile)
+        validSave = save_handler.save_validifier(saveFile)
     if saveFile and validSave:
         main = mainHandler(
             win,
@@ -428,7 +431,7 @@ def run(
         )
     else:
         main = mainHandler(
-            win, starting_room, gameFile_name=gameFile_name, gameFile_path=gameFile_path
+            win, starting_room, gameFile_name=gameFile_name, gameFile_path=gameFile_path, saveFileName=saveFileName
         )
     if saveFile and not validSave:
         # error handling add there
