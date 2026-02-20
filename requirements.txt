@@ -1,0 +1,2 @@
+windows-curses; platform_system == 'Windows'
+setuptools >= 77.0.3

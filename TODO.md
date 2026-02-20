@@ -15,3 +15,4 @@
 - [ ] Put save file info in shared lib for all access, and allow save to different file on saving
 - [ ] Write documentation for the engine
 - [ ] Allow for multiple items (?)
+- [ ] Allow choices to have the same name without breaking
