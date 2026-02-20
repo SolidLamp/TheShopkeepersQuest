@@ -24,7 +24,7 @@ class mainHandler:
     def __init__(
         self,
         win: curses.window,
-        starting_room: int = 1,
+        starting_room: int | None = None,
         saveFile: dict = {},
         gameFile_name: str = "game",
         gameFile_path: str = "./game.py",
@@ -48,6 +48,11 @@ class mainHandler:
         self.setup_stdscr()
         if saveFile:
             self.setup_loadSave(saveFile)
+
+        if starting_room:
+            self.roomID = starting_room
+        else:
+            self.roomID = self.starting_room
 
     def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
         file_path = os.path.abspath(file_path)
@@ -403,7 +408,7 @@ class mainHandler:
 
 def run(
     win: curses.window,
-    starting_room: int = 1,
+    starting_room: int | None = None,
     saveFileName: str = "game",
     saveFile: dict = {},
     gameFile_name: str = "game",
@@ -430,7 +435,11 @@ def run(
         )
     else:
         main = mainHandler(
-            win, starting_room, gameFile_name=gameFile_name, gameFile_path=gameFile_path, saveFileName=saveFileName
+            win,
+            starting_room,
+            gameFile_name=gameFile_name,
+            gameFile_path=gameFile_path,
+            saveFileName=saveFileName,
         )
     if saveFile and not validSave:
         # error handling add there

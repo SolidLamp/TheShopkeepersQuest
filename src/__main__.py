@@ -16,7 +16,7 @@ def main():
         for arg in sys.argv:
             match arg:
                 case "--about" | "--help" | "-h":
-                    gameInfo = toml_reader.read_toml("game_info.toml")
+                    gameInfo = toml_reader.read_toml("cli_info.toml")
                     gameInfo = shm.formatDict(gameInfo)
                     if not gameInfo["Patch"] or gameInfo["Patch"][0] == "-":
                         gameInfo["PatchConnector"] = ""

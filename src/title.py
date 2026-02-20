@@ -10,6 +10,7 @@ except ImportError as e:
 
 import save_handler
 import shm
+import toml_reader
 import tui
 
 
@@ -49,7 +50,7 @@ def handle_save(
     win: curses.window, game_path: str = "game", save_path: str = "game"
 ) -> None:
     if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
-        save_handler.read_save("game")
+        save_handler.read_save(save_path)
     ):
         saveFile = save_handler.read_save(save_path)
         shm.run(
