@@ -2,6 +2,7 @@ import time
 from dataclasses import dataclass
 import random
 import sys
+
 import tui
 import toml_reader
 
@@ -517,7 +518,7 @@ def get_rooms(win):
         },
         140: {
             "Script": lambda: win.getch(),
-        }
+        },
     }  # I figured it out
     rooms = overwrite_rooms(rooms, extrarooms)
     return rooms

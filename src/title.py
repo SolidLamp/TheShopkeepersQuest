@@ -7,7 +7,7 @@ try:
 except ImportError as e:
     print(f"The curses module was not found.\nError: {e}")
     sys.exit(1)
-import engine_info
+
 import save_handler
 import shm
 import tui
@@ -61,7 +61,9 @@ def handle_save(
             gameFile_path="./",
         )
     else:
-        shm.run(win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./")
+        shm.run(
+            win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./"
+        )
 
 
 def main(win: curses.window) -> None:
@@ -70,7 +72,7 @@ def main(win: curses.window) -> None:
     win.nodelay(True)
     tui.colorsetup(win)
     curses.cbreak()
-    engineInfo = engine_info.get()
+    engineInfo = toml_reader.get_engine_info()
     tui.draw_titlebar(win, engineInfo)
     padding = 1
     padx1 = 0

@@ -8,7 +8,6 @@ import sys
 import time
 import types
 
-import engine_info
 import save_handler
 import toml_reader
 import tui
@@ -42,7 +41,7 @@ class mainHandler:
         self.roomID = starting_room
         self.room = {}
         self.saveFileName = saveFileName
-        self.SHMversion = engine_info.get()
+        self.SHMversion = toml_reader.get_engine_info()
         self.starting_room = self.gameInfo.get("starting_room", 1)
         self.stdscr = win
         self.win = win
@@ -447,7 +446,7 @@ if __name__ == "__main__":
     # if len(sys.argv) > 1:
     # sys.argv[1]
     print(
-        engine_info.get(
+        toml_reader.get_engine_info(
             "{Name} {MajorVersion}{PatchConnector}{Patch}\n"
             "{ReleaseDate}\n{Link}\nThis Release: '{Dist}'"
         )

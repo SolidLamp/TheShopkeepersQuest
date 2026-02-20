@@ -2,6 +2,21 @@ import os
 import tomllib
 
 
+class formatDict(dict):
+    def __missing__(self, key: str) -> str:
+        string = "{" + key + "}"
+        return string
+
+
+def read_toml(file: str = "game.toml") -> dict:
+    if not os.path.exists(file):
+        return {}
+    else:
+        with open(file, "rb") as f:
+            gamedata = tomllib.load(f).copy()
+        return gamedata
+
+
 def replace_text(text: str) -> str:
     text = text.replace("\\n", "\n")
     text = text.replace("\\033", "\033")
@@ -28,14 +43,6 @@ def strtoint_key(gamedata: dict) -> dict:
     return new_gamedata
 
 
-def read_toml(file: str = "game.toml") -> dict:
-    if not os.path.exists(file):
-        return {}
-    else:
-        with open(file, "rb") as f:
-            gamedata = tomllib.load(f).copy()
-        return gamedata
-
 def read_gamedata(file: str = "game.toml") -> dict:
     if not os.path.exists(file):
         return {}
@@ -44,3 +51,16 @@ def read_gamedata(file: str = "game.toml") -> dict:
         ansi_replace(gamedata)
         gamedata = strtoint_key(gamedata)
         return gamedata
+
+
+def get_engine_info(
+    infoString: str = "{Name} {MajorVersion}{PatchConnector}{Patch}",
+) -> str:
+    engineInfo = read_toml("engine_info.toml")
+    engineInfo = formatDict(engineInfo)
+    if not engineInfo["Patch"] or engineInfo["Patch"][0] == "-":
+        engineInfo["PatchConnector"] = ""
+    else:
+        engineInfo["PatchConnector"] = " "
+    infoString = infoString.format_map(engineInfo)
+    return infoString

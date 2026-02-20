@@ -1,6 +1,8 @@
+#Used for the run script
+
 Name = "The Shopkeeper's Quest"
 Version = "Experimental"
-ReleaseDate = "2026-01-31"
+ReleaseDate = "2026-02-20"
 Licence = "MIT License"
 Creator = "SolidLamp"
 Link = "https://github.com/solidlamp"
