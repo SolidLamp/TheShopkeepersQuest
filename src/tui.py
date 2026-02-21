@@ -112,10 +112,11 @@ def print3(
     colorcode: int = 0,
     delay: float = 0.01,
     pauseAtNewline: float = 0.0,
-    speedUp: bool = True,
+    skip_text: bool = True,
 ) -> None:
     r"""Function to print string `text` to the provided curses window using a
     typewriter effect. Also handles control and escape codes.
+    When skip_text is true (true by default), pressing a key skips all delay.
 
     Supported control characters:
     - `\f` - clear the window
@@ -159,10 +160,18 @@ def print3(
         else:
             win.addstr(char, curses.color_pair(ansi))
             if delay:
-                win.refresh()
+                win.nodelay(True)
+                try:
+                    key = win.getkey()
+                except Exception:
+                    key = None
+                if key != None and skip_text:
+                    delay = 0
+                win.nodelay(False)
                 time.sleep(delay)
         i += 1
     win.refresh()
+    return()
 
 
 def handleCSI(

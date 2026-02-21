@@ -11,7 +11,7 @@
 - [x] Put toml_reader and engine_info together (yes)
 - [x] Fix starting room to read from game.py from shm.py
 - [x] Add UUIDs to save files
-- [ ] Add feature to control text speed in each room
+- [x] Add feature to control text speed in each room
 - [ ] Fix error handling
 - [ ] update print3 to stop splitting words across lines (unsure if should flick to next line upon reaching edge, or start printing on the next line and leave space; likely the latter, as more attractive and I surmise it to be simpler to code)
 - [ ] Allow choices to have the same name without breaking

@@ -33,7 +33,7 @@ class MiniSHM:
     def _option(self, key: int | str = 0) -> None:
         choices = self.options_dict[key]
         query = tui.option(self.win, self.title_string, list(choices.keys()))
-        if query == "q":
+        if isinstance(query, str):
             sys.exit(0)
         return query
 

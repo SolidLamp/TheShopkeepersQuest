@@ -43,6 +43,7 @@ class mainHandler:
         self.SHMversion = toml_reader.get_engine_info()
         self.starting_room = self.gameInfo.get("starting_room", 1)
         self.stdscr = win
+        self.text_speed = self.gameInfo.get("default_textspeed", 0.01)
         self.win = win
         self.setup_stdscr()
         if starting_room:
@@ -389,11 +390,10 @@ class mainHandler:
             self.history.pop(0)
         text = ""
         if "Requirements" in self.room and not self.room["Requirements"]():
-            print3(self.win, self.room["AlternateText"])
             text = self.room["AlternateText"]
         else:
-            print3(self.win, self.room["Text"])
             text = self.room["Text"]
+        print3(self.win, text, delay=self.room.get("TextSpeed",self.text_speed))
         if self.globaldebug:
             text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(self.history)
         if "Script" in self.room:
@@ -407,7 +407,8 @@ class mainHandler:
             self.fn_itemHandler("KeyItem")
         if "Automove" in self.room:
             self.fn_roomIDHandler(self.room["Automove"])
-            time.sleep(1)
+            automove_delay = not(self.room.get("InstantAutomove", False))
+            time.sleep(int(automove_delay))
         elif "Move" in self.room:
             self.fn_mainRoomHandler(text)
         if "Lose" in self.room:

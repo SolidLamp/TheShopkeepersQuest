@@ -1,3 +1,4 @@
+import curses
 import time
 from dataclasses import dataclass
 import random
@@ -507,7 +508,7 @@ def get_rooms(win):
             "Script": lambda: ShopkeeperFinalSpeech(win),
         },
         140: {
-            "Script": lambda: win.getch(),
+            "Script": lambda: (curses.flushinp(), win.getch(), curses.flushinp()),
         },
     }  # I figured it out
     rooms = overwrite_rooms(rooms, extrarooms)
