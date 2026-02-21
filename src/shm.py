@@ -31,6 +31,7 @@ class mainHandler:
         saveFileName: str = "game",
     ) -> None:
         self.compatibleComplevels = [1, 2]
+        self.current_saveid = None
         self.engineInfo = formatDict(toml_reader.read_toml("engine_info.toml"))
         self.game = self.setup_gameFile(gameFile_name, gameFile_path)
         self.gameFile_name = gameFile_name
@@ -244,6 +245,21 @@ class mainHandler:
         else:
             self.roomID = self.starting_room
 
+    def ui_text_handler(self) -> str:
+        text = ""
+        if "Requirements" in self.room and not self.room["Requirements"]():
+            text = self.room["AlternateText"]
+        else:
+            text = self.room["Text"]
+        tui.newline(self.win)
+        max_y, max_x = self.win.getmaxyx()
+        y, x = self.win.getyx()
+        new_x = max((max_x - len(text) - 1) // 2, 0)
+        self.win.move(y, new_x)
+        self.win.scrollok(True)
+        print3(self.win, text, delay=self.room.get("TextSpeed",self.text_speed))
+        return(text)
+
     def ui_option(self, text: str, options: list, Inventory: bool = True) -> int:
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
@@ -388,12 +404,7 @@ class mainHandler:
         self.history.append(self.roomID)
         if len(self.history) > 10:
             self.history.pop(0)
-        text = ""
-        if "Requirements" in self.room and not self.room["Requirements"]():
-            text = self.room["AlternateText"]
-        else:
-            text = self.room["Text"]
-        print3(self.win, text, delay=self.room.get("TextSpeed",self.text_speed))
+        text = self.ui_text_handler()
         if self.globaldebug:
             text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(self.history)
         if "Script" in self.room:

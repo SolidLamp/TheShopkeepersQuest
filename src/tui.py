@@ -113,10 +113,12 @@ def print3(
     delay: float = 0.01,
     pauseAtNewline: float = 0.0,
     skip_text: bool = True,
+    break_lines: bool = True,
 ) -> None:
     r"""Function to print string `text` to the provided curses window using a
     typewriter effect. Also handles control and escape codes.
     When skip_text is true (true by default), pressing a key skips all delay.
+    If break_lines is true (default), words will not be broken along lines.
 
     Supported control characters:
     - `\f` - clear the window
@@ -129,14 +131,29 @@ def print3(
     Supported escape sequences:
     - `0` - clear all formatting
     - `1` - create bold text with A_STANDOUT
+    - `5` - specify an 8-bit colour code; paired with 38 or 48.
     - `30`-`37` - change foreground colour
+    - `38` - change foreground colour to a complex 8-bit colour code; paired with 5.
     - `40`-`47` - change background colour
+    - `48` - change foreground colour to a complex 8-bit colour code; paired with 5.
     """
     i = 0
     ansi = int(colorcode)
     fg = curses.COLOR_WHITE
     bg = curses.COLOR_BLACK
     while i < len(text):
+        j = i
+        while j < len(text) and text[j] != "\n" and text[j] != " ":
+            j += 1
+        max_y, max_x = win.getmaxyx()
+        y, x = win.getyx()
+        if (
+            (j == " " or "\n")
+            and ((j - i) > (max_x - x))
+            and ((j - i) <= max_x)
+            and break_lines
+        ):
+            newline(win)
         char = text[i]
         if char == "\f":
             win.clear()
@@ -145,18 +162,18 @@ def print3(
             if pauseAtNewline:
                 time.sleep(pauseAtNewline)
         elif char == "\r":
-            y, x = win.getyx()
             win.move(y, 0)
         elif char == "\t":
             spaces = " " * _TAB_SIZE
             win.addstr(spaces)
         elif char == "\v":
-            x = win.getyx()[1]
             newline(win)
             y = win.getyx()[0]
             win.move(y, x)
         elif char == "\033" and text[i + 1] == "[":
             i, ansi, fg, bg = handleCSI(win, text, ansi, fg, bg, textPos=i + 2)
+        elif char == " " and x == 0 and break_lines:
+            pass
         else:
             win.addstr(char, curses.color_pair(ansi))
             if delay:
@@ -171,7 +188,7 @@ def print3(
                 time.sleep(delay)
         i += 1
     win.refresh()
-    return()
+    return ()
 
 
 def handleCSI(
@@ -248,7 +265,12 @@ def newline(win: curses.window) -> None:
     win.refresh()
 
 
-def option(win: curses.window, text: str, options: list) -> int | str:
+def option(
+    win: curses.window,
+    text: str,
+    options: list,
+    break_lines: bool = True,
+) -> int | str:
     value = 0
     win.nodelay(False)
     while 1:
@@ -260,7 +282,7 @@ def option(win: curses.window, text: str, options: list) -> int | str:
         win.move(y, new_x)
         curses.curs_set(0)
         win.scrollok(True)
-        print3(win, text, delay=0)
+        print3(win, text, delay=0, break_lines=break_lines)
         newline(win)
         win.refresh()
         fullLen = max(len(str(option)) for option in options)
