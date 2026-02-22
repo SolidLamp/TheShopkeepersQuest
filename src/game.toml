@@ -1,7 +1,7 @@
 [game_info]
 Name = "The Shopkeeper's Quest"
 Version = "Experimental"
-ReleaseDate = "2026-02-20"
+ReleaseDate = "2026-02-22"
 Licence = "MIT License"
 Creator = "SolidLamp"
 Link = "https://github.com/solidlamp"
@@ -267,12 +267,15 @@ Ending = "Secret"
 
 [34]
 Text = "Dead end."
+Automove = -2
 
 [35]
 Text = "Dead end."
+Automove = -2
 
 [36]
 Text = "Dead end."
+Automove = -2
 
 [38]
 Text = "You cannot go back now."
@@ -291,6 +294,7 @@ Move = [43, 12]
 
 [40]
 Text = "Dead end."
+Automove = -2
 
 [41]
 Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."

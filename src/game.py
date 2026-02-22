@@ -315,28 +315,12 @@ def get_rooms(win):
             "Text": "You become " + game_state.shopkeeperName + ".",
             "Inventory": False,
         },
-        34: {
-            "Text": "Dead end.",
-            "Automove": ("history", -2),
-        },
-        35: {
-            "Text": "Dead end.",
-            "Automove": ("history", -2),
-        },
-        36: {
-            "Text": "Dead end.",
-            "Automove": ("history", -2),
-        },
         38: {
             "Text": "You cannot go back now.",
             "Script": lambda: sys.exit(),
             "Options": ["You cannot."],
             "Inventory": False,
             "Automove": 38,
-        },
-        40: {
-            "Text": "Dead end.",
-            "Automove": ("history", -2),
         },
         52: {
             "Requirements": lambda: game_state.caveOpened,

@@ -95,30 +95,13 @@ class mainHandler:
         self.win = tui.create_newwin(self.stdscr, padding, padx1, padx2, pady1, pady2)
 
     def db_debug(self) -> None:
-        query = tui.option(self.win, "SHM Engine Debug Menu", ["Test room IDs"])
+        debug_options = ["Test room IDs", "Enable debug mode"]
+        query = tui.option(self.win, "SHM Engine Debug Menu", debug_options)
         match query:
             case 0:
-                text = ""
-                rooms = self.game.get_rooms(self.win)
-                for roomno in rooms:
-                    self.room = rooms[roomno]
-                    if "Move" in self.room:
-                        for idno in self.room["Move"]:
-                            self.win.addstr(str(idno))
-                            if isinstance(idno, int) and idno not in rooms:
-                                text += f"Warning: Invalid ID {idno} in {roomno}!\n"
-                    if "Automove" in self.room:
-                        automove = self.room["Automove"]
-                        self.win.addstr(str(automove))
-                        if isinstance(automove, int) and automove not in rooms:
-                            text += f"Warning: Invalid ID {automove} in {roomno}!\n"
-                self.win.clear()
-                if text:
-                    print3(self.win, text, 33, 0)
-                else:
-                    print3(self.win, "Success! No errors found.", 36, 0)
-                print3(self.win, "\nPress any key to exit Debug Menu...", 0, 0)
-                self.win.getch()
+                self.db_test_rooms()
+            case 1:
+                self.globaldebug = not (self.globaldebug)
 
     def db_log_error(
         self,
@@ -147,6 +130,37 @@ class mainHandler:
         if query == 1:
             sys.exit(2)
         print3(self.win, "\nPress any key to exit...", 0, 0)
+
+    def db_test_rooms(self) -> None:
+        text = ""
+        rooms = self.game.get_rooms(self.win)
+        idnos = []
+        for roomno, room in rooms.items():
+            if "Move" in room:
+                idnos.extend((idno, roomno) for idno in room["Move"])
+            if "Automove" in room:
+                idnos.append((room["Automove"], roomno))
+        for idno, roomno in idnos:
+            if isinstance(idno, int) and idno in rooms:
+                continue
+            negIDv1 = isinstance(idno, tuple) and idno[0] == "history" and idno[1] < 0
+            negIDv2_support = not (self.game.gameInfo["complevel"] == 1)
+            if negIDv1 and not negIDv2_support:
+                continue
+            if negIDv1 and negIDv2_support:
+                text += f"\033[36mNote: Room {roomno} uses complevel 1-style"
+                text += f" history ID references: {idno}\n\033[0m"
+                continue
+            if isinstance(idno, int) and idno < 0 and negIDv2_support:
+                continue
+            text += f"\033[33mWarning: Invalid ID {idno} in {roomno}!\n\033[0m"
+        self.win.clear()
+        if text:
+            print3(self.win, text, 33, 0)
+        else:
+            print3(self.win, "Success! No errors found.", 32, 0)
+        print3(self.win, "\nPress any key to exit Debug Menu...", 0, 0)
+        self.win.getch()
 
     def ui_drawtitlebar(
         self,
@@ -258,6 +272,7 @@ class mainHandler:
         new_x = max((max_x - len(text) - 1) // 2, 0)
         self.win.move(y, new_x)
         self.win.scrollok(True)
+        text = self.ui_format_string(text)
         print3(self.win, text, delay=self.room.get("TextSpeed", self.text_speed))
         return text
 
