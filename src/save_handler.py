@@ -11,6 +11,7 @@ def write_save(
     room: int,
     history: list[int],
     fileName: str = "game",
+    save_version: int = 0,
     game_id: str | uuid.UUID | uuid.SafeUUID | None = None,
     save_id: str | uuid.UUID | uuid.SafeUUID | None = None,
 ) -> None:
@@ -22,6 +23,7 @@ def write_save(
     dictionary = {
         "Game": gameInfo["title"],
         "Saved": datetime.now().isoformat(),
+        "save_version": save_version,
         "RoomID": room,
         "History": history,
         "game_state": game_state.__dict__.copy(),
@@ -35,7 +37,7 @@ def write_save(
         dictionary.update({"save_id": save_id})
     else:
         dictionary.update({"save_id": str(uuid.uuid4())})
-        #e.g. 164237f8-d3ce-46b2-95b1-b30d39ce4472
+        # e.g. 164237f8-d3ce-46b2-95b1-b30d39ce4472
     output = json.dumps(dictionary, indent=4)
     write_json(output, fileName)
 
@@ -58,16 +60,22 @@ def read_save(gameName: str = "game") -> dict:
 
 
 def save_validifier(saveFile: dict) -> bool:
-    return (
-        "Game" in saveFile
-        and "game_state" in saveFile
-        and "RoomID" in saveFile
-        and "History" in saveFile
-    )
+    if not isinstance(saveFile, dict):
+        return False
+    if "Game" not in saveFile or not isinstance(saveFile["Game"], str):
+        return False
+    if "game_state" not in saveFile or not isinstance(saveFile["game_state"], dict):
+        return False
+    if "RoomID" not in saveFile or not isinstance(saveFile["RoomID"], int):
+        return False
+    if "History" not in saveFile or not isinstance(saveFile["History"], list):
+        return False
+    return True
 
 
 def copy_save(file_name: str, existing_save: dict) -> None:
     old_save = os.path.abspath(file_name + ".sav")
-    old_copy = os.path.abspath(file_name) + existing_save.get("Saved", " - Copy") + ".sav"
+    old_copy = (
+        os.path.abspath(file_name) + existing_save.get("Saved", " - Copy") + ".sav"
+    )
     shutil.copyfile(old_save, old_copy)
-

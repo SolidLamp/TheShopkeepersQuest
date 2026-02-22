@@ -192,6 +192,7 @@ class mainHandler:
             self.roomID,
             self.history,
             self.saveFileName,
+            self.engineInfo["SaveVersion"],
             self.gameInfo.get("game_id", None),
             self.current_saveid,
         )
@@ -257,8 +258,8 @@ class mainHandler:
         new_x = max((max_x - len(text) - 1) // 2, 0)
         self.win.move(y, new_x)
         self.win.scrollok(True)
-        print3(self.win, text, delay=self.room.get("TextSpeed",self.text_speed))
-        return(text)
+        print3(self.win, text, delay=self.room.get("TextSpeed", self.text_speed))
+        return text
 
     def ui_option(self, text: str, options: list, Inventory: bool = True) -> int:
         if not hasattr(self.game_state, "inventory"):
@@ -298,6 +299,7 @@ class mainHandler:
                     self.roomID,
                     self.history,
                     self.saveFileName,
+                    self.engineInfo["SaveVersion"],
                     self.gameInfo.get("game_id", None),
                     self.current_saveid,
                 )
@@ -418,7 +420,7 @@ class mainHandler:
             self.fn_itemHandler("KeyItem")
         if "Automove" in self.room:
             self.fn_roomIDHandler(self.room["Automove"])
-            automove_delay = not(self.room.get("InstantAutomove", False))
+            automove_delay = not (self.room.get("InstantAutomove", False))
             time.sleep(int(automove_delay))
         elif "Move" in self.room:
             self.fn_mainRoomHandler(text)
@@ -449,6 +451,27 @@ def run(
     if saveFile:
         validSave = save_handler.save_validifier(saveFile)
     if saveFile and validSave:
+        save_version = saveFile.get("save_version", 0)
+        engine_info = toml_reader.read_toml("engine_info.toml")
+        engine_save_version = engine_info.get("SaveVersion", 0)
+        supported_version = save_version <= engine_save_version
+    if saveFile and not validSave:
+        timestamp = datetime.now().isoformat()
+        with open("error.log", "a") as log:
+            log.write(
+                f"{timestamp} Warning: Could not parse save file as a valid save file."
+                "\nContinuing without save file...\n"
+            )
+    if saveFile and not supported_version:
+        timestamp = datetime.now().isoformat()
+        with open("error.log", "a") as log:
+            log.write(
+                f"{timestamp} Warning: Could not parse save file. The save"
+                f" file has a version of {save_version}, but this version of"
+                f"the SHM Engine only supports up to {supported_version}\n"
+                "Continuing without save file...\n"
+            )
+    if saveFile and validSave and supported_version:
         main = mainHandler(
             win,
             saveFile["RoomID"],
@@ -465,9 +488,6 @@ def run(
             gameFile_path=gameFile_path,
             saveFileName=saveFileName,
         )
-    if saveFile and not validSave:
-        # error handling add there
-        raise Exception("DEBUG: Invalid save")
     main.fn_looper()
 
 
