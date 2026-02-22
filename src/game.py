@@ -74,26 +74,31 @@ keyItems = [
 
 @dataclass
 class Inventory:
+    """
+    The main inventory of a game, which allows for adding items and key items,
+    as well as displaying them as a string..
+    """
+    # which I may or may not have mainly used StackOverflow to figure out.
     items: list[str] = None
     keyItems: list[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.items = [] if self.items is None else self.items
         self.keyItems = [] if self.keyItems is None else self.keyItems
 
-    def getItem(self, item: str, win):
+    def getItem(self, item: str, win) -> None:
         print3(win, "\nYou got \033[1m" + str(item) + "\033[0m!\n")
         self.items.append(item)
         print3(win, "Press any button to continue...")
         win.getch()
 
-    def getKeyItem(self, item: str, win):
+    def getKeyItem(self, item: str, win) -> None:
         print3(win, "\nYou got \033[1m\033[47m" + str(item) + "\033[0m!\n")
         self.keyItems.append(item)
         print3(win, "Press any button to continue...")
         win.getch()
 
-    def __str__(self):
+    def __str__(self) -> str:
         if not self.items and not self.keyItems:
             return "Your inventory is empty"
         output = []
@@ -116,7 +121,7 @@ class gameState:
     caveOpened: bool = False
     fletcherOpen: bool = True
 
-    def getRuby(self, obtained: int, win):
+    def getRuby(self, obtained: int, win: curses.window) -> None:
         print3(win, "\nYou got \033[1m" + str(obtained) + "\033[0m Rubies!")
         self.rubies += obtained
         print3(
@@ -132,7 +137,7 @@ class gameState:
 game_state = gameState(inventory=Inventory(items=[]))
 
 
-def itemEvaluation():
+def itemEvaluation() -> int:
     cursedItems = len(
         {"Rusted Sword", "Amber Necklace", "Golden Idol"}
         & set(game_state.inventory.keyItems)
@@ -140,7 +145,7 @@ def itemEvaluation():
     return cursedItems
 
 
-def ShopkeeperFinalSpeech(win):
+def ShopkeeperFinalSpeech(win: curses.window) -> None:
     print3(
         win,
         "\033[33m'Well, I'll be. That's all of them. Honestly, I kind of doubted you could do it - now I see that my doubt was misplaced! You will go down in legend for your heroism!'",
@@ -150,7 +155,7 @@ def ShopkeeperFinalSpeech(win):
     time.sleep(1.5)
 
 
-def ShopkeeperAffirmations(win):
+def ShopkeeperAffirmations(win: curses.window) -> None:
     cursedItems = len(
         {"Rusted Sword", "Amber Necklace", "Golden Idol"}
         & set(game_state.inventory.keyItems)
@@ -161,7 +166,7 @@ def ShopkeeperAffirmations(win):
     )
 
 
-def fishEvaluation(win):
+def fishEvaluation(win: curses.window) -> None:
     fishBought = len(
         {
             "Fillet of Cod",
@@ -185,7 +190,7 @@ def fishEvaluation(win):
         )
 
 
-def mineralEvaluation(win):
+def mineralEvaluation(win: curses.window) -> None:
     for item in [
         item for item in list(game_state.inventory.items) if item in list(mysticalRocks)
     ]:  # This is not that readable but it does stuff basically]
@@ -198,7 +203,7 @@ def mineralEvaluation(win):
     )
 
 
-def debug(win):
+def debug(win: curses.window) -> None:
     game_state.inventory.getKeyItem("Rusted Sword", win)
     game_state.inventory.getKeyItem("Amber Necklace", win)
     game_state.inventory.getKeyItem("Golden Idol", win)
@@ -214,14 +219,15 @@ def debug(win):
     game_state.getRuby(9001, win)
 
 
-def overwrite_rooms(rooms: dict, extrarooms: dict):
+def overwrite_rooms(rooms: dict, extrarooms: dict) -> dict:
     new_rooms = rooms.copy()
     for key in filter(lambda key: key in rooms.keys(), extrarooms.keys()):  # orubt
         new_rooms[key].update(extrarooms[key])
     return new_rooms
 
 
-def get_rooms(win):
+def get_rooms(win: curses.window) -> dict:
+    """The most important part; returns a dict of rooms to the engine."""
     rooms = toml_reader.read_gamedata("game.toml")
     extrarooms = {
         0: {

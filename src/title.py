@@ -63,7 +63,9 @@ def handle_save(
         )
     else:
         shm.run(
-            win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./"
+            win, saveFileName=save_path,
+            gameFile_name=game_path,
+            gameFile_path="./"
         )
 
 
@@ -116,11 +118,8 @@ def main(win: curses.window) -> None:
     sys.exit(0)
 
 
-def title():
+def title() -> None:
     print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)
 
-
-#    options = ["Play The Shopkeeper's Quest", "Play The Shopkeeper's Quest [Skip Intro]", "Load Save", "Quit"]
-#    options = ["Play The Shopkeeper's Quest", "Play The Shopkeeper's Quest [Skip Intro]", "Load Save", "Quit"]

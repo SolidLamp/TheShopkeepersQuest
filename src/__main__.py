@@ -7,7 +7,7 @@ import shm
 import toml_reader
 import title
 
-def main():
+def main() -> None:
     if platform.system() != "Windows" and os.getuid() == 0:
         print("\033[31mCritical Error: root should not be running user processes")
         sys.exit(1)

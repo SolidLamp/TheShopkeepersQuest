@@ -74,7 +74,7 @@ _ENDBYTE_CHARS = [
 # 2097152
 
 
-def colorsetup(win):
+def colorsetup(win) -> None:
     curses.start_color()  # curses.A_NORMAL | curses.A_BOLD
     curses.use_default_colors()
     curses._use_ansi_colors = True
@@ -94,7 +94,7 @@ def colorsetup(win):
     curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
 
-def _ESCtoRGB(ESC: str | int):
+def _ESCtoRGB(ESC: str | int) -> tuple[int, int, int]:
     """
     Takes a 8-bit colour escape code, as a string or integer.
     Returns three ints: r, g, b, representing a 24-bit RGB value.
@@ -193,7 +193,7 @@ def print3(
 
 def handleCSI(
     win: curses.window, text: str, ansiCode: int, fg: int, bg: int, textPos: int
-):
+) -> tuple[int, int, int, int]:
     r"""
     Handles Control Sequence Introducer (CSI) characters ("\x1b[" or "\033[").
     Send the text to this function and the position after the "[" character.

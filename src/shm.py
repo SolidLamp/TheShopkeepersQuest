@@ -15,12 +15,15 @@ from tui import print3
 
 
 class formatDict(dict):
+    """A subclass of a dictionary which will not replace any key not present 
+    when format_map is used, preventing exceptions"""
     def __missing__(self, key: str) -> str:
         string = "{" + key + "}"
         return string
 
 
 class mainHandler:
+    """The main heart of the SHM Engine."""
     def __init__(
         self,
         win: curses.window,
@@ -56,6 +59,7 @@ class mainHandler:
             self.current_saveid = saveFile.get("save_id", None)
 
     def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
+        """This function imports the game script for access within the SHM Engine."""
         file_path = os.path.abspath(file_path)
         if file_path[-3:] != ".py":
             file_path = os.path.join(file_path, module_name)
@@ -70,6 +74,8 @@ class mainHandler:
         return module
 
     def setup_loadSave(self, saveFile: dict) -> None:
+        """Sets up the save file and sets up the game state by copying values
+        from the save file."""
         if (
             saveFile.get("game_id") != self.gameInfo["game_id"]
             or saveFile["Game"] != self.gameInfo["title"]
@@ -87,6 +93,7 @@ class mainHandler:
                 self.game_state.inventory.keyItems.append(item)
 
     def setup_stdscr(self) -> None:
+        """Sets up the main activity window, inside the border."""
         padding = 1
         padx1 = 0
         padx2 = 0
@@ -95,6 +102,7 @@ class mainHandler:
         self.win = tui.create_newwin(self.stdscr, padding, padx1, padx2, pady1, pady2)
 
     def db_debug(self) -> None:
+        """The debug menu"""
         debug_options = ["Test room IDs", "Enable debug mode"]
         query = tui.option(self.win, "SHM Engine Debug Menu", debug_options)
         match query:
@@ -110,6 +118,7 @@ class mainHandler:
         delay: float = 0.0,
         pauseAtNewline: float = 0.0,
     ) -> None:
+        """Log an error - that's basically it."""
         timestamp = datetime.now().isoformat()
         with open("error.log", "a") as log:
             log.write(f"{timestamp} {errorMsg}\n")
@@ -118,6 +127,7 @@ class mainHandler:
         print3(self.win, errorMsg, colorcode, delay, pauseAtNewline)
 
     def db_roomIDerror(self, rooms: dict) -> None:
+        """Handle an error when an invalid room is attempted to be loaded"""
         self.db_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
         query = self.ui_option(
             "Non-critical Error: Invalid RoomID",
@@ -132,6 +142,9 @@ class mainHandler:
         print3(self.win, "\nPress any key to exit...", 0, 0)
 
     def db_test_rooms(self) -> None:
+        """Debug menu - test all room IDs in the game file and check for any
+        invalid room IDs, and report any errors.
+        Also notes when (history, -x)-style references when complevel == 2"""
         text = ""
         rooms = self.game.get_rooms(self.win)
         idnos = []
@@ -168,6 +181,10 @@ class mainHandler:
         leftOverride: str | None = None,
         rightOverride: str | None = None,
     ) -> None:
+        """Handle the titlebar and set up the strings to be displayed.
+        Handles the 'titlebarCentre', 'titlebarLeft' and 'titlebarRight' 
+        attributes within a room, as well as the default titlebar strings set 
+        in game info."""
         leftString = "F1 - Help"
         rightString = "Q - Quit"
         if self.room and "Desc" in self.room:
@@ -200,6 +217,7 @@ class mainHandler:
         )
 
     def ui_ending(self, end: str) -> None:
+        """Handles endings of a game, including saving."""
         save_handler.write_save(
             self.game_state,
             self.gameInfo,
@@ -224,8 +242,30 @@ class mainHandler:
         time.sleep(3.5)
 
     def ui_format_string(self, string: str) -> str:
+        """Formats the string with the various available keys;
+        used to format the titlebar and the text of rooms.
+        Keys are in the format '{key}' embedded within a string.
+
+        Supported keys:
+         - 'abbr' - the abbreviation set by the game, if present.
+         - 'arch' - the architecure of the machine, uses platform.machine().
+         - 'date' - returns the current date in Y-M-D format.
+         - 'engine_info' - returns the current version of the SHM Engine.
+         - 'game_state' - the entire current game_state;
+             - call individual parts of game_state e.g. game_state.get().
+         - 'iso_date' - returns the current date in iso-format.
+         - 'python_implementation' - returns the current Python implementation
+         - 'python_version' - returns the current Python version
+         - 'self' - returns the entire self object;
+             - [see 'game_state' above] - recommended to only call children.
+         - 'system' - returns the current OS, using platform.system().
+         - 'time' - returns the current time in H:M.
+         - 'title' - returns the game title.
+         - 'utime' - returns the current time in Unix timestamp.
+        
+        """
         subDict = {
-            "abbr": self.gameInfo["abbr"],
+            "abbr": self.gameInfo.get("abbr", "{abbr}"),
             "arch": platform.machine(),
             "date": datetime.now().strftime("%Y-%m-%d"),
             "engine_info": self.SHMversion,
@@ -236,7 +276,7 @@ class mainHandler:
             "self": self,
             "system": platform.system(),
             "time": datetime.now().strftime("%H:%M"),
-            "title": self.gameInfo["title"],
+            "title": self.gameInfo.get("title", "{title}"),
             "utime": datetime.now().timestamp(),
         }
         subDict = formatDict(subDict)
@@ -246,6 +286,7 @@ class mainHandler:
         return string
 
     def ui_lose(self, lose: str) -> None:
+        """Handles losing the game"""
         time.sleep(0.25)
         if hasattr(self.game, "loseText") and lose in self.game.loseText:
             printText = "\n" + self.game.loseText[lose].replace("|", lose)
@@ -261,6 +302,8 @@ class mainHandler:
             self.roomID = self.starting_room
 
     def ui_text_handler(self) -> str:
+        """Handle the text of a room, between Text, AlternateText, etc.
+        Prints the text and returns the text."""
         text = ""
         if "Requirements" in self.room and not self.room["Requirements"]():
             text = self.room["AlternateText"]
@@ -277,6 +320,9 @@ class mainHandler:
         return text
 
     def ui_option(self, text: str, options: list, Inventory: bool = True) -> int:
+        """Handle options for the SHM Engine, as a wrapper for tui.option();
+         - Handles quit option
+         - Handles inventory option"""
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
         query = 0
@@ -339,13 +385,17 @@ class mainHandler:
         return query
 
     def fn_itemHandler(self, attr: str) -> None:
+        """Handles items within a room, including item requirements
+        - attr is a string that represents an attribute of the room;
+        - attr should be present in the room, e.g. 'Item'."""
         if (
             f"{attr}Requirements" in self.room
             and self.room[f"{attr}Requirements"]()
             or f"{attr}Requirements" not in self.room
         ):
-            if "ItemText" in self.room:
-                print3(self.win, "\n" + self.room["ItemText"])
+            if f"{attr}Text" in self.room:
+                errorMsg = "An error has occurred. This message should not appear."
+                print3(self.win, "\n" + self.room.get(f"{attr}Text", errorMsg))
             if (
                 hasattr(self.game_state, "inventory")
                 and self.game.keyItems
@@ -358,6 +408,9 @@ class mainHandler:
             self.win.getch()
 
     def fn_mainRoomHandler(self, text: str) -> None:
+        """The main handler of a room;
+        handles the moving between rooms and showing the options menu.
+        """
         OptionsIndex = []
         Options = []
         for i in self.room["Move"]:
@@ -381,7 +434,13 @@ class mainHandler:
             query = self.ui_option(text, Options)
         self.fn_roomIDHandler(OptionsIndex[query])
 
-    def fn_roomIDHandler(self, tmpID) -> None:
+    def fn_roomIDHandler(self, tmpID: int | tuple) -> None:
+        """
+        Handles room IDs and moving between rooms.
+         - Handles raw ID numbers, e.g. 2;
+         - Handles negative ID numbers, e.g. -2 (which are references to history);
+         - Handles history tuples, e.g. (history, -2)
+        """
         negIDsupport = not (self.game.gameInfo["complevel"] == 1)
         if isinstance(tmpID, tuple) and tmpID[0] == "history":
             self.roomID = self.history[tmpID[1]]
@@ -391,6 +450,11 @@ class mainHandler:
             self.roomID = tmpID
 
     def fn_gameLoop(self) -> None:
+        """
+        The main part of the engine;
+        the main loop of the game and calls all other functions.
+        Handles all attributes and parsing a room.
+        """
         rooms = self.game.get_rooms(self.win)
         self.win.clear()
         self.ui_drawtitlebar()
@@ -443,6 +507,7 @@ class mainHandler:
             self.ui_lose(self.room["Lose"])
 
     def fn_looper(self) -> None:
+        """Simple loop function that loops fn_gameLoop()"""
         while 1:
             self.fn_gameLoop()
 
