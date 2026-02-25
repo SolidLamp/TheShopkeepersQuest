@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections.abc import Callable
 import curses
 from datetime import datetime
 import importlib.util
@@ -7,11 +8,41 @@ import platform
 import sys
 import time
 import types
+from typing import Required, TypedDict
 
 import save_handler
 import toml_reader
 import tui
 from tui import print3
+
+
+class Room(TypedDict, total=False, extra=True):
+    """
+    This is the canonical format for rooms in the SHM Engine 1.2.
+    This has a main purpose of showing the supported keys, not type checking.
+    This TypedDict supports additional fields, although compromising type checking,
+    as fields such as Option[]Requirements are variable, where # represents an int.
+    Rooms within a game are recommended to use this order for their attributes.
+    """
+    Text: str
+    Requirements: Callable[[], bool]
+    AlternateText: str
+    TextSpeed: float
+    Desc: str
+    titlebarCentre: str
+    titlebarLeft: str
+    titlebarRight: str
+    Script: Callable[[], None]
+    Item: str
+    ItemRequirements: Callable[[], bool]
+    ItemText: str
+    Options: list[str]
+    Option0Requirements: Callable[[], bool]
+    Move: list[int]
+    Automove: int
+    InstantAutomove: bool
+    Lose: str
+    Ending: str
 
 
 class formatDict(dict):
@@ -33,27 +64,27 @@ class mainHandler:
         gameFile_path: str = "./game.py",
         saveFileName: str = "game",
     ) -> None:
-        self.compatibleComplevels = [1, 2]
-        self.current_saveid = None
+        self.COMPATIBLE_COMPLEVELS: list = [1, 2]
+        self.current_saveid: str | None = None
         self.engineInfo = formatDict(toml_reader.read_toml("engine_info.toml"))
         self.game = self.setup_gameFile(gameFile_name, gameFile_path)
-        self.gameFile_name = gameFile_name
-        self.gameInfo = self.game.gameInfo
+        self.gameFile_name: str = gameFile_name
+        self.gameInfo: dict = self.game.gameInfo
         self.game_state = self.game.game_state
-        self.globaldebug = False
+        self.globaldebug: bool = False
         self.history = self.game.history
-        self.room = {}
-        self.saveFileName = saveFileName
-        self.SHMversion = toml_reader.get_engine_info()
-        self.starting_room = self.gameInfo.get("starting_room", 1)
-        self.stdscr = win
+        self.room: Room = {}
+        self.saveFileName: str = saveFileName
+        self.SHMversion: str = toml_reader.get_engine_info()
+        self.starting_room: int = self.gameInfo.get("starting_room", 1)
+        self.stdscr: curses.window = win
         self.text_speed = self.gameInfo.get("default_textspeed", 0.01)
-        self.win = win
+        self.win: curses.window = win
         self.setup_stdscr()
         if starting_room:
-            self.roomID = starting_room
+            self.roomID: int = starting_room
         else:
-            self.roomID = self.starting_room
+            self.roomID: int = self.starting_room
         if saveFile:
             self.setup_loadSave(saveFile)
             self.current_saveid = saveFile.get("save_id", None)
@@ -461,8 +492,8 @@ class mainHandler:
         complevel = self.game.gameInfo["complevel"]
         subDict = self.engineInfo
         subDict["complevel"] = str(complevel)
-        subDict["complevels"] = str(self.compatibleComplevels)[1:-1]
-        if complevel not in self.compatibleComplevels:
+        subDict["complevels"] = str(self.COMPATIBLE_COMPLEVELS)[1:-1]
+        if complevel not in self.COMPATIBLE_COMPLEVELS:
             string = (
                 "ERROR: This game (complevel {complevel}) is not compatible with this"
                 " version of the {Name} {MajorVersion}.\n{Name} {MajorVersion} is only"
