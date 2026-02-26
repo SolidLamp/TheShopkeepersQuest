@@ -2,12 +2,12 @@
 from collections.abc import Callable
 import curses
 from datetime import datetime
-import importlib.util
-import os.path
+from importlib.util import module_from_spec, spec_from_file_location
+import os.path 
 import platform
 import sys
 import time
-import types
+from types import ModuleType
 from typing import Required, TypedDict
 
 import save_handler
@@ -16,7 +16,12 @@ import tui
 from tui import print3
 
 
-class Room(TypedDict, total=False, extra=True):
+class Room(TypedDict, total=False):
+    # NOTE: Type checking would require the 'extra_items' attribute from Python 3.15;
+    # Python 3.15 has not yet had a stable release yet as I am writing this comment;
+    # thus, this TypedDict cannot be used for type checking;
+    # it is thus solely used for documentation
+    # NOTE #2: Do not code at 11 PM or you will start hallucinating like AI slop
     """
     This is the canonical format for rooms in the SHM Engine 1.2.
     This has a main purpose of showing the supported keys, not type checking.
@@ -73,7 +78,7 @@ class mainHandler:
         self.game_state = self.game.game_state
         self.globaldebug: bool = False
         self.history = self.game.history
-        self.room: Room = {}
+        self.room: dict = {}
         self.saveFileName: str = saveFileName
         self.SHMversion: str = toml_reader.get_engine_info()
         self.starting_room: int = self.gameInfo.get("starting_room", 1)
@@ -89,15 +94,15 @@ class mainHandler:
             self.setup_loadSave(saveFile)
             self.current_saveid = saveFile.get("save_id", None)
 
-    def setup_gameFile(self, module_name: str, file_path: str) -> types.ModuleType:
+    def setup_gameFile(self, module_name: str, file_path: str) -> ModuleType:
         """This function imports the game script for access within the SHM Engine."""
         file_path = os.path.abspath(file_path)
         if file_path[-3:] != ".py":
             file_path = os.path.join(file_path, module_name)
             file_path = file_path + ".py"
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        spec = spec_from_file_location(module_name, file_path)
         try:
-            module = importlib.util.module_from_spec(spec)
+            module = module_from_spec(spec)
         except:
             raise ImportError("Failed to import game file")
         sys.modules[module_name] = module

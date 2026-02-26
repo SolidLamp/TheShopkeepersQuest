@@ -28,10 +28,10 @@ def remove_extension(file_name: str) -> str:
 
 def read_json(file_name: str = "file.json") -> dict:
     """Reads json from a the file `file_name`"""
-    if not os.path.exists(fileName):
+    if not os.path.exists(file_name):
         return {}
     else:
-        with open(fileName, "rt") as f:
+        with open(file_name, "rt") as f:
             gamedata = json.load(f).copy()
         return gamedata
 
@@ -39,7 +39,7 @@ def read_json(file_name: str = "file.json") -> dict:
 def read_save(file_name: str = "game") -> dict:
     """
     Reads the save from {game}.sav.
-    fileName should not include the .sav file extension
+    file_name should not include the .sav file extension
     """
     file_name = remove_extension(file_name)
     file_name += ".sav"
@@ -47,9 +47,9 @@ def read_save(file_name: str = "game") -> dict:
     return gamedata
 
 
-def write_json(saveFile: str, fileName: str = "game.sav") -> None:
-    """fileName should include the file extension"""
-    with open(fileName, "wt") as f:
+def write_json(saveFile: str, file_name: str = "game.sav") -> None:
+    """file_name should include the file extension"""
+    with open(file_name, "wt") as f:
         f.write(saveFile)
 
 
@@ -87,7 +87,7 @@ def write_save(
     else:
         dictionary.update({"save_id": str(uuid.uuid4())})
     output = json.dumps(dictionary, indent=4)
-    write_json(output, fileName)
+    write_json(output, file_name)
 
 
 def copy_save(file_name: str, existing_save: dict) -> None:
