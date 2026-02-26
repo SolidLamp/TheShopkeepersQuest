@@ -6,70 +6,14 @@ import time
 
 _TAB_SIZE = 4
 
-_ENDBYTE_CHARS = [
-    "@",
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-    "[",
-    "\\",
-    "]",
-    "^",
-    "_",
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
-    "o",
-    "p",
-    "q",
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
-    "w",
-    "x",
-    "y",
-    "z",
-    "{",
-    "|",
-    "}",
-    "~",
+# fmt: off
+_ENDBYTE_CHARS = ["@","A","B","C","D","E","F","G","H","I","J","K","L","M","N"
+                  "O","P","Q","R","S","T","U","V","W","X","Y","Z","[","\\","]",
+                  "^","_","a","b","c","d","e","f","g","h","i","j","k","l","m",
+                  "n","o","p","q","r","s","t","u","v","w","x","y","z","{","|",
+                  "}","~",
 ]
+# fmt: on
 
 # 2097152
 
@@ -129,9 +73,16 @@ def print3(
     - `\033` - escape sequences, seperated by `;` and terminated by `m`
 
     Supported escape sequences:
-    - `0` - clear all formatting
-    - `1` - create bold text with A_STANDOUT
-    - `5` - specify an 8-bit colour code; paired with 38 or 48.
+    - `0` - clear all formatting.
+    - `1` - create bold text with A_STANDOUT.
+    - `2` - decrease text intensity and dim text.
+    - `4` - enable an underline on text.
+    - `5` - enable blinking text.
+            [when supplemented with 38 | 48] apply an 8-bit colour code.
+    - `7` - Enable reverse video mode
+    - `24` - disable underline on text.
+    - `25` - disable blinking text.
+    - `27` - Disable reverse video mode
     - `30`-`37` - change foreground colour
     - `38` - change foreground colour to a complex 8-bit colour code; paired with 5.
     - `40`-`47` - change background colour
@@ -141,6 +92,7 @@ def print3(
     ansi = int(colorcode)
     fg = curses.COLOR_WHITE
     bg = curses.COLOR_BLACK
+    attr = 0
     while i < len(text):
         j = i
         while j < len(text) and text[j] != "\n" and text[j] != " ":
@@ -171,11 +123,11 @@ def print3(
             y = win.getyx()[0]
             win.move(y, x)
         elif char == "\033" and text[i + 1] == "[":
-            i, ansi, fg, bg = handleCSI(win, text, ansi, fg, bg, textPos=i + 2)
+            i, ansi, fg, bg, attr = handleCSI(win, text, ansi, fg, bg, i + 2, attr)
         elif char == " " and x == 0 and break_lines:
             pass
         else:
-            win.addstr(char, curses.color_pair(ansi))
+            win.addstr(char, curses.color_pair(ansi) | attr)
             if delay:
                 win.nodelay(True)
                 try:
@@ -192,8 +144,14 @@ def print3(
 
 
 def handleCSI(
-    win: curses.window, text: str, ansiCode: int, fg: int, bg: int, textPos: int
-) -> tuple[int, int, int, int]:
+    win: curses.window,
+    text: str,
+    ansi_code: int,
+    fg: int,
+    bg: int,
+    textPos: int,
+    attr: int = 0,
+) -> tuple[int, int, int, int, int]:
     r"""
     Handles Control Sequence Introducer (CSI) characters ("\x1b[" or "\033[").
     Send the text to this function and the position after the "[" character.
@@ -216,35 +174,49 @@ def handleCSI(
     i = 0
     while i < len(code):
         item = code[i]
-        if item == "0":
-            win.addstr("", curses.A_NORMAL)
-            ansiCode = 0
-            fg = curses.COLOR_WHITE
-            bg = curses.COLOR_BLACK
-        elif item == "1":
-            win.addstr("", curses.A_BOLD)
-        elif len(item) == 2 and item[0] == "3" and item[1] < "8":
-            fg = int(item[1])
-        elif item == "38" and code[i + 2 :] and code[i + 1] == "5":
-            fg = int(code[i + 2])
-            i += 2
-        elif len(item) == 2 and item[0] == "4" and item[1] < "8":
-            bg = int(item[1])
-        elif item == "48" and code[i + 2 :] and code[i + 1] == "5":
-            bg = int(code[i + 2])
-            i += 2
-        elif len(item) == 2 and item[0] == "9" and item[1] < "8":
-            fg = int(item[1]) + 8
-        elif len(item) == 3 and item[0:2] == "10" and item[2] < "8":
-            bg = int(item[2]) + 8
-        ansiCode = int(str(fg) + str(bg)) % min((curses.COLOR_PAIRS), 255) + 1
+        match item:
+            case "0" | "":
+                attr = 0
+                fg = curses.COLOR_WHITE
+                bg = curses.COLOR_BLACK
+            case "1":
+                attr |= curses.A_BOLD
+            case "2":
+                attr |= curses.A_DIM
+            case "4":
+                attr |= curses.A_UNDERLINE
+            case "5":
+                attr |= curses.A_BLINK
+            case "7":
+                attr |= curses.A_REVERSE
+            case "24":
+                attr |= ~curses.A_UNDERLINE
+            case "25":
+                attr |= ~curses.A_BLINK
+            case "27":
+                attr |= ~curses.A_REVERSE
+            case _ if len(item) == 2 and item[0] == "3" and item[1] < "8":
+                fg = int(item[1])
+            case "38" if code[i + 2 :] and code[i + 1] == "5":
+                fg = int(code[i + 2])
+                i += 2
+            case _ if len(item) == 2 and item[0] == "4" and item[1] < "8":
+                bg = int(item[1])
+            case "48" if code[i + 2 :] and code[i + 1] == "5":
+                bg = int(code[i + 2])
+                i += 2
+            case _ if len(item) == 2 and item[0] == "9" and item[1] < "8":
+                fg = int(item[1]) + 8
+            case _ if len(item) == 3 and item[0:2] == "10" and item[2] < "8":
+                bg = int(item[2]) + 8
+        ansi_code = int(str(fg) + str(bg)) % min((curses.COLOR_PAIRS), 255) + 1
         # On the above line, I use the magic number 255.
         # I would use a descriptive name, but I actually have no idea what it
         # does or why it works but everything breaks without it for some reason
         # despite the fact that it should actually break at 65536 on my machine
-        curses.init_pair(ansiCode, fg, bg)
+        curses.init_pair(ansi_code, fg, bg)
         i += 1
-    return (textPos, ansiCode, fg, bg)
+    return (textPos, ansi_code, fg, bg, attr)
 
 
 def newline(win: curses.window) -> None:
@@ -294,7 +266,6 @@ def option(
             win.move(y, new_x)
             padding = (fullLen - len(str(option))) / 2
             padding += 1
-            # printstr
             strToPrint = (
                 " " * math.floor(padding) + str(option) + " " * math.ceil(padding)
             )
@@ -329,40 +300,47 @@ def option(
 
 
 def draw_titlebar(
-    win: curses.window, title: str, leftString: str = "", rightString: str = ""
+    win: curses.window,
+    title: str,
+    leftString: str = "",
+    rightString: str = "",
+    border_vertical: str = "║",
+    border_horizontal: str = "═",
+    border_corner_topleft: str = "╔",
+    border_corner_topright: str = "╗",
+    border_corner_btmleft: str = "╚",
+    border_corner_btmright: str = "╝",
 ) -> None:
-    # curses.init_pair(253, 252, curses.COLOR_BLACK)
-    # curses.init_pair(226, curses.COLOR_BLACK, 252)
     win.scrollok(False)
     max_y, max_x = win.getmaxyx()
     win.move(0, 0)
     for y in range(0, max_y - 1):
         win.move(y, 0)
-        win.addstr("║")
+        win.addstr(border_vertical)
     for y in range(0, max_y - 1):
         win.move(y, max_x - 1)
-        win.addstr("║")
+        win.addstr(border_vertical)
     for x in range(0, max_x):
         win.move(max_y - 2, x)
-        win.addstr("═")
+        win.addstr(border_horizontal)
     for x in range(0, max_x):
         win.move(0, x)
-        win.addstr("═")
+        win.addstr(border_horizontal)
     win.move(0, 0)
-    win.addstr("╔")
+    win.addstr(border_corner_topleft)
     win.move(0, max_x - 1)
-    win.addstr("╗")
+    win.addstr(border_corner_topright)
     win.move(max_y - 2, 0)
-    win.addstr("╚")
+    win.addstr(border_corner_btmleft)
     win.move(max_y - 2, max_x - 1)
-    win.addstr("╝")
+    win.addstr(border_corner_btmright)
     centre = (max_x - len(title)) // 2
     win.move(0, centre)
-    win.addstr(title, curses.color_pair(47))
+    win.addstr(title, curses.A_STANDOUT)
     win.move(0, 1)
-    win.addstr(leftString, curses.color_pair(47))
+    win.addstr(leftString, curses.A_STANDOUT)
     win.move(0, max_x - len(rightString) - 1)
-    win.addstr(rightString, curses.color_pair(47))
+    win.addstr(rightString, curses.A_STANDOUT)
     win.scrollok(True)
     win.refresh()
 

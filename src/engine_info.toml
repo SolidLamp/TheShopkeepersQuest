@@ -1,6 +1,6 @@
 Name  = "SHM Engine"
 MajorVersion = "1.2"
-Patch = "-dev4"
+Patch = "-dev5"
 Indev = true
 PythonVer = 3.11
 ReleaseDate = "2026-02-26"

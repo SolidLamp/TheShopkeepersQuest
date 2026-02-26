@@ -84,7 +84,7 @@ def main(win: curses.window) -> None:
     pady2 = 1
     newwin = tui.create_newwin(win, padding, padx1, padx2, pady1, pady2)
     string = (
-        "\033[38;5;75m"
+        "\033[1;38;5;75m"
         + r"""
         ___ _  _ ____
          |  |__| |___

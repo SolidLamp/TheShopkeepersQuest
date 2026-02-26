@@ -217,20 +217,25 @@ class mainHandler:
         leftOverride: str | None = None,
         rightOverride: str | None = None,
     ) -> None:
-        """Handle the titlebar and set up the strings to be displayed.
+        """
+        Handle the titlebar and set up the strings to be displayed.
         Handles the 'titlebarCentre', 'titlebarLeft' and 'titlebarRight' 
         attributes within a room, as well as the default titlebar strings set 
-        in game info."""
-        leftString = "F1 - Help"
-        rightString = "Q - Quit"
+        in game info.
+        Also handles 'border_vertical', 'border_horizontal', 'border_corner_topleft',
+        'border_corner_topright', 'border_corner_btmleft', 'border_corner_btmright'
+        attributes of game info, and builds the specific border design based on them.
+        """
+        leftString = " F1 - Help "
+        rightString = " Q - Quit "
         if self.room and "Desc" in self.room:
-            string = " {abbr} | {desc} "
+            title_string = " {abbr} | {desc} "
         else:
-            string = self.gameInfo["title"]
+            title_string = self.gameInfo["title"]
         if "titlebarCentre" in self.room:
-            string = self.room["titlebarCentre"]
+            title_string = self.room["titlebarCentre"]
         elif "default_titlebar_centre" in self.gameInfo:
-            string = self.gameInfo["default_titlebar_centre"]
+            title_string = self.gameInfo["default_titlebar_centre"]
         if "titlebarLeft" in self.room:
             leftString = self.room["titlebarLeft"]
         elif "default_titlebar_left" in self.gameInfo:
@@ -240,16 +245,25 @@ class mainHandler:
         elif "default_titlebar_right" in self.gameInfo:
             rightString = self.gameInfo["default_titlebar_right"]
         if centreOverride is not None:
-            string = centreOverride
+            title_string = centreOverride
         if leftOverride is not None:
             leftString = leftOverride
         if rightOverride is not None:
             rightString = rightOverride
-        string = self.ui_format_string(string)
+        title_string = self.ui_format_string(title_string)
         leftString = self.ui_format_string(leftString)
         rightString = self.ui_format_string(rightString)
         tui.draw_titlebar(
-            self.stdscr, title=string, leftString=leftString, rightString=rightString
+            self.stdscr,
+            title=title_string,
+            leftString=leftString,
+            rightString=rightString,
+            border_vertical=self.gameInfo.get("border_vertical","║"),
+            border_horizontal=self.gameInfo.get("border_horizontal","═"),
+            border_corner_topleft=self.gameInfo.get("border_corner_topleft","╔"),
+            border_corner_topright=self.gameInfo.get("border_corner_topright", "╗"),
+            border_corner_btmleft=self.gameInfo.get("border_corner_btmleft","╚"),
+            border_corner_btmright=self.gameInfo.get("border_corner_btmright","╝"),
         )
 
     def ui_ending(self, end: str) -> None:

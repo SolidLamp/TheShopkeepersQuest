@@ -1,7 +1,7 @@
 [game_info]
 Name = "The Shopkeeper's Quest"
 Version = "Experimental"
-ReleaseDate = "2026-02-22"
+ReleaseDate = "2026-02-26"
 Licence = "MIT License"
 Creator = "SolidLamp"
 Link = "https://github.com/solidlamp"
@@ -11,10 +11,16 @@ abbr ="TSQ"
 title = "The Shopkeeper's Quest"
 desc = "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident."
 starting_room = 140
-default_titlebar_left = "F1 - Help"
+default_titlebar_left = " F1 - Help "
 default_titlebar_centre = " {abbr} - {desc} "
-default_titlebar_right = "Q - Quit"
+default_titlebar_right = " Q - Quit "
 default_textspeed = 0.01
+border_vertical =  "║"
+border_horizontal = "═"
+border_corner_topleft = "╔"
+border_corner_topright = "╗"
+border_corner_btmleft = "╚"
+border_corner_btmright = "╝"
 
 
 [0]
