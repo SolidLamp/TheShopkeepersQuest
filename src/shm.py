@@ -253,17 +253,13 @@ class mainHandler:
         title_string = self.ui_format_string(title_string)
         leftString = self.ui_format_string(leftString)
         rightString = self.ui_format_string(rightString)
+        default_border = self.engineInfo.get("DefaultBorderStyle", 0)
         tui.draw_titlebar(
             self.stdscr,
             title=title_string,
             leftString=leftString,
             rightString=rightString,
-            border_vertical=self.gameInfo.get("border_vertical","║"),
-            border_horizontal=self.gameInfo.get("border_horizontal","═"),
-            border_corner_topleft=self.gameInfo.get("border_corner_topleft","╔"),
-            border_corner_topright=self.gameInfo.get("border_corner_topright", "╗"),
-            border_corner_btmleft=self.gameInfo.get("border_corner_btmleft","╚"),
-            border_corner_btmright=self.gameInfo.get("border_corner_btmright","╝"),
+            style=self.gameInfo.get("border_style", default_border),
         )
 
     def ui_ending(self, end: str) -> None:
@@ -396,7 +392,9 @@ class mainHandler:
             padding = 1
             pady2 += 1
             quitwin = tui.create_newwin(self.win, padding, padx1, padx2, pady1, pady2)
-            tui.draw_titlebar(quitborder, "")
+            default_border = self.engineInfo.get("DefaultBorderStyle", 0)
+            border_style = self.gameInfo.get("border_style", default_border)
+            tui.draw_titlebar(quitborder, "", "", "", border_style)
             query = tui.option(
                 quitwin,
                 "Are you sure you want to quit?",

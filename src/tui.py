@@ -304,36 +304,57 @@ def draw_titlebar(
     title: str,
     leftString: str = "",
     rightString: str = "",
-    border_vertical: str = "║",
-    border_horizontal: str = "═",
-    border_corner_topleft: str = "╔",
-    border_corner_topright: str = "╗",
-    border_corner_btmleft: str = "╚",
-    border_corner_btmright: str = "╝",
+    style: int = 1,
 ) -> None:
+    styles = {
+        0:  ["|", "|", "-", "-", "*", "*", "*", "*"],
+        1:  ["║", "║", "═", "═", "╔", "╗", "╚", "╝"],
+        2:  ["│", "│", "─", "─", "┌", "┐", "└", "┘"],
+        3:  ["║", "║", "─", "─", "╓", "╖", "╙", "╜"],
+        4:  ["│", "│", "═", "═", "╒", "╕", "╘", "╛"],
+        5:  ["│", "│", "─", "─", "╭", "╮", "╰", "╯"],
+        6:  ["▌", "▐", "▀", "▄", "▛", "▜", "▙", "▟"],
+        7:  ["█", "█", "█", "█", "█", "█", "█", "█"],
+        8:  ["│", "│", "─", "─", "█", "█", "█", "█"],
+        9:  ["│", "│", "─", "─", "┼", "┼", "┼", "┼"],
+        10: [" ", " ", "█", "█", "█", "█", "█", "█"],
+        11: [" ", " ", " ", " ", " ", " ", " ", " "],
+    }
+    pos = {
+        "vertical_left": 0,
+        "vertical_right": 1,
+        "horizontal_top": 2,
+        "horizontal_btm": 3,
+        "corner_topleft": 4,
+        "corner_topright": 5,
+        "corner_btmleft": 6,
+        "corner_btmright": 7,
+    }
+    if style not in styles:
+        style = 1
     win.scrollok(False)
     max_y, max_x = win.getmaxyx()
     win.move(0, 0)
     for y in range(0, max_y - 1):
         win.move(y, 0)
-        win.addstr(border_vertical)
+        win.addstr(styles[style][pos["vertical_left"]])
     for y in range(0, max_y - 1):
         win.move(y, max_x - 1)
-        win.addstr(border_vertical)
+        win.addstr(styles[style][pos["vertical_right"]])
     for x in range(0, max_x):
         win.move(max_y - 2, x)
-        win.addstr(border_horizontal)
+        win.addstr(styles[style][pos["horizontal_btm"]])
     for x in range(0, max_x):
         win.move(0, x)
-        win.addstr(border_horizontal)
+        win.addstr(styles[style][pos["horizontal_top"]])
     win.move(0, 0)
-    win.addstr(border_corner_topleft)
+    win.addstr(styles[style][pos["corner_topleft"]])
     win.move(0, max_x - 1)
-    win.addstr(border_corner_topright)
+    win.addstr(styles[style][pos["corner_topright"]])
     win.move(max_y - 2, 0)
-    win.addstr(border_corner_btmleft)
+    win.addstr(styles[style][pos["corner_btmleft"]])
     win.move(max_y - 2, max_x - 1)
-    win.addstr(border_corner_btmright)
+    win.addstr(styles[style][pos["corner_btmright"]])
     centre = (max_x - len(title)) // 2
     win.move(0, centre)
     win.addstr(title, curses.A_STANDOUT)

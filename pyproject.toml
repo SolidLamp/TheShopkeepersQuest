@@ -1,6 +1,6 @@
 [project]
 name = "TheShopkeepersQuest"
-version = "1.2-dev2"
+version = "1.2-dev5"
 description = "The Shopkeeper's Quest - an open-source, text-based adventure game."
 license = "MIT"
 license-files = ["LICEN[CS]E*"]

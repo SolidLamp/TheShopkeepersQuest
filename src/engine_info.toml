@@ -7,3 +7,4 @@ ReleaseDate = "2026-02-26"
 Dist = "The Shopkeeper's Quest Experimental"
 Link = "https://github.com/solidlamp"
 SaveVersion = 1
+DefaultBorderStyle = 1
