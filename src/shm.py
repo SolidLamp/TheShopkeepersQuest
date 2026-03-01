@@ -298,7 +298,7 @@ class mainHandler:
          - 'date' - returns the current date in Y-M-D format.
          - 'engine_info' - returns the current version of the SHM Engine.
          - 'game_state' - the entire current game_state;
-             - call individual parts of game_state e.g. game_state.get().
+             - call individual parts of game_state
          - 'iso_date' - returns the current date in iso-format.
          - 'python_implementation' - returns the current Python implementation
          - 'python_version' - returns the current Python version

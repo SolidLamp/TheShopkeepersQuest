@@ -33,7 +33,7 @@ Options = [
                 'Go to the forest',
                  'Follow the road to the village',
                  'Explore the cave',
-                 "Go to The Shopkeeper's shop",
+                 "Go to {game_state.shopkeeperName}'s shop",
                  'Go to the bazaar',
            ]
 Move = [3, 9, 88, 66, 73]

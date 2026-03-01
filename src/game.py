@@ -237,16 +237,6 @@ def get_rooms(win: curses.window) -> dict:
             "titlebarRight": "right",
             "Script": lambda: debug(win),
         },
-        1: {
-            "Desc": "Outskirts of the Village",
-            "Options": [
-                "Go to the forest",
-                "Follow the road to the village",
-                "Explore the cave",
-                "Go to " + game_state.shopkeeperName + "'s shop",
-                "Go to the bazaar",
-            ],
-        },
         2: {
             "Desc": "Outskirts of the Village",
             "Options": [

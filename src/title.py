@@ -103,7 +103,6 @@ def main(win: curses.window) -> None:
     screen_options = {
         0: {
             "Play The Shopkeeper's Quest": 1,
-            # "Play The Shopkeeper's Quest [Skip Intro]": lambda: print("ue"),
             "Quit": lambda: sys.exit(),
         },
         1: {

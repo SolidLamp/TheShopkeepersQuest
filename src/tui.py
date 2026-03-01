@@ -123,7 +123,7 @@ def print3(
             y = win.getyx()[0]
             win.move(y, x)
         elif char == "\033" and text[i + 1] == "[":
-            i, ansi, fg, bg, attr = handleCSI(win, text, ansi, fg, bg, i + 2, attr)
+            i, ansi, fg, bg, attr = handleCSI_m(win, text, ansi, fg, bg, i + 2, attr)
         elif char == " " and x == 0 and break_lines:
             pass
         else:
@@ -143,7 +143,7 @@ def print3(
     return ()
 
 
-def handleCSI(
+def handleCSI_m(
     win: curses.window,
     text: str,
     ansi_code: int,
@@ -153,7 +153,7 @@ def handleCSI(
     attr: int = 0,
 ) -> tuple[int, int, int, int, int]:
     r"""
-    Handles Control Sequence Introducer (CSI) characters ("\x1b[" or "\033[").
+    Handles Control Sequence Introducer (CSI) _m codes ("\x1b[" or "\033[").
     Send the text to this function and the position after the "[" character.
     Handles 3-bit, 4-bit and 8-bit Select Graphic Rendition (SGR) colours.
 
@@ -256,7 +256,7 @@ def option(
         win.scrollok(True)
         print3(win, text, delay=0, break_lines=break_lines)
         newline(win)
-        win.refresh()
+        og_y, og_x = win.getyx()
         fullLen = max(len(str(option)) for option in options)
         new_x = max((max_x - fullLen - 1) // 2 - 1, 0)
         for option in options:
@@ -270,7 +270,7 @@ def option(
                 " " * math.floor(padding) + str(option) + " " * math.ceil(padding)
             )
             win.addstr(" ")
-            if options.index(option) == value:
+            if (y - og_y) == (value + 1):
                 win.move(y, new_x - 1)
                 win.addstr("> ")
                 win.addstr(strToPrint, curses.A_STANDOUT)
