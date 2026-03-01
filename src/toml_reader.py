@@ -27,6 +27,19 @@ def ansi_replace(gamedata: dict) -> dict:
     for i in gamedata:
         if "Text" in gamedata[i]:
             gamedata[i]["Text"] = replace_text(gamedata[i]["Text"])
+
+        if "AlternateText" in gamedata[i]:
+            gamedata[i]["AlternateText"] = replace_text(gamedata[i]["AlternateText"])
+        
+        if "ItemText" in gamedata[i]:
+            gamedata[i]["ItemText"] = replace_text(gamedata[i]["ItemText"])
+        
+        if "KeyItemText" in gamedata[i]:
+            gamedata[i]["KeyItemText"] = replace_text(gamedata[i]["KeyItemText"])
+        
+        if "Desc" in gamedata[i]:
+            gamedata[i]["Desc"] = replace_text(gamedata[i]["Desc"])
+
         if "Options" in gamedata[i]:
             for option in gamedata[i]["Options"]:
                 option = replace_text(option)

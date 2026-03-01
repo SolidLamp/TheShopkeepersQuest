@@ -3,7 +3,7 @@ from collections.abc import Callable
 import curses
 from datetime import datetime
 from importlib.util import module_from_spec, spec_from_file_location
-import os.path 
+import os.path
 import platform
 import sys
 import time
@@ -41,8 +41,12 @@ class Room(TypedDict, total=False):
     Item: str
     ItemRequirements: Callable[[], bool]
     ItemText: str
+    KeyItem: str
+    KeyItemRequirements: Callable[[], bool]
+    KeyItemText: str
     Options: list[str]
     Option0Requirements: Callable[[], bool]
+    Inventory: bool
     Move: list[int]
     Automove: int
     InstantAutomove: bool
@@ -51,8 +55,9 @@ class Room(TypedDict, total=False):
 
 
 class formatDict(dict):
-    """A subclass of a dictionary which will not replace any key not present 
+    """A subclass of a dictionary which will not replace any key not present
     when format_map is used, preventing exceptions"""
+
     def __missing__(self, key: str) -> str:
         string = "{" + key + "}"
         return string
@@ -60,6 +65,7 @@ class formatDict(dict):
 
 class mainHandler:
     """The main heart of the SHM Engine."""
+
     def __init__(
         self,
         win: curses.window,
@@ -219,8 +225,8 @@ class mainHandler:
     ) -> None:
         """
         Handle the titlebar and set up the strings to be displayed.
-        Handles the 'titlebarCentre', 'titlebarLeft' and 'titlebarRight' 
-        attributes within a room, as well as the default titlebar strings set 
+        Handles the 'titlebarCentre', 'titlebarLeft' and 'titlebarRight'
+        attributes within a room, as well as the default titlebar strings set
         in game info.
         Also handles 'border_vertical', 'border_horizontal', 'border_corner_topleft',
         'border_corner_topright', 'border_corner_btmleft', 'border_corner_btmright'
@@ -264,6 +270,10 @@ class mainHandler:
 
     def ui_ending(self, end: str) -> None:
         """Handles endings of a game, including saving."""
+        titlebar_centre = "{title}"
+        titlebar_left = ""
+        titlebar_right = ""
+        self.ui_drawtitlebar(titlebar_centre, titlebar_left, titlebar_right)
         save_handler.write_save(
             self.game_state,
             self.gameInfo,
@@ -308,7 +318,7 @@ class mainHandler:
          - 'time' - returns the current time in H:M.
          - 'title' - returns the game title.
          - 'utime' - returns the current time in Unix timestamp.
-        
+
         """
         subDict = {
             "abbr": self.gameInfo.get("abbr", "{abbr}"),
@@ -367,8 +377,8 @@ class mainHandler:
 
     def ui_option(self, text: str, options: list, Inventory: bool = True) -> int:
         """Handle options for the SHM Engine, as a wrapper for tui.option();
-         - Handles quit option
-         - Handles inventory option"""
+        - Handles quit option
+        - Handles inventory option"""
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
         query = 0
@@ -433,27 +443,31 @@ class mainHandler:
         return query
 
     def fn_itemHandler(self, attr: str) -> None:
-        """Handles items within a room, including item requirements
+        """
+        Handles items within a room, including item requirements
         - attr is a string that represents an attribute of the room;
-        - attr should be present in the room, e.g. 'Item'."""
-        if (
+        - attr should be present in the room, e.g. 'Item'.
+        """
+        if not (
             f"{attr}Requirements" in self.room
             and self.room[f"{attr}Requirements"]()
             or f"{attr}Requirements" not in self.room
         ):
-            if f"{attr}Text" in self.room:
-                errorMsg = "An error has occurred. This message should not appear."
-                print3(self.win, "\n" + self.room.get(f"{attr}Text", errorMsg))
-            if (
-                hasattr(self.game_state, "inventory")
-                and self.game.keyItems
-                and self.room[attr] in self.game.keyItems
-                and self.room[attr] not in self.game_state.inventory.keyItems
-            ):
-                self.game_state.inventory.getKeyItem(self.room[attr], self.win)
-            elif hasattr(self.game_state, "inventory"):
-                self.game_state.inventory.getItem(self.room[attr], self.win)
-            self.win.getch()
+            return
+
+        if f"{attr}Text" in self.room:
+            errorMsg = "An error has occurred. This message should not appear."
+            print3(self.win, "\n" + self.room.get(f"{attr}Text", errorMsg))
+        if (
+            hasattr(self.game_state, "inventory")
+            and self.game.keyItems
+            and self.room[attr] in self.game.keyItems
+            and self.room[attr] not in self.game_state.inventory.keyItems
+        ):
+            self.game_state.inventory.getKeyItem(self.room[attr], self.win)
+        elif hasattr(self.game_state, "inventory"):
+            self.game_state.inventory.getItem(self.room[attr], self.win)
+        self.win.getch()
 
     def fn_mainRoomHandler(self, text: str) -> None:
         """The main handler of a room;
@@ -538,9 +552,6 @@ class mainHandler:
             text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(self.history)
         if "Script" in self.room:
             self.room["Script"]()
-        if "Ending" in self.room:
-            self.ui_ending(self.room["Ending"])
-            self.roomID = self.starting_room
         if "Item" in self.room:
             self.fn_itemHandler("Item")
         if "KeyItem" in self.room:
@@ -551,6 +562,9 @@ class mainHandler:
             time.sleep(int(automove_delay))
         elif "Move" in self.room:
             self.fn_mainRoomHandler(text)
+        if "Ending" in self.room:
+            self.ui_ending(self.room["Ending"])
+            self.roomID = self.starting_room
         if "Lose" in self.room:
             self.ui_lose(self.room["Lose"])
 

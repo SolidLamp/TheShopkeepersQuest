@@ -74,7 +74,7 @@ def print3(
 
     Supported escape sequences:
     - `0` - clear all formatting.
-    - `1` - create bold text with A_STANDOUT.
+    - `1` - create bold text with A_BOLD.
     - `2` - decrease text intensity and dim text.
     - `4` - enable an underline on text.
     - `5` - enable blinking text.
@@ -136,6 +136,7 @@ def print3(
                     key = None
                 if key != None and skip_text:
                     delay = 0
+                    pauseAtNewline = 0
                 win.nodelay(False)
                 time.sleep(delay)
         i += 1
