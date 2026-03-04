@@ -191,11 +191,11 @@ def handleCSI_m(
             case "7":
                 attr |= curses.A_REVERSE
             case "24":
-                attr |= ~curses.A_UNDERLINE
+                attr &= ~curses.A_UNDERLINE
             case "25":
-                attr |= ~curses.A_BLINK
+                attr &= ~curses.A_BLINK
             case "27":
-                attr |= ~curses.A_REVERSE
+                attr &= ~curses.A_REVERSE
             case _ if len(item) == 2 and item[0] == "3" and item[1] < "8":
                 fg = int(item[1])
             case "38" if code[i + 2 :] and code[i + 1] == "5":
