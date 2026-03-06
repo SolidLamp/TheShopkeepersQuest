@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import os.path
 import sys
 import time
@@ -37,13 +38,13 @@ class MiniSHM:
             sys.exit(0)
         return query
 
-    def screen(self, key: int | str = 0) -> None:
-        task = key
+    def screen(self, task: int | str | Callable[[], None] = 0) -> None:
         while isinstance(task, int) or isinstance(task, str):
             query = self._option(task)
             choices = self.options_dict[task]
             task = list(choices.values())[query]
-        task()
+        if callable(task):
+            task()
 
 
 def handle_save(

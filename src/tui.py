@@ -22,20 +22,21 @@ def colorsetup(win) -> None:
     curses.start_color()  # curses.A_NORMAL | curses.A_BOLD
     curses.use_default_colors()
     curses._use_ansi_colors = True
-    curses.init_pair(31, curses.COLOR_RED, curses.COLOR_BLACK)
-    curses.init_pair(32, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(33, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(34, curses.COLOR_BLUE, curses.COLOR_BLACK)
-    curses.init_pair(35, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    curses.init_pair(36, curses.COLOR_CYAN, curses.COLOR_BLACK)
-    curses.init_pair(37, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(41, curses.COLOR_BLACK, curses.COLOR_RED)
-    curses.init_pair(42, curses.COLOR_BLACK, curses.COLOR_GREEN)
-    curses.init_pair(43, curses.COLOR_BLACK, curses.COLOR_YELLOW)
-    curses.init_pair(44, curses.COLOR_BLACK, curses.COLOR_BLUE)
-    curses.init_pair(45, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
-    curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
-    curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    return
+    # curses.init_pair(31, curses.COLOR_RED, curses.COLOR_BLACK)
+    # curses.init_pair(32, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    # curses.init_pair(33, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    # curses.init_pair(34, curses.COLOR_BLUE, curses.COLOR_BLACK)
+    # curses.init_pair(35, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+    # curses.init_pair(36, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    # curses.init_pair(37, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    # curses.init_pair(41, curses.COLOR_BLACK, curses.COLOR_RED)
+    # curses.init_pair(42, curses.COLOR_BLACK, curses.COLOR_GREEN)
+    # curses.init_pair(43, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+    # curses.init_pair(44, curses.COLOR_BLACK, curses.COLOR_BLUE)
+    # curses.init_pair(45, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+    # curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
+    # curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
 
 def _ESCtoRGB(ESC: str | int) -> tuple[int, int, int]:
@@ -238,6 +239,13 @@ def newline(win: curses.window) -> None:
     win.refresh()
 
 
+def centre_text(win: curses.window, text: str) -> None:
+    max_y, max_x = win.getmaxyx()
+    y, x = win.getyx()
+    new_x = max((max_x - len(text) - 1) // 2, 0)
+    win.move(y, new_x)
+
+
 def option(
     win: curses.window,
     text: str,
@@ -250,9 +258,8 @@ def option(
         win.clear()
         newline(win)
         max_y, max_x = win.getmaxyx()
-        y, x = win.getyx()
-        new_x = max((max_x - len(text) - 1) // 2, 0)
-        win.move(y, new_x)
+        if "\n" not in text:
+            centre_text(win, text)
         curses.curs_set(0)
         win.scrollok(True)
         print3(win, text, delay=0, break_lines=break_lines)
@@ -308,16 +315,16 @@ def draw_titlebar(
     style: int = 1,
 ) -> None:
     styles = {
-        0:  ["|", "|", "-", "-", "*", "*", "*", "*"],
-        1:  ["║", "║", "═", "═", "╔", "╗", "╚", "╝"],
-        2:  ["│", "│", "─", "─", "┌", "┐", "└", "┘"],
-        3:  ["║", "║", "─", "─", "╓", "╖", "╙", "╜"],
-        4:  ["│", "│", "═", "═", "╒", "╕", "╘", "╛"],
-        5:  ["│", "│", "─", "─", "╭", "╮", "╰", "╯"],
-        6:  ["▌", "▐", "▀", "▄", "▛", "▜", "▙", "▟"],
-        7:  ["█", "█", "█", "█", "█", "█", "█", "█"],
-        8:  ["│", "│", "─", "─", "█", "█", "█", "█"],
-        9:  ["│", "│", "─", "─", "┼", "┼", "┼", "┼"],
+        0: ["|", "|", "-", "-", "*", "*", "*", "*"],
+        1: ["║", "║", "═", "═", "╔", "╗", "╚", "╝"],
+        2: ["│", "│", "─", "─", "┌", "┐", "└", "┘"],
+        3: ["║", "║", "─", "─", "╓", "╖", "╙", "╜"],
+        4: ["│", "│", "═", "═", "╒", "╕", "╘", "╛"],
+        5: ["│", "│", "─", "─", "╭", "╮", "╰", "╯"],
+        6: ["▌", "▐", "▀", "▄", "▛", "▜", "▙", "▟"],
+        7: ["█", "█", "█", "█", "█", "█", "█", "█"],
+        8: ["│", "│", "─", "─", "█", "█", "█", "█"],
+        9: ["│", "│", "─", "─", "┼", "┼", "┼", "┼"],
         10: [" ", " ", "█", "█", "█", "█", "█", "█"],
         11: [" ", " ", " ", " ", " ", " ", " ", " "],
     }

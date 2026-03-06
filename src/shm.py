@@ -16,6 +16,11 @@ import tui
 from tui import print3
 
 
+HISTORY_MAX_LEN = 10
+AUTOMOVE_DELAY = 1
+ENDING_DELAY = 0.5
+
+
 class Room(TypedDict, total=False):
     # NOTE: Type checking would require the 'extra_items' attribute from Python 3.15;
     # Python 3.15 has not yet had a stable release yet as I am writing this comment;
@@ -119,7 +124,7 @@ class mainHandler:
         """Sets up the save file and sets up the game state by copying values
         from the save file."""
         if (
-            saveFile.get("game_id") != self.gameInfo["game_id"]
+            saveFile.get("game_id") != self.gameInfo.get("game_id")
             or saveFile["Game"] != self.gameInfo["title"]
         ):
             # put error handling here
@@ -269,11 +274,12 @@ class mainHandler:
         )
 
     def ui_ending(self, end: str) -> None:
-        """Handles endings of a game, including saving."""
+        """Handles endings in a game, including autosaving."""
         titlebar_centre = "{title}"
         titlebar_left = ""
         titlebar_right = ""
         self.ui_drawtitlebar(titlebar_centre, titlebar_left, titlebar_right)
+        self.roomID = self.starting_room
         save_handler.write_save(
             self.game_state,
             self.gameInfo,
@@ -366,10 +372,8 @@ class mainHandler:
         else:
             text = self.room["Text"]
         tui.newline(self.win)
-        max_y, max_x = self.win.getmaxyx()
-        y, x = self.win.getyx()
-        new_x = max((max_x - len(text) - 1) // 2, 0)
-        self.win.move(y, new_x)
+        if "\n" not in text:
+            tui.centre_text(self.win, text)
         self.win.scrollok(True)
         text = self.ui_format_string(text)
         print3(self.win, text, delay=self.room.get("TextSpeed", self.text_speed))
@@ -545,7 +549,7 @@ class mainHandler:
             self.db_roomIDerror(rooms)
         self.ui_drawtitlebar()
         self.history.append(self.roomID)
-        if len(self.history) > 10:
+        if len(self.history) > HISTORY_MAX_LEN:
             self.history.pop(0)
         text = self.ui_text_handler()
         if self.globaldebug:
@@ -559,12 +563,15 @@ class mainHandler:
         if "Automove" in self.room:
             self.fn_roomIDHandler(self.room["Automove"])
             automove_delay = not (self.room.get("InstantAutomove", False))
+            automove_delay = AUTOMOVE_DELAY * automove_delay
             time.sleep(int(automove_delay))
         elif "Move" in self.room:
             self.fn_mainRoomHandler(text)
         if "Ending" in self.room:
+            automove_delay = not (self.room.get("InstantAutomove", False))
+            automove_delay = ENDING_DELAY * automove_delay
+            time.sleep(automove_delay)
             self.ui_ending(self.room["Ending"])
-            self.roomID = self.starting_room
         if "Lose" in self.room:
             self.ui_lose(self.room["Lose"])
 
