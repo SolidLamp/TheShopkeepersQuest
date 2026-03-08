@@ -32,8 +32,8 @@ identifier that is located within a gamefile):
 | get_rooms     | Callable  | A function which returns a dict of rooms.       |
 +---------------+-----------+-------------------------------------------------+
 
-*(Note that within Python, 'Callable' refers to a function, or any object which
-can be called.)*
+*Note that within Python, 'Callable' refers to a function, or any object which
+can be called.*
 
 
 gameInfo

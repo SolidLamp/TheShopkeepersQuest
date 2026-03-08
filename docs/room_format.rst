@@ -49,7 +49,8 @@ Quick Reference Table
 +-----------------------+--------------------+---------------------------------+
 | ItemRequirements      | Callable[[], bool] | If True, the player gets the    |
 |                       |                    | item; otherwise, the player     |
-|                       |                    | gets no item.                   |
+|                       |                    | gets no item. If not present,   |
+|                       |                    | acts as True.                   |
 +-----------------------+--------------------+---------------------------------+
 | ItemText              | str                | The string printed when the     |
 |                       |                    | user receives the item in this  |
@@ -77,13 +78,17 @@ Quick Reference Table
 |                       |                    | accessible from within that     |
 |                       |                    | room; True if not present.      |
 +-----------------------+--------------------+---------------------------------+
-| Move                  | list[int]          | In the same order as 'Options'. |
-|                       |                    | Every option moves you to the   |
+| Move                  | list[int |         | In the same order as 'Options'. |
+|                       |   tuple[str, int]] | Every option moves you to the   |
 |                       |                    | room ID in the same position    |
 |                       |                    | within this list.               |
+|                       |                    |                                 |
+|                       |                    | Also see `Room ID Format`_      |
 +-----------------------+--------------------+---------------------------------+
-| Automove              | int                | A room ID to automatically move |
-|                       |                    | to, without an option dialogue. |
+| Automove              | int |              | A room ID to automatically move |
+|                       |   tuple[str, int]] | to, without an option dialogue. |
+|                       |                    |                                 |
+|                       |                    | Also see `Room ID Format`_      |
 +-----------------------+--------------------+---------------------------------+
 | InstantAutomove       | bool               | Whether there should be a delay |
 |                       |                    | for 'Automove' or not; treated  |
@@ -100,3 +105,35 @@ Quick Reference Table
 |                       |                    | by the ending function.         |
 +-----------------------+--------------------+---------------------------------+
 
+
+Room ID Format
+==============
+Room IDs are usually represented by the int ``x``, where x represents the room 
+with ID x.
+An ID can also dynamically refer to a previous room that the user has visited, 
+by using a negative ID. For example, the ID ``-x`` will refer to the room that 
+the user was in x rooms ago.
+
+*Note that the current room the user is within is also considered within these 
+calculations - the ID ``-1`` will refer to the current room.*
+
+*Also note that saving and loading a file will change the list of 
+previously-visited rooms. This is by adding the room the user saved in to the 
+list of previously-visited rooms. This will make it appear twice.
+For this reason, it is not recommended to use negative IDs within rooms with 
+multiple connections. As the user cannot save and quit within a room with 
+Automove, you can ensure expected behaviour in such a scenario.*
+
+Negative IDs can also be represented in the older form ``("history", -x)``, 
+which will refer to the room that the user was in x rooms ago.
+This form was the only negative ID form which was only available prior to 
+SHM 1.2. This form is not recommened and the modern negative ID system 
+should be used over this older system in all possible situations.
+
+However, developers should be familar with this older system to know that 
+the ID ``("history", -x)`` is equivalent to ``-x`` - the former should be 
+converted to the latter when touching up a gamefile. 
+
+You can also check for this older system and invalid room IDs in the Debug 
+Menu, with the option ``Test room IDs``. The Debug Menu is triggered by 
+pressing 'D' within a room.

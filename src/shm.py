@@ -500,7 +500,7 @@ class mainHandler:
             query = self.ui_option(text, Options)
         self.fn_roomIDHandler(OptionsIndex[query])
 
-    def fn_roomIDHandler(self, tmpID: int | tuple) -> None:
+    def fn_roomIDHandler(self, tmpID: int | tuple[str, int]) -> None:
         """
         Handles room IDs and moving between rooms.
          - Handles raw ID numbers, e.g. 2;
