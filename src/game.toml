@@ -1,7 +1,7 @@
 [game_info]
 Name = "The Shopkeeper's Quest"
 Version = "Experimental"
-ReleaseDate = "2026-03-01"
+ReleaseDate = "2026-03-08"
 Licence = "MIT License"
 Creator = "SolidLamp"
 Link = "https://github.com/solidlamp"
@@ -15,7 +15,7 @@ default_titlebar_left = " F1 - Help "
 default_titlebar_centre = " {abbr} - {desc} "
 default_titlebar_right = " Q - Quit "
 default_textspeed = 0.01
-border_style = 1
+# border_style = 1
 
 
 [0]

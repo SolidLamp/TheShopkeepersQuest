@@ -3,12 +3,14 @@ from collections.abc import Callable
 import curses
 from datetime import datetime
 from importlib.util import module_from_spec, spec_from_file_location
+from itertools import chain
 import os.path
 import platform
+import re
 import sys
 import time
 from types import ModuleType
-from typing import Required, TypedDict
+from typing import Callable, Required, TypedDict
 
 import save_handler
 import toml_reader
@@ -150,45 +152,17 @@ class mainHandler:
 
     def db_debug(self) -> None:
         """The debug menu"""
-        debug_options = ["Test room IDs", "Enable debug mode"]
+        debug_options = ["Test room IDs", "Enable debug mode", "Test room attributes"]
         query = tui.option(self.win, "SHM Engine Debug Menu", debug_options)
         match query:
             case 0:
-                self.db_test_rooms()
+                self.db_test_roomIDs()
             case 1:
                 self.globaldebug = not (self.globaldebug)
+            case 2:
+                self.db_test_attributes()
 
-    def db_log_error(
-        self,
-        errorMsg: str,
-        colorcode: int = 0,
-        delay: float = 0.0,
-        pauseAtNewline: float = 0.0,
-    ) -> None:
-        """Log an error - that's basically it."""
-        timestamp = datetime.now().isoformat()
-        with open("error.log", "a") as log:
-            log.write(f"{timestamp} {errorMsg}\n")
-        self.win.refresh()
-        self.ui_drawtitlebar(centreOverride="Error", leftOverride="", rightOverride="")
-        print3(self.win, errorMsg, colorcode, delay, pauseAtNewline)
-
-    def db_roomIDerror(self, rooms: dict) -> None:
-        """Handle an error when an invalid room is attempted to be loaded"""
-        self.db_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
-        query = self.ui_option(
-            "Non-critical Error: Invalid RoomID",
-            ["Open Debug Menu", "Quit Game"],
-            False,
-        )
-        if query == 0:
-            self.db_debug()
-            sys.exit(2)
-        if query == 1:
-            sys.exit(2)
-        print3(self.win, "\nPress any key to exit...", 0, 0)
-
-    def db_test_rooms(self) -> None:
+    def db_test_roomIDs(self) -> None:
         """Debug menu - test all room IDs in the game file and check for any
         invalid room IDs, and report any errors.
         Also notes when (history, -x)-style references when complevel == 2"""
@@ -221,6 +195,90 @@ class mainHandler:
             print3(self.win, "Success! No errors found.", 32, 0)
         print3(self.win, "\nPress any key to exit Debug Menu...", 0, 0)
         self.win.getch()
+
+    def db_test_attributes(self) -> None:
+        """
+        Debug menu - check all attribute types within a room, and log whenever
+        an incorrect type is found.
+        """
+        attribute_types = {
+            "Text": str,
+            "Requirements": Callable,
+            "AlternateText": str,
+            "TextSpeed": float,
+            "Desc": str,
+            "titlebarCentre": str,
+            "titlebarLeft": str,
+            "titlebarRight": str,
+            "Script": Callable,
+            "Item": str,
+            "ItemRequirements": Callable,
+            "ItemText": str,
+            "KeyItem": str,
+            "KeyItemRequirements": Callable,
+            "KeyItemText": str,
+            "Options": list,
+            "Inventory": bool | int,
+            "Move": list,
+            "Automove": int | tuple,
+            "InstantAutomove": bool | int,
+            "Lose": str,
+            "Ending": str,
+        }
+        text = ""
+        rooms = self.game.get_rooms(self.win)
+        for attribute, value, roomno, room in chain.from_iterable(
+            ((attribute, value, roomno, room) for attribute, value in room.items())
+            for roomno, room in rooms.items()
+        ):
+            if attribute in attribute_types and not isinstance(
+                room[attribute], attribute_types[attribute]
+            ):
+                real_type = type(room[attribute])
+                text += f"\033[33mWarning: Attribute '{attribute}' in room {roomno} "
+                text += f"is {type(room[attribute])}!\n\033[0m"
+            if re.fullmatch(r"Option\d+Requirements", attribute):
+                continue
+            if attribute not in attribute_types:
+                text += f"\033[33mWarning: Invalid attribute '{attribute}' in room "
+                text += f"{roomno}!\n\033[0m"
+        self.win.clear()
+        if text:
+            print3(self.win, text, 33, 0)
+        else:
+            print3(self.win, "Success! No errors found.", 32, 0)
+        print3(self.win, "\nPress any key to exit Debug Menu...", 0, 0)
+        self.win.getch()
+
+    def err_log_error(
+        self,
+        errorMsg: str,
+        colorcode: int = 0,
+        delay: float = 0.0,
+        pauseAtNewline: float = 0.0,
+    ) -> None:
+        """Log an error - that's basically it."""
+        timestamp = datetime.now().isoformat()
+        with open("error.log", "a") as log:
+            log.write(f"{timestamp} {errorMsg}\n")
+        self.win.refresh()
+        self.ui_drawtitlebar(centreOverride="Error", leftOverride="", rightOverride="")
+        print3(self.win, errorMsg, colorcode, delay, pauseAtNewline)
+
+    def err_roomIDerror(self, rooms: dict) -> None:
+        """Handle an error when an invalid room is attempted to be loaded"""
+        self.db_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
+        query = self.ui_option(
+            "Non-critical Error: Invalid RoomID",
+            ["Open Debug Menu", "Quit Game"],
+            False,
+        )
+        if query == 0:
+            self.db_debug()
+            sys.exit(2)
+        if query == 1:
+            sys.exit(2)
+        print3(self.win, "\nPress any key to exit...", 0, 0)
 
     def ui_drawtitlebar(
         self,

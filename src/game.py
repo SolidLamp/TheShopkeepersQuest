@@ -3,6 +3,7 @@ import time
 from dataclasses import dataclass
 import random
 import sys
+from typing import Any
 
 import tui
 import toml_reader
@@ -235,7 +236,7 @@ def get_rooms(win: curses.window) -> dict:
             "Text": "\033[93m'" + random.choice(ShopkeeperQuotesExit) + "'\033[0m",
         },
         73: {
-            "TextRequirements": lambda: game_state.fletcherOpen,
+            "Requirements": lambda: game_state.fletcherOpen,
             "Option1Requirements": lambda: game_state.fletcherOpen,
         },
         74: {
@@ -279,7 +280,7 @@ def get_rooms(win: curses.window) -> dict:
             "Option1Requirements": lambda: not hasItem("Bow and Arrow"),
         },
         83: {
-            "Requirements": game_state.rubies >= 75,
+            "Requirements": lambda: game_state.rubies >= 75,
             "Script": lambda: setattr(
                 game_state,
                 "rubies",
@@ -289,7 +290,7 @@ def get_rooms(win: curses.window) -> dict:
                     else game_state.rubies
                 ),
             ),
-            "KeyItemRequirements": game_state.rubies >= 75,
+            "KeyItemRequirements": lambda: game_state.rubies >= 75,
         },
         84: {
             "Requirements": lambda: hasItem("Silver Amulet"),
