@@ -1,53 +1,58 @@
 import curses
 import math
 import os
-import sys
 import time
 
 _TAB_SIZE = 4
 
 # fmt: off
-_ENDBYTE_CHARS = ["@","A","B","C","D","E","F","G","H","I","J","K","L","M","N"
-                  "O","P","Q","R","S","T","U","V","W","X","Y","Z","[","\\","]",
-                  "^","_","a","b","c","d","e","f","g","h","i","j","k","l","m",
-                  "n","o","p","q","r","s","t","u","v","w","x","y","z","{","|",
-                  "}","~",
+_ENDBYTE_CHARS = [
+    "@","A","B","C","D","E","F","G","H","I","J","K","L","M","N",
+    "O","P","Q","R","S","T","U","V","W","X","Y","Z","[","\\","]",
+    "^","_","a","b","c","d","e","f","g","h","i","j","k","l","m",
+    "n","o","p","q","r","s","t","u","v","w","x","y","z","{","|",
+    "}","~",
 ]
 # fmt: on
 
 # 2097152
 
 
-def colorsetup(win) -> None:
+def colorsetup(win: curses.window) -> None:
     curses.start_color()  # curses.A_NORMAL | curses.A_BOLD
     curses.use_default_colors()
-    curses._use_ansi_colors = True
+    #### curses._use_ansi_colors = True
     return
-    # curses.init_pair(31, curses.COLOR_RED, curses.COLOR_BLACK)
-    # curses.init_pair(32, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    # curses.init_pair(33, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    # curses.init_pair(34, curses.COLOR_BLUE, curses.COLOR_BLACK)
-    # curses.init_pair(35, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    # curses.init_pair(36, curses.COLOR_CYAN, curses.COLOR_BLACK)
-    # curses.init_pair(37, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    # curses.init_pair(41, curses.COLOR_BLACK, curses.COLOR_RED)
-    # curses.init_pair(42, curses.COLOR_BLACK, curses.COLOR_GREEN)
-    # curses.init_pair(43, curses.COLOR_BLACK, curses.COLOR_YELLOW)
-    # curses.init_pair(44, curses.COLOR_BLACK, curses.COLOR_BLUE)
-    # curses.init_pair(45, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
-    # curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
-    # curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    #### curses.init_pair(31, curses.COLOR_RED, curses.COLOR_BLACK)
+    #### curses.init_pair(32, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    #### curses.init_pair(33, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    #### curses.init_pair(34, curses.COLOR_BLUE, curses.COLOR_BLACK)
+    #### curses.init_pair(35, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+    #### curses.init_pair(36, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    #### curses.init_pair(37, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    #### curses.init_pair(41, curses.COLOR_BLACK, curses.COLOR_RED)
+    #### curses.init_pair(42, curses.COLOR_BLACK, curses.COLOR_GREEN)
+    #### curses.init_pair(43, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+    #### curses.init_pair(44, curses.COLOR_BLACK, curses.COLOR_BLUE)
+    #### curses.init_pair(45, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+    #### curses.init_pair(46, curses.COLOR_BLACK, curses.COLOR_CYAN)
+    #### curses.init_pair(47, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
 
-def _ESCtoRGB(ESC: str | int) -> tuple[int, int, int]:
+def _ESCtoRGB(ESC_code: str | int) -> tuple[int, int, int]:
     """
-    Takes a 8-bit colour escape code, as a string or integer.
-    Returns three ints: r, g, b, representing a 24-bit RGB value.
+    Converts an 8-bit escape code to a 24-bit RGB value 
+
+    Args:
+        ESC_code (str | int): A 8-bit colour escape code, as a string or integer.
+
+    Returns:
+        tuple[int, int, int]: A 24-bit RGB value in the form (red, green, blue).
     """
-    ESC = int(ESC)
-    r = (ESC - 16) // 36
-    b = (ESC - 16) % 6
-    g = ((ESC - 16) % 36) // 6
+    ESC_code: int = int(ESC_code)
+    r: int = (ESC_code - 16) // 36
+    b: int = (ESC_code - 16) % 6
+    g: int = ((ESC_code - 16) % 36) // 6
     return (r, g, b)
 
 
@@ -95,17 +100,12 @@ def print3(
     bg = curses.COLOR_BLACK
     attr = 0
     while i < len(text):
-        j = i
+        j: int = i
         while j < len(text) and text[j] != "\n" and text[j] != " ":
             j += 1
         max_y, max_x = win.getmaxyx()
         y, x = win.getyx()
-        if (
-            (j == " " or "\n")
-            and ((j - i) > (max_x - x))
-            and ((j - i) <= max_x)
-            and break_lines
-        ):
+        if ((j - i) > (max_x - x)) and ((j - i) <= max_x) and break_lines:
             newline(win)
         char = text[i]
         if char == "\f":
@@ -249,7 +249,7 @@ def centre_text(win: curses.window, text: str) -> None:
 def option(
     win: curses.window,
     text: str,
-    options: list,
+    options: list[str],
     break_lines: bool = True,
 ) -> int | str:
     value = 0
@@ -289,7 +289,7 @@ def option(
                 win.addstr(strToPrint)
         try:
             curses.flushinp()
-            key = win.getkey()
+            key: str = win.getkey()
         except Exception:
             key = "KEY_UP"
         if key == os.linesep:
@@ -303,7 +303,7 @@ def option(
             value += 1
         elif key == "KEY_DOWN" and value >= finalOption:
             value = 0
-        elif isinstance(key, str) and len(key) == 1 and not key.isnumeric():
+        elif len(key) == 1:
             return key
         elif key.isnumeric() and int(key) < len(options) + 1 and int(key) > 0:
             value = int(key) - 1

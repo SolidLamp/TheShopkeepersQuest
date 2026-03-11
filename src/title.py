@@ -1,3 +1,6 @@
+from typing import Any
+
+
 from collections.abc import Callable
 import os.path
 import sys
@@ -27,13 +30,39 @@ class MiniSHM:
     def __init__(
         self, win: curses.window, options_dict: dict, title_string: str = "SHM Engine"
     ) -> None:
+        """
+        Initialises MiniSHM
+
+        Args:
+            win (curses.window):
+            A curses window instance.
+
+            options_dict (dict):
+            The dictionary containing all options for the menu.
+
+            title_string (str, optional):
+            The string to display to the user while navigating the title screen.
+            Defaults to "SHM Engine".
+        """
         self.options_dict = options_dict
         self.title_string = title_string
         self.win = win
 
     def _option(self, key: int | str = 0) -> None:
-        choices = self.options_dict[key]
-        query = tui.option(self.win, self.title_string, list(choices.keys()), False)
+        """
+        Displays an option to the user
+
+        Args:
+            key (int | str, optional):
+            The particular menu of the title screen to display.
+            Defaults to 0.
+
+        Returns:
+            int: The chosen option by the user.
+        """
+        choices: Any = self.options_dict[key]
+        options: list[Any] = list(choices.keys())
+        query: int | str = tui.option(self.win, self.title_string, options, False)
         if isinstance(query, str):
             sys.exit(0)
         return query
@@ -50,6 +79,21 @@ class MiniSHM:
 def handle_save(
     win: curses.window, game_path: str = "game", save_path: str = "game"
 ) -> None:
+    """
+    Handles the save files
+
+    Args:
+        win (curses.window): A curses window instance.
+
+        game_path (str, optional):
+        The relative path to the gamefile. 
+        Defaults to "game".
+
+        save_path (str, optional):
+        The relative path to the savefile.
+        Defaults to "game".
+
+    """
     if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
         save_handler.read_save(save_path)
     ):

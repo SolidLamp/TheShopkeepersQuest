@@ -1,6 +1,7 @@
+from collections.abc import Callable
 import curses
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import random
 import sys
 from typing import Any
@@ -8,11 +9,11 @@ from typing import Any
 import tui
 import toml_reader
 
-print3 = tui.print3
+print3: Callable[..., None] = tui.print3
 
 
 gameInfo: dict[str, Any]
-history: dict[int]
+history: list[int]
 endingText: dict[str, str]
 defaultEnding: str
 loseText: dict[str, str]
@@ -26,16 +27,16 @@ history: list[int] = []
 
 endingText: dict[str, str] = {
     "Good": "And so, overnight, all the people returned to the village, as "
-        "if they had never left.\nSoon after, the village was lifted into high "
-        "spirits as the harvest had been the best in almost thirty years.\n"
-        "Despite the prospering village, you decided to leave.\nYou had no "
-        "desire to stay after the events you just experienced, and you would "
-        "rather leave than stay to make some money.",
+        + "if they had never left.\nSoon after, the village was lifted into high "
+        + "spirits as the harvest had been the best in almost thirty years.\n"
+        + "Despite the prospering village, you decided to leave.\nYou had no "
+        + "desire to stay after the events you just experienced, and you would "
+        + "rather leave than stay to make some money.",
     "Secret": "And so, overnight, you became the new shopkeeper, but nothing "
-        "really changed in the end.\nThe villagers never returned, but many "
-        "travellers came, hearing about what happened.\nMany decided to stay "
-        "after a plentiful harvest brought good omens to the village.\nThis, "
-        "however, would not be the last of it...\n...and you knew that.",
+        + "really changed in the end.\nThe villagers never returned, but many "
+        + "travellers came, hearing about what happened.\nMany decided to stay "
+        + "after a plentiful harvest brought good omens to the village.\nThis, "
+        + "however, would not be the last of it...\n...and you knew that.",
     "SHM": "You achieved the\n|\nEnding.\nTry Again?",
 }
 
@@ -79,13 +80,8 @@ class Inventory:
     as well as displaying them as a string.
     """
 
-    # which I may or may not have mainly used StackOverflow to figure out.
-    items: list[str] = None
-    keyItems: list[str] = None
-
-    def __post_init__(self) -> None:
-        self.items = [] if self.items is None else self.items
-        self.keyItems = [] if self.keyItems is None else self.keyItems
+    items: list[str] = field(default_factory=list)
+    keyItems: list[str] = field(default_factory=list)
 
     def getItem(self, item: str, win: curses.window) -> None:
         print3(win, "\nYou got \033[1m" + str(item) + "\033[0m!\n")
@@ -151,17 +147,25 @@ game_state = gameState(inventory=Inventory(items=[]))
 
 
 def overwrite_rooms(rooms: dict, extrarooms: dict) -> dict:
-    new_rooms = rooms.copy()
+    new_rooms: dict[Any, Any] = rooms.copy()
     for key in filter(lambda key: key in rooms.keys(), extrarooms.keys()):  # orubt
         new_rooms[key].update(extrarooms[key])
     return new_rooms
 
 
-def get_rooms(win: curses.window) -> dict:
-    """The most important part; returns a dict of rooms to the engine."""
+def get_rooms(win: curses.window) -> dict[int, dict]:
+    """
+    The most important part; returns a dict of rooms to the engine.
+
+    Args:
+        win (curses.window): A curses window instance.
+
+    Returns:
+        dict[int, dict]: The dictionary of rooms; for more info see room_format.rst
+    """
     hasItem = game_state.inventory.hasItem
-    rooms = toml_reader.read_gamedata("game.toml")
-    room_scripts = {
+    rooms: dict[int | str, dict] = toml_reader.read_gamedata("game.toml")
+    room_scripts: dict[int, dict] = {
         0: {
             "Script": lambda: debug(win),
         },
@@ -322,15 +326,15 @@ def get_rooms(win: curses.window) -> dict:
         },
         93: {
             "ItemRequirements": lambda: not hasItem("A Funny-looking Rock")
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
         },
         95: {
             "ItemRequirements": lambda: not hasItem("What you think is an Emerald")
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
         },
         98: {
             "ItemRequirements": lambda: not hasItem("Some strange stone")
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
         },
         99: {
             "Requirements": lambda: game_state.caveOpened,
@@ -340,14 +344,14 @@ def get_rooms(win: curses.window) -> dict:
         },
         109: {
             "ItemRequirements": lambda: not hasItem("Some Tourmaline, maybe")
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
         },
         114: {
             "Text": "You are within the cave. It is difficult to see. "
-                    "There is a path to your northeast and northwest.",
+                    + "There is a path to your northeast and northwest.",
             "Item": "A Weird shard of something",
             "ItemRequirements": lambda: not hasItem("A Weird shard of something")
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
             "ItemText": "On the ground, you find a weird shard of something.",
             "Options": ["Go northeast", "Go northwest"],
             "Move": [113, 109],
@@ -357,24 +361,24 @@ def get_rooms(win: curses.window) -> dict:
         },
         122: {
             "ItemRequirements": lambda: not hasItem("A Chunk of Marble")
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
         },
         126: {
             "ItemRequirements": lambda: not hasItem(
                 "A Stone that looks kind of like a face"
             )
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
         },
         127: {"Option2Requirements": lambda: hasItem("Fishing Rod")},
         128: {
             "ItemRequirements": lambda: not hasItem("A beautiful, azure blue rock")
-            and random.randrange(0, 3) == "2",
+            and random.randrange(start=0, stop=3) == 2,
         },
         130: {
             "Script": lambda: ShopkeeperFinalSpeech(win),
         },
     }
-    rooms = overwrite_rooms(rooms, room_scripts)
+    rooms: dict[int, dict[Any, Any]] = overwrite_rooms(rooms, room_scripts)
     return rooms
 
 
@@ -397,15 +401,15 @@ ShopkeeperQuotes = [
     "You'll always be welcome here in my shop.",
     "Have a look at my wares. They could prove to be useful.",
     "Sorry I can't give discounts - I have a business to run, and I must make my "
-        "money somehow.",
+    + "money somehow.",
     "I don't blame you for coming inside in this winter.",
     "Sit down a while. I don't want you too stressed, my friend.",
     "I always believe that everyone has a tale worth telling - maybe talk to "
-        "more people.",
+    + "more people.",
     "Have you checked out the bazaar? There's a fisherman there who sells "
-        "excellent-quality rods.",
+    + "excellent-quality rods.",
     "Have you heard the news about the King? It's said that he's fallen ill. "
-        "He's a good man - I hope he fully recovers.",
+    + "He's a good man - I hope he fully recovers.",
     "Have you seen the nearby forest? There's been some monkey sightings there.",
 ]
 
@@ -433,8 +437,8 @@ def ShopkeeperFinalSpeech(win: curses.window) -> None:
     print3(
         win,
         "\033[93m'Well, I'll be. That's all of them. Honestly, I kind of "
-        "doubted you could do it - now I see that my doubt was misplaced! "
-        "You will go down in legend for your heroism!'",
+        + "doubted you could do it - now I see that my doubt was misplaced! "
+        + "You will go down in legend for your heroism!'",
     )
     time.sleep(0.75)
     print3(win, "\033[93m\n'Oh, and just one more thing: thank you.'\033[0m")
@@ -449,7 +453,7 @@ def ShopkeeperAffirmations(win: curses.window) -> None:
     print3(
         win,
         f"\033[93m'Great! You managed to get {cursedItems} of the items - now "
-        f"we just need {3 - cursedItems} more!'\033[0m",
+        + f"we just need {3 - cursedItems} more!'\033[0m",
     )
 
 
@@ -468,14 +472,14 @@ def fishEvaluation(win: curses.window) -> None:
         print3(
             win,
             "\033[36m'You know, I recently got a new fishing rod. Say, you "
-            "can have my old one, since you bought something.'\033[0m",
+            + "can have my old one, since you bought something.'\033[0m",
         )
         game_state.inventory.getKeyItem("Fishing Rod", win)
     else:
         print3(
             win,
             "\033[36m'You know, I'd be more in the mood to talk if you bought "
-            "something.'\033[0m",
+            + "something.'\033[0m",
         )
 
 
@@ -489,7 +493,7 @@ def mineralEvaluation(win: curses.window) -> None:
     print3(
         win,
         "\033[32m'Thank you so much. These will be excellent to add to my "
-        "collection.'\033[0m",
+        + "collection.'\033[0m",
     )
 
 

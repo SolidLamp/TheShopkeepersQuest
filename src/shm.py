@@ -10,7 +10,7 @@ import re
 import sys
 import time
 from types import ModuleType
-from typing import Callable, Required, TypedDict
+from typing import Any, TypedDict
 
 import save_handler
 import toml_reader
@@ -18,9 +18,9 @@ import tui
 from tui import print3
 
 
-HISTORY_MAX_LEN = 10
-AUTOMOVE_DELAY = 1
-ENDING_DELAY = 0.5
+HISTORY_MAX_LEN: int = 10
+AUTOMOVE_DELAY: float = 1.0
+ENDING_DELAY: float = 0.5
 
 
 class Room(TypedDict, total=False):
@@ -77,26 +77,57 @@ class mainHandler:
         self,
         win: curses.window,
         starting_room: int | None = None,
-        saveFile: dict = {},
+        saveFile: dict[str, Any] = {},
         gameFile_name: str = "game",
         gameFile_path: str = "./game.py",
         saveFileName: str = "game",
     ) -> None:
-        self.COMPATIBLE_COMPLEVELS: list = [1, 2]
+        """Set up an instance of the SHM Engine with a given gamefile.
+
+        Args:
+            win (curses.window):
+            A curses window instance.
+
+            starting_room (int | None, optional):
+            When specified, the engine starts within that room ID.
+            If None, uses the starting_room within the gamefile.
+            Defaults to None.
+
+            saveFile (dict, optional):
+            The save file.
+            Defaults to {}.
+
+            gameFile_name (str, optional):
+            The name of the module name which corresponds to the gamefile to be loaded.
+            Defaults to "game".
+
+            gameFile_path (str, optional):
+            The file path of the gamefile to be loaded.
+            Accepts both relative and absolute paths.
+            If the file extension is not specified, defaults to '.py'.
+            Defaults to "./game.py".
+
+            saveFileName (str, optional):
+            The name of the save file to write to when the game is saved.
+            Defaults to "game".
+        """
+        self.COMPATIBLE_COMPLEVELS: list[int] = [1, 2]
         self.current_saveid: str | None = None
-        self.engineInfo = formatDict(toml_reader.read_toml("engine_info.toml"))
-        self.game = self.setup_gameFile(gameFile_name, gameFile_path)
+        self.engineInfo: formatDict = formatDict(
+            toml_reader.read_toml("engine_info.toml")
+        )
+        self.game: ModuleType = self.setup_gameFile(gameFile_name, gameFile_path)
         self.gameFile_name: str = gameFile_name
-        self.gameInfo: dict = self.game.gameInfo
-        self.game_state = self.game.game_state
+        self.gameInfo: dict[str, Any] = self.game.gameInfo
+        self.game_state: Any = self.game.game_state
         self.globaldebug: bool = False
-        self.history = self.game.history
-        self.room: dict = {}
+        self.history: list[int] = self.game.history
+        self.room: dict[int, Any] = {}
         self.saveFileName: str = saveFileName
         self.SHMversion: str = toml_reader.get_engine_info()
         self.starting_room: int = self.gameInfo.get("starting_room", 1)
         self.stdscr: curses.window = win
-        self.text_speed = self.gameInfo.get("default_textspeed", 0.01)
+        self.text_speed: float = self.gameInfo.get("default_textspeed", 0.01)
         self.win: curses.window = win
         self.setup_stdscr()
         if starting_room:
@@ -108,23 +139,41 @@ class mainHandler:
             self.current_saveid = saveFile.get("save_id", None)
 
     def setup_gameFile(self, module_name: str, file_path: str) -> ModuleType:
-        """This function imports the game script for access within the SHM Engine."""
+        """
+        Imports a module and allows it to be publicly available.
+        This function is used to import the gamefile in context of the SHM Engine.
+
+        Args:
+            module_name (str): The name of the module to import.
+            file_path (str): The path of the module to import.
+
+        Raises:
+            ImportError: This error is raised if the specified module is nonexistent.
+
+        Returns:
+            ModuleType: The module which has just been imported.
+        """
         file_path = os.path.abspath(file_path)
         if file_path[-3:] != ".py":
             file_path = os.path.join(file_path, module_name)
             file_path = file_path + ".py"
         spec = spec_from_file_location(module_name, file_path)
         try:
-            module = module_from_spec(spec)
+            module = module_from_spec(spec)  # pyright: ignore
         except:
             raise ImportError("Failed to import game file")
         sys.modules[module_name] = module
-        spec.loader.exec_module(module)
+        spec.loader.exec_module(module)  # pyright: ignore
         return module
 
     def setup_loadSave(self, saveFile: dict) -> None:
-        """Sets up the save file and sets up the game state by copying values
-        from the save file."""
+        """
+        Sets up the save file and sets up the game state by copying values
+        from the save file.
+
+        Args:
+            saveFile (dict): A dictionary in the SHM Engine save file format.
+        """
         if (
             saveFile.get("game_id") != self.gameInfo.get("game_id")
             or saveFile["Game"] != self.gameInfo["title"]
@@ -177,8 +226,10 @@ class mainHandler:
         for idno, roomno in idnos:
             if isinstance(idno, int) and idno in rooms:
                 continue
-            negIDv1 = isinstance(idno, tuple) and idno[0] == "history" and idno[1] < 0
-            negIDv2_support = not (self.game.gameInfo["complevel"] == 1)
+            negIDv1: bool = (
+                isinstance(idno, tuple) and idno[0] == "history" and idno[1] < 0
+            )
+            negIDv2_support: bool = not (self.game.gameInfo["complevel"] == 1)
             if negIDv1 and not negIDv2_support:
                 continue
             if negIDv1 and negIDv2_support:
@@ -257,7 +308,24 @@ class mainHandler:
         delay: float = 0.0,
         pauseAtNewline: float = 0.0,
     ) -> None:
-        """Log an error - that's basically it."""
+        """
+        Log an error - that's basically it.
+
+        Args:
+            errorMsg (str): The message to display to the user
+
+            colorcode (int, optional, deprecated):
+            Changes the colour of the text; see tui.print3.
+            Defaults to 0.
+
+            delay (float, optional):
+            The time between characters being printed; see tui.print3.
+            Defaults to 0.0.
+
+            pauseAtNewline (float, optional):
+            The time that is waited when a new line is created; see tui.print3.
+            Defaults to 0.0.
+        """
         timestamp = datetime.now().isoformat()
         with open("error.log", "a") as log:
             log.write(f"{timestamp} {errorMsg}\n")
@@ -265,7 +333,7 @@ class mainHandler:
         self.ui_drawtitlebar(centreOverride="Error", leftOverride="", rightOverride="")
         print3(self.win, errorMsg, colorcode, delay, pauseAtNewline)
 
-    def err_roomIDerror(self, rooms: dict) -> None:
+    def err_roomIDerror(self) -> None:
         """Handle an error when an invalid room is attempted to be loaded"""
         self.db_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
         query = self.ui_option(
@@ -291,9 +359,20 @@ class mainHandler:
         Handles the 'titlebarCentre', 'titlebarLeft' and 'titlebarRight'
         attributes within a room, as well as the default titlebar strings set
         in game info.
-        Also handles 'border_vertical', 'border_horizontal', 'border_corner_topleft',
-        'border_corner_topright', 'border_corner_btmleft', 'border_corner_btmright'
-        attributes of game info, and builds the specific border design based on them.
+        Also passes the border style as defined within game info, to tui.draw_titlebar.
+
+        Args:
+            centreOverride (str | None, optional):
+            Overrides the text displayed in the centre of the titlebar.
+            Defaults to None.
+
+            leftOverride (str | None, optional):
+            Overrides the text displayed in the right corner of the titlebar.
+            Defaults to None.
+
+            rightOverride (str | None, optional):
+            Overrides the text displayed in the left corner of the titlebar.
+            Defaults to None.
         """
         leftString = " F1 - Help "
         rightString = " Q - Quit "
@@ -332,7 +411,14 @@ class mainHandler:
         )
 
     def ui_ending(self, end: str) -> None:
-        """Handles endings in a game, including autosaving."""
+        """
+        Handles endings in a game, including autosaving.
+
+        Args:
+            end (str):
+            The ending which the user has received.
+            The ending text is set within the gamefile, under the endingText attribute.
+        """
         titlebar_centre = "{title}"
         titlebar_left = ""
         titlebar_right = ""
@@ -362,7 +448,8 @@ class mainHandler:
         time.sleep(3.5)
 
     def ui_format_string(self, string: str) -> str:
-        """Formats the string with the various available keys;
+        """
+        Formats the string with the various available keys;
         used to format the titlebar and the text of rooms.
         Keys are in the format '{key}' embedded within a string.
 
@@ -383,6 +470,12 @@ class mainHandler:
          - 'title' - returns the game title.
          - 'utime' - returns the current time in Unix timestamp.
 
+
+        Args:
+            string (str): The string to be formatted by the function.
+
+        Returns:
+            str: The output string that has been formatted.
         """
         subDict = {
             "abbr": self.gameInfo.get("abbr", "{abbr}"),
@@ -406,7 +499,14 @@ class mainHandler:
         return string
 
     def ui_lose(self, lose: str) -> None:
-        """Handles losing the game"""
+        """
+        Handles losing the game.
+
+        Args:
+            lose (str):
+            The loss which the user has received.
+            The loss text is set within the gamefile, under the loseText attribute.
+        """
         time.sleep(0.25)
         if hasattr(self.game, "loseText") and lose in self.game.loseText:
             printText = "\n" + self.game.loseText[lose].replace("|", lose)
@@ -422,8 +522,13 @@ class mainHandler:
             self.roomID = self.starting_room
 
     def ui_text_handler(self) -> str:
-        """Handle the text of a room, between Text, AlternateText, etc.
-        Prints the text and returns the text."""
+        """
+        Handle the text of a room, between Text, AlternateText, etc.
+        Prints the text and returns the text.
+
+        Returns:
+            str: The appropriate text of the room to be used.
+        """
         text = ""
         if "Requirements" in self.room and not self.room["Requirements"]():
             text = self.room["AlternateText"]
@@ -437,16 +542,31 @@ class mainHandler:
         print3(self.win, text, delay=self.room.get("TextSpeed", self.text_speed))
         return text
 
-    def ui_option(self, text: str, options: list, Inventory: bool = True) -> int:
-        """Handle options for the SHM Engine, as a wrapper for tui.option();
+    def ui_option(self, text: str, choices: list[str], Inventory: bool = True) -> int:
+        """
+        Handle options for the SHM Engine, as a wrapper for tui.option();
         - Handles quit option
-        - Handles inventory option"""
+        - Handles inventory optio
+
+        Args:
+            text (str):
+            The text to display to the user.
+
+            choices (list[str]):
+            The list of options to display to the user.
+
+            Inventory (bool, optional):
+            Whether inventory is enabled or disabled.
+            Defaults to True.
+
+        Returns:
+            int: The user's chosen option, as corresponds to place in the array.
+        """
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
         query = 0
-        choices = options
         if Inventory and hasattr(self.game_state, "inventory"):
-            choices = options + ["Inventory"]
+            choices = choices + ["Inventory"]
         for i in range(len(choices)):
             choices[i] = self.ui_format_string(choices[i])
         text = self.ui_format_string(text)
@@ -506,9 +626,13 @@ class mainHandler:
 
     def fn_itemHandler(self, attr: str) -> None:
         """
-        Handles items within a room, including item requirements
-        - attr is a string that represents an attribute of the room;
-        - attr should be present in the room, e.g. 'Item'.
+        Handles items within a room, including item requirements.
+
+        Args:
+            attr (str):
+            A string that represents an attribute of the room;
+            should be present in the room, e.g. 'Item'.
+            The official possible values as of SHM 1.2 are: 'Item', 'KeyItem'
         """
         if not (
             f"{attr}Requirements" in self.room
@@ -532,8 +656,12 @@ class mainHandler:
         self.win.getch()
 
     def fn_mainRoomHandler(self, text: str) -> None:
-        """The main handler of a room;
+        """
+        The main handler of a room;
         handles the moving between rooms and showing the options menu.
+
+        Args:
+            text (str): The text to be displayed to the user at the option menu.
         """
         OptionsIndex = []
         Options = []
@@ -564,6 +692,9 @@ class mainHandler:
          - Handles raw ID numbers, e.g. 2;
          - Handles negative ID numbers, e.g. -2 (which are references to history);
          - Handles history tuples, e.g. (history, -2)
+
+        Args:
+            tmpID (int | tuple[str, int]): The ID number to be parsed.
         """
         negIDsupport = not (self.game.gameInfo["complevel"] == 1)
         if isinstance(tmpID, tuple) and tmpID[0] == "history":
@@ -601,10 +732,10 @@ class mainHandler:
             self.room = rooms[self.roomID]
         elif self.starting_room in rooms:
             self.room = rooms[self.starting_room]
-            self.db_roomIDerror(rooms)
+            self.db_roomIDerror()
         else:
             self.room = rooms[1]
-            self.db_roomIDerror(rooms)
+            self.db_roomIDerror()
         self.ui_drawtitlebar()
         self.history.append(self.roomID)
         if len(self.history) > HISTORY_MAX_LEN:
@@ -649,6 +780,35 @@ def run(
 ) -> None:
     """
     The wrapper to start the SHM Engine.
+
+    Args:
+        win (curses.window):
+        A curses window instance.
+
+        starting_room (int | None, optional):
+        When specified, the engine starts within that room ID.
+        If None, uses the starting_room within the gamefile.
+        Defaults to None.
+
+        saveFileName (str, optional):
+        The name of the save file to write to when the game is saved.
+        Defaults to "game".
+
+        saveFile (dict, optional):
+        The save file.
+        Defaults to {}.
+
+        gameFile_name (str, optional):
+        The name of the module name which corresponds to the gamefile to be loaded.
+        Defaults to "game".
+
+        gameFile_path (str, optional):
+        The file path of the gamefile to be loaded.
+        Accepts both relative and absolute paths.
+        May not include the file itself or only the directory.
+        If the file extension is not specified, defaults to '.py'.
+        Defaults to "./".
+
     """
     curses.curs_set(0)
     win.scrollok(True)
@@ -667,16 +827,16 @@ def run(
         with open("error.log", "a") as log:
             log.write(
                 f"{timestamp} Warning: Could not parse save file as a valid save file."
-                "\nContinuing without save file...\n"
+                + "\nContinuing without save file...\n"
             )
     if saveFile and not supported_version:
         timestamp = datetime.now().isoformat()
         with open("error.log", "a") as log:
             log.write(
                 f"{timestamp} Warning: Could not parse save file. The save"
-                f" file has a version of {save_version}, but this version of"
-                f"the SHM Engine only supports up to {supported_version}\n"
-                "Continuing without save file...\n"
+                + f" file has a version of {save_version}, but this version of"
+                + f"the SHM Engine only supports up to {supported_version}\n"
+                + "Continuing without save file...\n"
             )
     if saveFile and validSave and supported_version:
         main = mainHandler(
@@ -698,7 +858,7 @@ def run(
     main.fn_looper()
 
 
-gameLoop = run
+gameLoop: Callable[..., None] = run
 
 
 if __name__ == "__main__":
@@ -708,7 +868,7 @@ if __name__ == "__main__":
     print(
         toml_reader.get_engine_info(
             "{Name} {MajorVersion}{PatchConnector}{Patch}\n"
-            "{ReleaseDate}\n{Link}\nThis Release: '{Dist}'"
+            + "{ReleaseDate}\n{Link}\nThis Release: '{Dist}'"
         )
     )
     sys.exit(0)
