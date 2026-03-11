@@ -57,6 +57,16 @@ should be as follows:
   `PEP 484`_).
 * All class attributes should include variable annotations, but variables
   within individual functions do not require this.
+* Avoid implicit string concatenation in most cases, except on assignment of 
+  the string to a variable without operators.
+* Return statements should have redundant parentheses.
+* Docstrings should within the format created by autoDocstring
+
+  * Whenever a given argument requires multiple lines, all arguments should
+    be seperated by line, and the default value should also be provided on 
+    a new line.
+  * Docstrings should have the triple quotes (``"""``) on seperate lines from 
+    the docstring itself.
 
 
 Commit Styling
