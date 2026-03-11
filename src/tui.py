@@ -269,8 +269,11 @@ def option(
         new_x = max((max_x - fullLen - 1) // 2 - 1, 0)
         for option in options:
             max_y, max_x = win.getmaxyx()
+            y2 = win.getyx()[0]
             newline(win)
             y, x = win.getyx()
+            if y2 != (y - 1):
+                og_y -= 1
             win.move(y, new_x)
             padding = (fullLen - len(str(option))) / 2
             padding += 1
