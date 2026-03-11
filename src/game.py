@@ -373,9 +373,6 @@ def get_rooms(win: curses.window) -> dict:
         130: {
             "Script": lambda: ShopkeeperFinalSpeech(win),
         },
-        140: {
-            "Script": lambda: (curses.flushinp(), win.getch(), curses.flushinp()),
-        },
     }
     rooms = overwrite_rooms(rooms, room_scripts)
     return rooms
