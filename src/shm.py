@@ -10,7 +10,7 @@ import re
 import sys
 import time
 from types import ModuleType
-from typing import Any, TypedDict
+from typing import Any, TypedDict, NotRequired
 
 import save_handler
 import toml_reader
@@ -61,28 +61,55 @@ class Room(TypedDict, total=False):
     Ending: str
 
 
+class Save(TypedDict):
+    """This is the canonical format for save files with save version 1."""
+    Game: str
+    Saved: str
+    save_version: int
+    RoomID: int
+    History: list[int]
+    game_state: dict[str, Any]
+    inventory: dict[str, list[str]]
+    game_id: NotRequired[int | str]
+    save_id: int | str
+
+
+class EngineInfo(TypedDict):
+    Name: str
+    MajorVersion: str
+    Patch: str
+    Indev: bool
+    PythonVer: float
+    ReleaseDate: str
+    Dist: str
+    Link: str
+    SaveVersion: int
+    DefaultBorderStyle: int
+
+
 class formatDict(dict):
     """A subclass of a dictionary which will not replace any key not present
-    when format_map is used, preventing exceptions"""
+    when format_map is used, preventing exceptions."""
 
     def __missing__(self, key: str) -> str:
         string = "{" + key + "}"
         return string
 
 
-class mainHandler:
+class MainHandler:
     """The main heart of the SHM Engine."""
 
     def __init__(
         self,
         win: curses.window,
         starting_room: int | None = None,
-        saveFile: dict[str, Any] = {},
+        saveFile: Save | None = None,
         gameFile_name: str = "game",
         gameFile_path: str = "./game.py",
         saveFileName: str = "game",
     ) -> None:
-        """Set up an instance of the SHM Engine with a given gamefile.
+        """
+        Set up an instance of the SHM Engine with a given gamefile.
 
         Args:
             win (curses.window):
@@ -93,9 +120,9 @@ class mainHandler:
             If None, uses the starting_room within the gamefile.
             Defaults to None.
 
-            saveFile (dict, optional):
+            saveFile (Save | None, optional):
             The save file.
-            Defaults to {}.
+            Defaults to None.
 
             gameFile_name (str, optional):
             The name of the module name which corresponds to the gamefile to be loaded.
@@ -112,7 +139,7 @@ class mainHandler:
             Defaults to "game".
         """
         self.COMPATIBLE_COMPLEVELS: list[int] = [1, 2]
-        self.current_saveid: str | None = None
+        self.current_saveid: int | str | None = None
         self.engineInfo: formatDict = formatDict(
             toml_reader.read_toml("engine_info.toml")
         )
@@ -122,7 +149,7 @@ class mainHandler:
         self.game_state: Any = self.game.game_state
         self.globaldebug: bool = False
         self.history: list[int] = self.game.history
-        self.room: dict[int, Any] = {}
+        self.room: dict[str, Any] = {}
         self.saveFileName: str = saveFileName
         self.SHMversion: str = toml_reader.get_engine_info()
         self.starting_room: int = self.gameInfo.get("starting_room", 1)
@@ -166,7 +193,7 @@ class mainHandler:
         spec.loader.exec_module(module)  # pyright: ignore
         return module
 
-    def setup_loadSave(self, saveFile: dict) -> None:
+    def setup_loadSave(self, saveFile: Save | None) -> None:
         """
         Sets up the save file and sets up the game state by copying values
         from the save file.
@@ -174,6 +201,8 @@ class mainHandler:
         Args:
             saveFile (dict): A dictionary in the SHM Engine save file format.
         """
+        if saveFile is None:
+            return
         if (
             saveFile.get("game_id") != self.gameInfo.get("game_id")
             or saveFile["Game"] != self.gameInfo["title"]
@@ -271,7 +300,7 @@ class mainHandler:
             "Options": list,
             "Inventory": bool | int,
             "Move": list,
-            "Automove": int | tuple,
+            "Automove": int | tuple[str, int],
             "InstantAutomove": bool | int,
             "Lose": str,
             "Ending": str,
@@ -335,7 +364,7 @@ class mainHandler:
 
     def err_roomIDerror(self) -> None:
         """Handle an error when an invalid room is attempted to be loaded"""
-        self.db_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
+        self.err_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
         query = self.ui_option(
             "Non-critical Error: Invalid RoomID",
             ["Open Debug Menu", "Quit Game"],
@@ -608,10 +637,10 @@ class mainHandler:
             if query == 1:
                 sys.exit()
             else:
-                query = self.ui_option(text, options, Inventory)
+                query = self.ui_option(text, choices, Inventory)
         elif query == "d":
             self.db_debug()
-            query = self.ui_option(text, options, Inventory)
+            query = self.ui_option(text, choices, Inventory)
         elif Inventory and (query == choices.index("Inventory") or query == "i"):
             self.win.clear()
             self.ui_drawtitlebar(centreOverride="Inventory")
@@ -619,9 +648,9 @@ class mainHandler:
             print3(self.win, "\nPress any key to exit inventory.")
             self.win.getch()
             self.ui_drawtitlebar()
-            query = self.ui_option(text, options, Inventory)
+            query = self.ui_option(text, choices, Inventory)
         if not isinstance(query, int):
-            query = self.ui_option(text, options, Inventory)
+            query = self.ui_option(text, choices, Inventory)
         return query
 
     def fn_itemHandler(self, attr: str) -> None:
@@ -724,7 +753,7 @@ class mainHandler:
                 " compatible with the following complevels: {complevels}"
             )
             string = string.format_map(subDict)
-            self.db_log_error(errorMsg=string, colorcode=31, delay=0)
+            self.err_log_error(errorMsg=string, colorcode=31, delay=0)
             print3(self.win, "\nPress any key to exit...", 0, 0)
             self.win.getch()
             sys.exit(1)
@@ -732,10 +761,10 @@ class mainHandler:
             self.room = rooms[self.roomID]
         elif self.starting_room in rooms:
             self.room = rooms[self.starting_room]
-            self.db_roomIDerror()
+            self.err_roomIDerror()
         else:
             self.room = rooms[1]
-            self.db_roomIDerror()
+            self.err_roomIDerror()
         self.ui_drawtitlebar()
         self.history.append(self.roomID)
         if len(self.history) > HISTORY_MAX_LEN:
@@ -774,7 +803,7 @@ def run(
     win: curses.window,
     starting_room: int | None = None,
     saveFileName: str = "game",
-    saveFile: dict = {},
+    saveFile: dict[None, None] | Save | None = None,
     gameFile_name: str = "game",
     gameFile_path: str = "./",
 ) -> None:
@@ -815,13 +844,15 @@ def run(
     tui.colorsetup(win)
     curses.cbreak()
     curses.noecho()
+    if saveFile is None:
+        saveFile: dict[None, None] = {}
     if saveFile:
-        validSave = save_handler.save_validifier(saveFile)
+        validSave: bool = save_handler.save_validifier(saveFile)
     if saveFile and validSave:
-        save_version = saveFile.get("save_version", 0)
-        engine_info = toml_reader.read_toml("engine_info.toml")
+        save_version: int = int(saveFile.get("save_version", 0))
+        engine_info: EngineInfo = toml_reader.read_toml("engine_info.toml")
         engine_save_version = engine_info.get("SaveVersion", 0)
-        supported_version = save_version <= engine_save_version
+        supported_version: bool = (save_version <= engine_save_version)
     if saveFile and not validSave:
         timestamp = datetime.now().isoformat()
         with open("error.log", "a") as log:
@@ -830,8 +861,8 @@ def run(
                 + "\nContinuing without save file...\n"
             )
     if saveFile and not supported_version:
-        timestamp = datetime.now().isoformat()
-        with open("error.log", "a") as log:
+        timestamp: str = datetime.now().isoformat()
+        with open(file="error.log", mode="a") as log:
             log.write(
                 f"{timestamp} Warning: Could not parse save file. The save"
                 + f" file has a version of {save_version}, but this version of"
@@ -839,7 +870,7 @@ def run(
                 + "Continuing without save file...\n"
             )
     if saveFile and validSave and supported_version:
-        main = mainHandler(
+        main: MainHandler = MainHandler(
             win,
             saveFile["RoomID"],
             saveFile,
@@ -848,7 +879,7 @@ def run(
             saveFileName,
         )
     else:
-        main = mainHandler(
+        main: MainHandler = MainHandler(
             win,
             starting_room,
             gameFile_name=gameFile_name,

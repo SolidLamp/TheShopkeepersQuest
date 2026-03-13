@@ -86,7 +86,7 @@ def handle_save(
         win (curses.window): A curses window instance.
 
         game_path (str, optional):
-        The relative path to the gamefile. 
+        The relative path to the gamefile.
         Defaults to "game".
 
         save_path (str, optional):
@@ -97,10 +97,10 @@ def handle_save(
     if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
         save_handler.read_save(save_path)
     ):
-        saveFile = save_handler.read_save(save_path)
+        saveFile: dict[Any, Any] = save_handler.read_save(save_path)
         shm.run(
             win,
-            0,
+            starting_room=0,
             saveFileName=save_path,
             saveFile=saveFile,
             gameFile_name=game_path,
@@ -108,9 +108,7 @@ def handle_save(
         )
     else:
         shm.run(
-            win, saveFileName=save_path,
-            gameFile_name=game_path,
-            gameFile_path="./"
+            win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./"
         )
 
 
@@ -166,4 +164,3 @@ def title() -> None:
     print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)
-
