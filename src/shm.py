@@ -63,6 +63,7 @@ class Room(TypedDict, total=False):
 
 class Save(TypedDict):
     """This is the canonical format for save files with save version 1."""
+
     Game: str
     Saved: str
     save_version: int
@@ -163,7 +164,6 @@ class MainHandler:
             self.roomID: int = self.starting_room
         if saveFile:
             self.setup_loadSave(saveFile)
-            self.current_saveid = saveFile.get("save_id", None)
 
     def setup_gameFile(self, module_name: str, file_path: str) -> ModuleType:
         """
@@ -199,25 +199,37 @@ class MainHandler:
         from the save file.
 
         Args:
-            saveFile (dict): A dictionary in the SHM Engine save file format.
+            saveFile (Save | None): A dictionary in the SHM Engine save file format.
         """
-        if saveFile is None:
+
+        if not isinstance(saveFile, dict):
             return
+
+        game_id = self.gameInfo.get("game_id")
         if (
-            saveFile.get("game_id") != self.gameInfo.get("game_id")
+            saveFile.get("game_id", game_id) != game_id
             or saveFile["Game"] != self.gameInfo["title"]
         ):
-            # put error handling here
+            self.err_log_error(
+                error_type="Error",
+                error_msg="The save file does not correspond to the current game. "
+                        + "Continuing without save file...",
+            )
             self.roomID = self.starting_room
             return
+
         self.history.extend(saveFile["History"])
+
         for item in saveFile["game_state"]:
             setattr(self.game_state, item, saveFile["game_state"][item])
+
         if hasattr(self.game_state, "inventory") and "inventory" in saveFile:
             for item in saveFile["inventory"]["items"]:
                 self.game_state.inventory.items.append(item)
             for item in saveFile["inventory"]["keyItems"]:
                 self.game_state.inventory.keyItems.append(item)
+
+        self.current_saveid = saveFile.get("save_id", None)
 
     def setup_stdscr(self) -> None:
         """Sets up the main activity window, inside the border."""
@@ -314,7 +326,6 @@ class MainHandler:
             if attribute in attribute_types and not isinstance(
                 room[attribute], attribute_types[attribute]
             ):
-                real_type = type(room[attribute])
                 text += f"\033[33mWarning: Attribute '{attribute}' in room {roomno} "
                 text += f"is {type(room[attribute])}!\n\033[0m"
             if re.fullmatch(r"Option\d+Requirements", attribute):
@@ -332,50 +343,56 @@ class MainHandler:
 
     def err_log_error(
         self,
-        errorMsg: str,
-        colorcode: int = 0,
-        delay: float = 0.0,
-        pauseAtNewline: float = 0.0,
+        error_type: str,
+        error_msg: str,
     ) -> None:
         """
         Log an error - that's basically it.
 
         Args:
-            errorMsg (str): The message to display to the user
+            error_type (str):
+            The type of error to display.
+            Valid values: "Alert", "Critical Error", "Error", "Warning"
 
-            colorcode (int, optional, deprecated):
-            Changes the colour of the text; see tui.print3.
-            Defaults to 0.
 
-            delay (float, optional):
-            The time between characters being printed; see tui.print3.
-            Defaults to 0.0.
-
-            pauseAtNewline (float, optional):
-            The time that is waited when a new line is created; see tui.print3.
-            Defaults to 0.0.
+            error_msg (str):
+            The message to display to the user.
         """
-        timestamp = datetime.now().isoformat()
+        colours: dict[str, str] = {
+            "Alert": "\033[36m",
+            "Critical Error": "\033[31;1m",
+            "Error": "\033[31m",
+            "Warning": "\033[33m",
+        }
+        timestamp: str = datetime.now().isoformat()
+        error_txt = f"{error_type}: {error_msg}\n"
         with open("error.log", "a") as log:
-            log.write(f"{timestamp} {errorMsg}\n")
+            log.write(f"[{timestamp}] {error_txt}")
         self.win.refresh()
-        self.ui_drawtitlebar(centreOverride="Error", leftOverride="", rightOverride="")
-        print3(self.win, errorMsg, colorcode, delay, pauseAtNewline)
+        self.ui_drawtitlebar(
+            centreOverride=error_type, leftOverride="", rightOverride=""
+        )
+        print3(self.win, text=error_msg, delay=0)
+        error_txt: str = colours.get(error_type, "") + error_txt
+        if error_type == "Critical Error":
+            tui.option(self.win, text=error_txt, options=["Exit"])
+            sys.exit(1)
+        else:
+            tui.option(self.win, text=error_txt, options=["Dismiss"])
 
     def err_roomIDerror(self) -> None:
         """Handle an error when an invalid room is attempted to be loaded"""
-        self.err_log_error(f"Non-critical Error: Invalid RoomID: {self.roomID}", 33, 0)
-        query = self.ui_option(
-            "Non-critical Error: Invalid RoomID",
-            ["Open Debug Menu", "Quit Game"],
-            False,
+        self.err_log_error(
+            error_type="Error", error_msg=f"Invalid RoomID: {self.roomID}"
+        )
+        query: int | str = tui.option(
+            self.win,
+            text="Error: Invalid RoomID",
+            options=["Open Debug Menu", "Dismiss"],
         )
         if query == 0:
             self.db_debug()
-            sys.exit(2)
-        if query == 1:
-            sys.exit(2)
-        print3(self.win, "\nPress any key to exit...", 0, 0)
+        self.roomID = self.starting_room
 
     def ui_drawtitlebar(
         self,
@@ -546,7 +563,7 @@ class MainHandler:
         time.sleep(0.5)
         query = tui.option(self.win, printText + "Try again?", ["Yes", "No"])
         if query == 1 or query == "q":
-            sys.exit()
+            sys.exit(0)
         else:
             self.roomID = self.starting_room
 
@@ -589,7 +606,7 @@ class MainHandler:
             Defaults to True.
 
         Returns:
-            int: The user's chosen option, as corresponds to place in the array.
+            int: The user's chosen option, as corresponds to place in the lists.
         """
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
@@ -633,9 +650,9 @@ class MainHandler:
                     self.gameInfo.get("game_id", None),
                     self.current_saveid,
                 )
-                sys.exit()
+                sys.exit(0)
             if query == 1:
-                sys.exit()
+                sys.exit(0)
             else:
                 query = self.ui_option(text, choices, Inventory)
         elif query == "d":
@@ -752,11 +769,8 @@ class MainHandler:
                 " version of the {Name} {MajorVersion}.\n{Name} {MajorVersion} is only"
                 " compatible with the following complevels: {complevels}"
             )
-            string = string.format_map(subDict)
-            self.err_log_error(errorMsg=string, colorcode=31, delay=0)
-            print3(self.win, "\nPress any key to exit...", 0, 0)
-            self.win.getch()
-            sys.exit(1)
+            string: str = string.format_map(subDict)
+            self.err_log_error(error_type="Critical Error", error_msg=string)
         if self.roomID in rooms:
             self.room = rooms[self.roomID]
         elif self.starting_room in rooms:
@@ -852,7 +866,7 @@ def run(
         save_version: int = int(saveFile.get("save_version", 0))
         engine_info: EngineInfo = toml_reader.read_toml("engine_info.toml")
         engine_save_version = engine_info.get("SaveVersion", 0)
-        supported_version: bool = (save_version <= engine_save_version)
+        supported_version: bool = save_version <= engine_save_version
     if saveFile and not validSave:
         timestamp = datetime.now().isoformat()
         with open("error.log", "a") as log:
