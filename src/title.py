@@ -151,7 +151,7 @@ def main(win: curses.window) -> None:
         1: {
             "Save 1": lambda: handle_save(win, game_path="game", save_path="game1"),
             "Save 2": lambda: handle_save(win, game_path="game", save_path="game2"),
-            "Save 3": lambda: handle_save(win, game_path="game", save_path="game3"),
+            "Save 3": lambda: handle_save(win, game_path="game2", save_path="game3"),
             "Back": 0,
         },
     }

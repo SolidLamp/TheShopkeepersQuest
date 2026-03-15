@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import os.path
 import shutil
+from typing import Any
 import uuid
 
 
@@ -47,6 +48,26 @@ def read_save(file_name: str = "game") -> dict:
     return gamedata
 
 
+def type_normaliser(value: Any) -> int | float | str | bool | list | dict | None:
+    NORMALISED_TYPES = (int, float, str, bool, list, dict)
+    if isinstance(value, NORMALISED_TYPES):
+        return value
+    if hasattr(value, "__int__"):
+        return int(value)
+    if hasattr(value, "__float__"):
+        return float(value)
+    if hasattr(value, "__str__"):
+        return str(value)
+    if hasattr(value, "__bool__"):
+        return bool(value)
+    if hasattr(value, "__iter__"):
+        return list(value)
+    if hasattr(value, "__dict__"):
+        return dict(value)
+    else:
+        return None
+
+
 def write_json(saveFile: str, file_name: str = "game.sav") -> None:
     """file_name should include the file extension"""
     with open(file_name, "wt") as f:
@@ -69,16 +90,21 @@ def write_save(
     if existing_save and existing_save.get("save_id", "2") != save_id:
         copy_save(file_name, existing_save)
     file_name += ".sav"
+
+    json_game_state = {
+        k: type_normaliser(v) for k, v in game_state.__dict__.copy().items()
+    }
+
     dictionary = {
         "Game": gameInfo["title"],
         "Saved": datetime.now().isoformat(),
         "save_version": save_version,
         "RoomID": room,
         "History": history,
-        "game_state": game_state.__dict__.copy(),
+        "game_state": json_game_state,
     }
-    if "inventory" in dictionary["game_state"]:
-        dictionary["game_state"].pop("inventory")
+    if "inventory" in json_game_state:
+        json_game_state.pop("inventory")
         dictionary.update({"inventory": game_state.__dict__["inventory"].__dict__})
     if game_id:
         dictionary.update({"game_id": game_id})

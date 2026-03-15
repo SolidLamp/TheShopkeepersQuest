@@ -4,4 +4,5 @@ __pycache__/
 *.zip
 *.sav
 **/error.log
+game2.py
 
