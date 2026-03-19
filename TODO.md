@@ -18,4 +18,5 @@
 - [ ] Add shop system
 - [ ] RPG Battle System (copy from Morshu: The Game???)
 - [ ] Update to src/ layout
+- [ ] Typing file
 - [x] Write documentation for the engine

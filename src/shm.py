@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from _curses import window
 from code import interact
 from collections.abc import Callable
 import curses
@@ -14,8 +15,9 @@ import re
 import sys
 import time
 from types import ModuleType
-from typing import Any, TypedDict, NotRequired
+from typing import Any, Callable, TypedDict, NotRequired
 
+from box import Box
 import save_handler
 import toml_reader
 import tui
@@ -55,13 +57,14 @@ class Room(TypedDict, total=False):
     KeyItem: str
     KeyItemRequirements: Callable[[], bool]
     KeyItemText: str
-    # Battle: something
+    Enemy: int | list[int]  # Refers to the ID of the enemy
     Options: list[str]
     Option0Requirements: Callable[[], bool]
-    Inventory: bool
-    Move: list[int]
-    Automove: int
+    Move: list[int | tuple[str, int]]
+    Automove: int | tuple[str, int]
     InstantAutomove: bool
+    Inventory: bool
+    CanSave: bool
     Lose: str
     Ending: str
 
@@ -93,13 +96,182 @@ class EngineInfo(TypedDict):
     DefaultBorderStyle: int
 
 
-class formatDict(dict):
+class FormatDict(dict):
     """A subclass of a dictionary which will not replace any key not present
     when format_map is used, preventing exceptions."""
 
     def __missing__(self, key: str) -> str:
         string = "{" + key + "}"
         return string
+
+
+class BattleHooks(TypedDict):
+    level_hook: Box[int]
+    exp_hook: Box[int]
+    power_hook: Box[int]
+    health_hook: Box[int]
+    get_money_hook: Callable[[curses.window, int], None]
+    loss_text_hook: str
+
+
+class Enemy(TypedDict):
+    name: str
+    health: int
+    exp: int
+    money: int
+
+
+class BattleHandler:
+    """This class handles battles within the SHM Engine."""
+
+    def __init__(
+        self, stdscr: curses.window, hook_dict: BattleHooks, enemy: Enemy
+    ) -> None:
+        self.win: curses.window = stdscr
+
+        self.hooks: BattleHooks = hook_dict
+        self.player_level: Box[int] = self.hooks["level_hook"]
+        self.player_exp: Box[int] = self.hooks["exp_hook"]
+        self.player_power: Box[int] = self.hooks["power_hook"]
+        self.max_player_health: Box[int] = self.hooks["health_hook"]
+        self.player_health: int = int(self.max_player_health)
+        self.get_money: Callable[[window, int], None] = self.hooks["get_money_hook"]
+        self.loss_text: str = self.hooks["loss_text_hook"]
+
+        self.enemy: Enemy = enemy
+        self.enemy_name: str = self.enemy.get("name", "Default Enemy")
+        self.enemy_health: int = self.enemy.get("health", 100)
+        self.max_enemy_health: int = self.enemy.get("health", 100)
+        self.enemy_exp: int = self.enemy.get("exp", 30)
+        self.money: int = self.enemy.get("money", 5)
+
+    def battle_handler(self) -> bool:
+        total_round: int = 0
+        total_var: float = 0.0
+        while self.player_health > 0 and self.enemy_health > 0:
+            self.player_health, self.enemy_health, total_var = self.bat_battle()
+            total_round += 1
+        if self.player_health == 0 and self.enemy_health == 0:
+            return True
+        if self.player_health > 0:
+            print3(self.win, text="\n\033[32mYou won!\033[0m")
+            self.win.refresh()
+            time.sleep(0.25)
+            tui.print3(
+                self.win, text=f"\n\033[32mYou gained {self.enemy_exp} EXP!\033[0m"
+            )
+            self.win.refresh()
+            time.sleep(0.25)
+
+            self.player_exp += self.enemy_exp
+            while self.player_exp > 100:
+                self.player_level += 1
+                self.player_exp -= 100
+                self.player_power += 10
+                self.player_health += 20
+                print3(
+                    self.win,
+                    text="\n\033[32mYou leveled up!\n"
+                    + f"Current level: {self.player_level}\033[0m",
+                )
+                self.win.refresh()
+                time.sleep(0.25)
+            avg_var: float = total_var / total_round
+            gained_money: int = int(self.money * avg_var)
+            self.get_money(self.win, gained_money)
+            self.win.refresh()
+            time.sleep(0.75)
+            return True
+        else:
+            self.ui_lose(self.loss_text)  # TODO: fix this; probably do if false
+            return False
+
+    def bat_battle(self, total_var: float = 0.0) -> tuple[int, int, float]:
+        VARIANCE_DIVISOR: int = 10
+        self.win.clear()
+        text: str = self.bat_hud(
+            player_health,
+            max_player_health,
+            level,
+            enemy_name,
+            enemy_health,
+            max_enemy_health,
+        )
+        in_menu: bool = True
+        while in_menu:
+            options: list[str] = ["Fight", "Item", "Escape"]
+            Options = IntEnum("Options", [("Fight", 0), ("Inventory", 1), ("Run", 2)])
+            query = "q"
+            while not (isinstance(query, int)) and query != "i":
+                query: int | str = tui.option(self.win, text, options)
+            if query == "i":
+                query = Options.Inventory
+            if query == Options.Fight:
+                variance: float = player_power / VARIANCE_DIVISOR
+                damage = player_power + rand(int(-1 * variance), int(variance))
+                enemy_health -= damage
+                print3(self.win, f"You did {damage} damage to {enemy_name}!")
+                self.win.refresh()
+                time.sleep(0.25)
+                in_menu = False
+                break
+            elif query == Options.Inventory:
+                items: set[str] = set(self.game_state.inventory.items)
+                keyItems: set[str] = set(self.game_state.inventory.keyItems)
+                player_items: set[str] = items | keyItems
+                usables: set[str] = set(self.battle_items.keys()) & player_items
+                in_menu = bool(len(usables))
+                if not (in_menu):
+                    print3(self.win, text="Your inventory is empty.")
+                    time.sleep(0.35)
+                    continue
+                options: list[str] = list(usables)
+                options.append("Back")
+                while not (isinstance(query, int)) and query != "i":
+                    query: int | str = tui.option(self.win, text, options)
+                if query == "i":
+                    query = len(options) - 1
+                self.battle_items[query]()
+
+            elif query == Options.Run:
+                if rand(start=0, stop=4) != 3 or enemy_name in self.battle_boss_list:
+                    print3(self.win, text="\nYou couldn't get away!")
+                    self.win.refresh()
+                    time.sleep(0.25)
+                    in_menu = False
+                    break
+                else:
+                    print3(self.win, text="\nYou managed to get away!")
+                    self.win.refresh()
+                    time.sleep(0.65)
+                    self.win.clear()
+                    return (0, 0, total_var)
+            else:
+                continue
+        damage: int = enemy_power
+        if enemy_power >= 20 and self.gameInfo.get("variable_damage", True):
+            variance: float = enemy_power / VARIANCE_DIVISOR
+            total_var += variance
+            damage += rand(start=int(-1 * variance), stop=int(variance))
+        player_health -= damage
+        print3(self.win, text=f"\033[31m\n{enemy_name} did {damage} damage!\033[0m")
+        self.win.refresh()
+        time.sleep(0.45)
+        return (player_health, enemy_health, total_var)
+
+    def bat_hud(self) -> str:
+        get_hp_bar = lambda hp, maxhp: str("▊" * math.floor(hp / maxhp * 10))
+        make_hud = lambda name, hp, maxhp, hpbar: f"{name}: {hp}/{maxhp}    {hpbar}"
+        make_ui = lambda name, hp, maxhp: make_hud(
+            name, hp, maxhp, hpbar=get_hp_bar(hp, maxhp)
+        )
+
+        player_name: str = f"You (Level {self.player_level})"
+        enemui = make_ui(self.enemy_name, self.enemy_health, self.max_enemy_health)
+        playui = make_ui(self.player_name, self.player_health, self.max_player_health)
+
+        text: str = f"{enemui}\n\n{playui}\n"
+        return text
 
 
 class MainHandler:
@@ -146,7 +318,7 @@ class MainHandler:
         """
         self.COMPATIBLE_COMPLEVELS: list[int] = [1, 2]
         self.current_saveid: int | str | None = None
-        self.engineInfo: formatDict = formatDict(
+        self.engineInfo: FormatDict = FormatDict(
             toml_reader.read_toml("engine_info.toml")
         )
         self.game: ModuleType = self.setup_gameFile(gameFile_name, gameFile_path)
@@ -557,7 +729,7 @@ class MainHandler:
             "title": self.gameInfo.get("title", "{title}"),
             "utime": datetime.now().timestamp(),
         }
-        subDict = formatDict(subDict)
+        subDict = FormatDict(subDict)
         if self.room and "Desc" in self.room:
             subDict["desc"] = self.room["Desc"]
         string = string.format_map(subDict)
@@ -908,7 +1080,7 @@ class MainHandler:
         in_menu: bool = True
         while in_menu:
             options: list[str] = ["Fight", "Item", "Escape"]
-            Options = IntEnum("Options", [("Fight", 1), ("Inventory", 2), ("Run", 3)])
+            Options = IntEnum("Options", [("Fight", 0), ("Inventory", 1), ("Run", 2)])
             query = "q"
             while not (isinstance(query, int)) and query != "i":
                 query: int | str = tui.option(self.win, text, options)
