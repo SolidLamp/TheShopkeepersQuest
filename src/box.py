@@ -202,6 +202,14 @@ class Box(Generic[T]):
         """String representation of the box."""
         return str(self.value)
 
+    def __index__(self) -> int:
+        """Returns an integer index of the object."""
+        try:
+            value = int(self.value)
+        except TypeError as e:
+            raise TypeError(f"{type(self.index)} is not compatible with int.\n{e}")
+        return value
+
     def __copy__(self) -> Self:
         """Duplicates the immutable box to a new box object."""
         copied_box: Box[T] = Box(self.value)

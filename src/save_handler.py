@@ -6,6 +6,9 @@ from typing import Any
 import uuid
 
 
+# TODO: Save version 2: box
+
+
 def save_validifier(saveFile: dict) -> bool:
     if not isinstance(saveFile, dict):
         return False
