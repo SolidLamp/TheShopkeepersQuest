@@ -93,6 +93,14 @@ fields. The following table has all expected values within gameInfo:
 | variable_damage         | bool  | No        | Whether any battles will have |
 |                         |       |           | partially RNG-based damage.   |
 +-------------------------+-------+-----------+-------------------------------+
+| hide_warnings           | bool  | No        | If enabled, no warnings will  |
+|                         |       |           | be displayed to the user, but |
+|                         |       |           | are logged in error.log.      |
++-------------------------+-------+-----------+-------------------------------+
+| disable_debug           | bool  | No        | If enabled, the debug menu    |
+|                         |       |           | becomes inaccessible when     |
+|                         |       |           | pressing 'd'.                 |
++-------------------------+-------+-----------+-------------------------------+
 
 
 history

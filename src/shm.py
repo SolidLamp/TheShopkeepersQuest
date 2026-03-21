@@ -491,6 +491,8 @@ class MainHandler:
 
     def db_debug(self) -> None:
         """The debug menu"""
+        if "disable_debug" in self.gameInfo and self.gameInfo["disable_debug"]:
+            return
         debug_options = ["Test room IDs", "Enable debug mode", "Test room attributes"]
         query = tui.option(self.win, "SHM Engine Debug Menu", debug_options)
         match query:
@@ -617,6 +619,10 @@ class MainHandler:
         error_txt = f"{error_type}: {error_msg}\n"
         with open("error.log", "a") as log:
             log.write(f"[{timestamp}] {error_txt}")
+
+        if self.gameInfo.get("hide_warnings", False) and error_type == "Warning":
+            return
+
         self.win.refresh()
         self.ui_drawtitlebar(
             centreOverride=error_type, leftOverride="", rightOverride=""
@@ -634,13 +640,6 @@ class MainHandler:
         self.err_log_error(
             error_type="Error", error_msg=f"Invalid RoomID: {self.roomID}"
         )
-        query: int | str = tui.option(
-            self.win,
-            text="Error: Invalid RoomID",
-            options=["Open Debug Menu", "Dismiss"],
-        )
-        if query == 0:
-            self.db_debug()
         self.roomID = self.starting_room
 
     def ui_drawtitlebar(
@@ -982,23 +981,24 @@ class MainHandler:
             query = self.ui_option(text, Options)
         self.fn_roomIDHandler(OptionsIndex[query])
 
-    def fn_roomIDHandler(self, tmpID: int | tuple[str, int]) -> None:
+    def fn_roomIDHandler(self, room_id: int | tuple[str, int]) -> None:
         """
         Handles room IDs and moving between rooms.
-         - Handles raw ID numbers, e.g. 2;
-         - Handles negative ID numbers, e.g. -2 (which are references to history);
-         - Handles history tuples, e.g. (history, -2)
+
+        * Handles raw ID numbers, e.g. 2;
+        * Handles negative ID numbers, e.g. -2 (which are references to history);
+        * Handles history tuples, e.g. (history, -2)
 
         Args:
             tmpID (int | tuple[str, int]): The ID number to be parsed.
         """
         negIDsupport = not (self.game.gameInfo["complevel"] == 1)
-        if isinstance(tmpID, tuple) and tmpID[0] == "history":
-            self.roomID = self.history[tmpID[1]]
-        elif isinstance(tmpID, int) and (tmpID < 0 and negIDsupport):
-            self.roomID = self.history[tmpID]
-        elif isinstance(tmpID, int) and (tmpID >= 0 or not negIDsupport):
-            self.roomID = tmpID
+        if isinstance(room_id, tuple) and room_id[0] == "history":
+            self.roomID = self.history[room_id[1]]
+        elif isinstance(room_id, int) and (room_id < 0 and negIDsupport):
+            self.roomID = self.history[room_id]
+        elif isinstance(room_id, int) and (room_id >= 0 or not negIDsupport):
+            self.roomID = room_id
 
     def fn_gameLoop(self) -> None:
         """
@@ -1015,9 +1015,9 @@ class MainHandler:
         subDict["complevels"] = str(self.COMPATIBLE_COMPLEVELS)[1:-1]
         if complevel not in self.COMPATIBLE_COMPLEVELS:
             string = (
-                "ERROR: This game (complevel {complevel}) is not compatible with this"
-                " version of the {Name} {MajorVersion}.\n{Name} {MajorVersion} is only"
-                " compatible with the following complevels: {complevels}"
+                "This game (complevel {complevel}) is not compatible with this"
+                " version of the {Name} {MajorVersion}.\n{Name} {MajorVersion}"
+                " is only compatible with the following complevels: {complevels}"
             )
             string: str = string.format_map(subDict)
             self.err_log_error(error_type="Critical Error", error_msg=string)
