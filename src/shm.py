@@ -837,7 +837,7 @@ class MainHandler:
         print3(self.win, text, delay=self.room.get("TextSpeed", self.text_speed))
         return text
 
-    def ui_option(self, text: str, choices: list[str], Inventory: bool = True) -> int:
+    def ui_option(self, text: str, options: list[str], Inventory: bool = True) -> int:
         """
         Handle options for the SHM Engine, as a wrapper for tui.option();
         - Handles quit option
@@ -857,6 +857,7 @@ class MainHandler:
         Returns:
             int: The user's chosen option, as corresponds to place in the lists.
         """
+        choices = options.copy()
         if not hasattr(self.game_state, "inventory"):
             Inventory = False
         query = 0
@@ -903,10 +904,10 @@ class MainHandler:
             if query == 1:
                 sys.exit(0)
             else:
-                query = self.ui_option(text, choices, Inventory)
+                query = self.ui_option(text, options, Inventory)
         elif query == "d":
             self.db_debug()
-            query = self.ui_option(text, choices, Inventory)
+            query = self.ui_option(text, options, Inventory)
         elif Inventory and (query == choices.index("Inventory") or query == "i"):
             self.win.clear()
             self.ui_drawtitlebar(centreOverride="Inventory")
@@ -914,9 +915,9 @@ class MainHandler:
             print3(self.win, "\nPress any key to exit inventory.")
             self.win.getch()
             self.ui_drawtitlebar()
-            query = self.ui_option(text, choices, Inventory)
+            query = self.ui_option(text, options, Inventory)
         if not isinstance(query, int):
-            query = self.ui_option(text, choices, Inventory)
+            query = self.ui_option(text, options, Inventory)
         return query
 
     def fn_itemHandler(self, attr: str) -> None:
