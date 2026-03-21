@@ -90,6 +90,9 @@ fields. The following table has all expected values within gameInfo:
 | border_style            | int   | No        | The style of border used for  |
 |                         |       |           | the game. (Usually omitted)   |
 +-------------------------+-------+-----------+-------------------------------+
+| variable_damage         | bool  | No        | Whether any battles will have |
+|                         |       |           | partially RNG-based damage.   |
++-------------------------+-------+-----------+-------------------------------+
 
 
 history

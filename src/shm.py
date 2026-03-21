@@ -109,7 +109,10 @@ class BattleHooks(TypedDict):
     power_hook: Box[int]
     health_hook: Box[int]
     get_money_hook: Callable[[curses.window, int], None]
-    # loss_text_hook: str
+    loss_text: str
+    level_up_xp: NotRequired[Callable[[], int | Box[int]] | int | Box[int]]
+    power_increase: NotRequired[Callable[[], int | Box[int]] | int | Box[int]]
+    health_increase: NotRequired[Callable[[], int | Box[int]] | int | Box[int]]
 
 
 class Enemy(TypedDict):
@@ -124,7 +127,12 @@ class BattleHandler:
     """This class handles battles within the SHM Engine."""
 
     def __init__(
-        self, stdscr: curses.window, hook_dict: BattleHooks, enemy: Enemy
+        self,
+        stdscr: curses.window,
+        hook_dict: BattleHooks,
+        enemy: Enemy,
+        boss_list: list[str],
+        variable_damage: bool,
     ) -> None:
         self.win: curses.window = stdscr
 
@@ -146,18 +154,62 @@ class BattleHandler:
         self.money: int = self.enemy.get("money", 5)
         self.enemy_power: int = self.enemy.get("power", 580)
 
+        self.level_up_xp: int | Box[int] = 0
+        self.power_increase: int | Box[int] = 0
+        self.health_increase: int | Box[int] = 0
+
+        self.boss_list: list[str] = boss_list
+        self.variable_damage: bool = variable_damage
+
         self.in_fight: bool = True
         self.total_var: float = 0.0
 
-    def battle_handler(self) -> bool:
+    def setup_level_up_stats(self) -> None:
         POWER_INCREASE: int = 10
         HEALTH_INCREASE: int = 10
         LEVEL_UP_XP: int = 100
+
+        if "level_up_xp" in self.hooks and isinstance(
+            self.hooks["level_up_xp"], Callable
+        ):
+            self.level_up_xp = self.hooks["level_up_xp"]()
+        elif "level_up_xp" in self.hooks and isinstance(
+            self.hooks["level_up_xp"], (int, Box)
+        ):
+            self.level_up_xp = self.hooks["level_up_xp"]
+        else:
+            self.level_up_xp = LEVEL_UP_XP
+
+        if "power_increase" in self.hooks and isinstance(
+            self.hooks["power_increase"], Callable
+        ):
+            self.power_increase = self.hooks["power_increase"]()
+        elif "power_increase" in self.hooks and isinstance(
+            self.hooks["power_increase"], (int, Box)
+        ):
+            self.power_increase = self.hooks["power_increase"]
+        else:
+            self.power_increase = POWER_INCREASE
+
+        if "health_increase" in self.hooks and isinstance(
+            self.hooks["health_increase"], Callable
+        ):
+            self.health_increase = self.hooks["health_increase"]()
+        elif "health_increase" in self.hooks and isinstance(
+            self.hooks["health_increase"], (int, Box)
+        ):
+            self.health_increase = self.hooks["health_increase"]
+        else:
+            self.health_increase = HEALTH_INCREASE
+
+    def battle_handler(self) -> bool:
+        self.setup_level_up_stats()
+
         total_round: int = 0
         while self.player_health > 0 and self.enemy_health > 0 and self.in_fight:
-            self.bat_battle()
+            self.do_turn()
             total_round += 1
-        if self.in_fight = False:
+        if not self.in_fight:
             return True
         if self.player_health == 0 and self.enemy_health == 0:
             return True
@@ -172,17 +224,18 @@ class BattleHandler:
             time.sleep(0.25)
 
             self.player_exp += self.enemy_exp
-            while self.player_exp >= LEVEL_UP_XP:
+            while self.player_exp >= self.level_up_xp:
                 self.player_level += 1
-                self.player_exp -= LEVEL_UP_XP
-                self.player_power += POWER_INCREASE
-                self.player_health += HEALTH_INCREASE
+                self.player_exp -= self.level_up_xp
+                self.player_power += self.power_increase
+                self.player_health += self.health_increase
                 print3(
                     self.win,
                     text="\n\033[32mYou leveled up!\n"
                     + f"Current level: {self.player_level}\033[0m",
                 )
                 self.win.refresh()
+                self.setup_level_up_stats()
                 time.sleep(0.25)
             avg_var: float = self.total_var / total_round
             gained_money: int = int(self.money * avg_var)
@@ -193,10 +246,10 @@ class BattleHandler:
         else:
             return False
 
-    def bat_battle(self) -> None:
+    def do_turn(self) -> None:
         VARIANCE_DIVISOR: int = 10
         self.win.clear()
-        text: str = self.bat_hud()
+        text: str = self.create_hud()
         in_menu: bool = True
         while in_menu:
             options: list[str] = ["Fight", "Item", "Escape"]
@@ -208,10 +261,12 @@ class BattleHandler:
                 query = Options.Inventory
             if query == Options.Fight:
                 variance: float = self.player_power / VARIANCE_DIVISOR
-                damage = self.player_power + rand(int(-1 * variance), int(variance))
+                abs_variance: int = rand(int(-1 * variance), int(variance))
+                abs_variance = abs_variance if self.variable_damage else 0
+                damage: int = self.player_power + abs_variance
                 self.enemy_health -= damage
                 self.win.clear()
-                print3(self.win, "\n" + text, delay = 0)
+                print3(self.win, "\n" + text, delay=0)
                 print3(self.win, f"\nYou did {damage} damage to {self.enemy_name}!")
                 self.win.refresh()
                 time.sleep(0.25)
@@ -237,9 +292,7 @@ class BattleHandler:
                 # self.battle_items[query]()
 
             elif query == Options.Run:
-                # TODO: Boss list
-                if rand(start=0, stop=4) != 3 or False:
-                    # self.enemy_name in self.battle_boss_list:
+                if rand(start=0, stop=4) != 3 or self.enemy_name in self.boss_list:
                     print3(self.win, text="\nYou couldn't get away!")
                     self.win.refresh()
                     time.sleep(0.25)
@@ -254,10 +307,15 @@ class BattleHandler:
                     return
             else:
                 continue
+        
+        if self.enemy_health <= 0:
+            return
+
         damage: int = self.enemy_power
-        if self.enemy_power >= 20 and True:
-            # TODO: self.gameInfo.get("variable_damage", True):
+        if self.enemy_power >= 20:
             variance: float = self.enemy_power / VARIANCE_DIVISOR
+            abs_variance: int = rand(int(-1 * variance), int(variance))
+            abs_variance = abs_variance if self.variable_damage else 0
             self.total_var += variance
             damage += rand(start=int(-1 * variance), stop=int(variance))
         self.player_health -= damage
@@ -266,7 +324,7 @@ class BattleHandler:
         time.sleep(0.45)
         return
 
-    def bat_hud(self) -> str:
+    def create_hud(self) -> str:
         get_hp_bar = lambda hp, maxhp: str("▊" * math.floor(hp / maxhp * 10))
         make_hud = lambda name, hp, maxhp, hpbar: f"{name}: {hp}/{maxhp}    {hpbar}"
         make_ui = lambda name, hp, maxhp: make_hud(
@@ -1006,10 +1064,13 @@ class MainHandler:
             self.fn_gameLoop()
 
     def fn_battle_handler(self, enemy_name: str = "Default Enemy") -> None:
+        DEFAULT_LOSS_TEXT: str = "You have fallen in battle..."
+
         if not self.battle_hooks:
             return
 
-        # TODO: Get enemy
+        # TODO: Get this stuff
+
         enemy: Enemy = {
             "name": "Enemy",
             "health": 20,
@@ -1018,13 +1079,20 @@ class MainHandler:
             "power": 30,
         }
 
-        battle: BattleHandler = BattleHandler(self.win, self.battle_hooks, enemy)
+        boss_list = []
+
+        variable_damage = True
+
+        battle: BattleHandler = BattleHandler(
+            self.win, self.battle_hooks, enemy, boss_list, variable_damage
+        )
         if battle.battle_handler():
-            pass
+            return
+        elif "loss_text" in self.battle_hooks:
+            loss_text: str = self.battle_hooks.get("loss_text")
         else:
-            # loss_text: str = self.hooks.get("loss_text_hook", )
-            loss_text: str = "String"  # TODO: fix this
-            self.ui_lose(loss_text)
+            loss_text: str = DEFAULT_LOSS_TEXT
+        self.ui_lose(loss_text)
 
 
 # battle_hooks = player power, level, money,
