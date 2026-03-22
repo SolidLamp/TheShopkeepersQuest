@@ -3,6 +3,7 @@ import json
 import os.path
 import shutil
 from typing import Any
+import unicodedata
 import uuid
 
 
@@ -51,7 +52,7 @@ def read_save(file_name: str = "game") -> dict:
     return gamedata
 
 
-def type_normaliser(value: Any) -> int | float | str | bool | list | dict | None:
+def normalise_type(value: Any) -> int | float | str | bool | list | dict | None:
     NORMALISED_TYPES = (int, float, str, bool, list, dict)
     if isinstance(value, NORMALISED_TYPES):
         return value
@@ -70,9 +71,17 @@ def type_normaliser(value: Any) -> int | float | str | bool | list | dict | None
     else:
         return None
 
+def filename_compat(file_name: str) -> str:
+    illegal_chars = str.maketrans(r'\/?%*:|"<>,;= ', "..._._.___.._.")
+    file_name = file_name.translate(illegal_chars)
+    file_name = "".join(ch for ch in file_name if unicodedata.category(ch)[0]!="C")
+    file_name = file_name.encode(encoding="ascii", errors="ignore").decode()
+    return file_name
 
 def write_json(saveFile: str, file_name: str = "game.sav") -> None:
     """file_name should include the file extension"""
+    file_name = os.path.normpath(file_name)
+    file_name = filename_compat(file_name)
     with open(file_name, "wt") as f:
         f.write(saveFile)
 
@@ -95,7 +104,7 @@ def write_save(
     file_name += ".sav"
 
     json_game_state = {
-        k: type_normaliser(v) for k, v in game_state.__dict__.copy().items()
+        k: normalise_type(v) for k, v in game_state.__dict__.copy().items()
     }
 
     dictionary = {
@@ -120,9 +129,10 @@ def write_save(
 
 
 def copy_save(file_name: str, existing_save: dict) -> None:
-    file_name = remove_extension(file_name)
-    old_save = os.path.abspath(file_name + ".sav")
-    old_copy = (
+    file_name: str = remove_extension(file_name)
+    old_save: str = os.path.abspath(file_name + ".sav")
+    old_copy: str = (
         os.path.abspath(file_name) + "-" + existing_save.get("Saved", "copy") + ".sav"
     )
+    old_copy = filename_compat(old_copy)
     shutil.copyfile(old_save, old_copy)
