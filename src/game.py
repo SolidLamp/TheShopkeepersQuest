@@ -279,7 +279,6 @@ def get_rooms(win: curses.window) -> dict[int, dict]:
             "Text": "Current Rubies:"
             + str(game_state.rubies)
             + "\n\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies.",
-            "Options": ["Purchase the bow", "Talk", "Talk", "Leave"],
             "Option0Requirements": lambda: not hasItem("Bow and Arrow"),
             "Option1Requirements": lambda: not hasItem("Bow and Arrow"),
         },
