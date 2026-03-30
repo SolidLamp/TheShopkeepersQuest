@@ -19,8 +19,8 @@ should be as follows:
 * Nesting should not be excessive - excluding nesting due to code being within
   a class, nesting should be minimised.
 
-   * General rule: if you have to scroll horizontally to focus on the code,
-     it's too much nesting.
+  * General rule: if you have to scroll horizontally to focus on the code,
+    it's too much nesting.
 
 * Class definitions should not be nested within each other, as it makes code
   complicated and difficult to read.

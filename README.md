@@ -3,7 +3,7 @@
 ![Logo](./img.png)
 
 The Shopkeeper's Quest is a text-based adventure game written in Python. It is licensed MIT and it is free for anyone to play and modify.<br>
-Based on [Steamed Hams: The Game Plus!](https://github.com/SolidLamp/Steamed-Hams)<br>
+Built using the SHM Engine 1.2<br>
 
 Inspired by:
 
@@ -17,5 +17,5 @@ Inspired by:
 ## Usage and Requirements
 
 - Requires Python 3.11+.
-- Requires ncurses (Linux/MacOS/*BSD/*nix), which is likely pre-installed. For Windows, you must install windows-curses from PyPI using PIP (or your favourite Python package tool).
-- To run the game, you simply run `TheShopKeepersQuest.py` with your installation of Python (e.g. `python3 TheShopKeepersQuest.py` on Debian and many others; doesn't matter). It's a simple Python script, really.
+- Requires ncurses, ususally pre-installed on *nix systems. For Windows, you must install [windows-curses](https://pypi.org/project/windows-curses/).
+- To run the game, you should execute the `src/` as a module. e.g. `python -m src` in the parent directory. This varies for different systems.
