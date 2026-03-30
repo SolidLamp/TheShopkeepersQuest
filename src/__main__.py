@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
+import os
 import platform
 import sys
-import os
 
-import shm
-import toml_reader
-import title
+from src import shm, title, toml_reader
+
 
 def main() -> None:
     if platform.system() != "Windows" and os.getuid() == 0:
@@ -34,6 +33,7 @@ def main() -> None:
         sys.exit(0)
     else:
         title.title()
+
 
 if __name__ == "__main__":
     main()

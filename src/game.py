@@ -1,13 +1,12 @@
-from collections.abc import Callable
 import curses
-import time
-from dataclasses import dataclass, field
 import random
 import sys
+import time
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from typing import Any
 
-import tui
-import toml_reader
+from src import toml_reader, tui
 
 print3: Callable[..., None] = tui.print3
 
@@ -27,16 +26,16 @@ history: list[int] = []
 
 endingText: dict[str, str] = {
     "Good": "And so, overnight, all the people returned to the village, as "
-        + "if they had never left.\nSoon after, the village was lifted into high "
-        + "spirits as the harvest had been the best in almost thirty years.\n"
-        + "Despite the prospering village, you decided to leave.\nYou had no "
-        + "desire to stay after the events you just experienced, and you would "
-        + "rather leave than stay to make some money.",
+    + "if they had never left.\nSoon after, the village was lifted into high "
+    + "spirits as the harvest had been the best in almost thirty years.\n"
+    + "Despite the prospering village, you decided to leave.\nYou had no "
+    + "desire to stay after the events you just experienced, and you would "
+    + "rather leave than stay to make some money.",
     "Secret": "And so, overnight, you became the new shopkeeper, but nothing "
-        + "really changed in the end.\nThe villagers never returned, but many "
-        + "travellers came, hearing about what happened.\nMany decided to stay "
-        + "after a plentiful harvest brought good omens to the village.\nThis, "
-        + "however, would not be the last of it...\n...and you knew that.",
+    + "really changed in the end.\nThe villagers never returned, but many "
+    + "travellers came, hearing about what happened.\nMany decided to stay "
+    + "after a plentiful harvest brought good omens to the village.\nThis, "
+    + "however, would not be the last of it...\n...and you knew that.",
     "SHM": "You achieved the\n|\nEnding.\nTry Again?",
 }
 
@@ -347,7 +346,7 @@ def get_rooms(win: curses.window) -> dict[int, dict]:
         },
         114: {
             "Text": "You are within the cave. It is difficult to see. "
-                    + "There is a path to your northeast and northwest.",
+            + "There is a path to your northeast and northwest.",
             "Item": "A Weird shard of something",
             "ItemRequirements": lambda: not hasItem("A Weird shard of something")
             and random.randrange(start=0, stop=3) == 2,

@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
-from collections.abc import Callable
 import curses
+import math
+import os.path
+import platform
+import re
+import sys
+import time
+from collections.abc import Callable
 from datetime import datetime
 from enum import IntEnum
 from importlib.util import module_from_spec, spec_from_file_location
 from itertools import chain
-import math
-import os.path
-import platform
 from random import randrange as rand
-import re
-import sys
-import time
 from types import ModuleType
-from typing import Any, TypedDict, NotRequired
+from typing import Any, NotRequired, TypedDict
 
-from box import Box
-import save_handler
-import toml_reader
-import tui
-from tui import print3
+from _frozen_importlib import ModuleSpec
 
+from src import save_handler, toml_reader, tui
+from src.box import Box
+from src.tui import print3
 
 HISTORY_MAX_LEN: int = 10
 AUTOMOVE_DELAY: float = 1.0
@@ -307,7 +306,7 @@ class BattleHandler:
                     return
             else:
                 continue
-        
+
         if self.enemy_health <= 0:
             return
 
@@ -433,9 +432,13 @@ class MainHandler:
         if file_path[-3:] != ".py":
             file_path = os.path.join(file_path, module_name)
             file_path = file_path + ".py"
-        spec = spec_from_file_location(module_name, file_path)
+        spec: ModuleSpec | None = spec_from_file_location(
+            name=module_name,
+            location=file_path,
+            submodule_search_locations=[os.path.dirname(file_path)],
+        )
         try:
-            module = module_from_spec(spec)  # pyright: ignore
+            module: ModuleType = module_from_spec(spec)  # pyright: ignore
         except:
             raise ImportError("Failed to import game file")
         sys.modules[module_name] = module
@@ -1021,6 +1024,8 @@ class MainHandler:
             )
             string: str = string.format_map(subDict)
             self.err_log_error(error_type="Critical Error", error_msg=string)
+        with open("error.log", "a") as log:
+            log.write(str(rooms))
         if self.roomID in rooms:
             self.room = rooms[self.roomID]
         elif self.starting_room in rooms:

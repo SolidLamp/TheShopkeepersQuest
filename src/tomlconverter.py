@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import curses
-import game
-import tui
 
-#NOTE: This script is for testing purposes only!
+from src import game, tui
+
+# NOTE: This script is for testing purposes only!
 
 
 def doit3(room: dict, string: str) -> str:

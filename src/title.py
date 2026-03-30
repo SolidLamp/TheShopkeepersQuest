@@ -1,10 +1,7 @@
-from typing import Any
-
-
-from collections.abc import Callable
 import os.path
 import sys
-import time
+from collections.abc import Callable
+from typing import Any
 
 try:
     import curses
@@ -12,10 +9,7 @@ except ImportError as e:
     print(f"The curses module was not found.\nError: {e}")
     sys.exit(1)
 
-import save_handler
-import shm
-import toml_reader
-import tui
+from src import save_handler, shm, toml_reader, tui
 
 
 class MiniSHM:
@@ -104,11 +98,11 @@ def handle_save(
             saveFileName=save_path,
             saveFile=saveFile,
             gameFile_name=game_path,
-            gameFile_path="./",
+            gameFile_path="./src",
         )
     else:
         shm.run(
-            win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./"
+            win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./src"
         )
 
 

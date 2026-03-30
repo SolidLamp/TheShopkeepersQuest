@@ -17,6 +17,6 @@
 - [x] Allow choices to have the same name without breaking
 - [ ] Add shop system
 - [ ] RPG Battle System (copy from Morshu: The Game???)
-- [ ] Update to src/ layout
+- [x] Update to src/ layout
 - [ ] Typing file
 - [x] Write documentation for the engine

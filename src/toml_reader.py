@@ -1,8 +1,7 @@
-from typing import Any
-
-
 import os
 import tomllib
+from pathlib import Path
+from typing import Any
 
 
 class formatDict(dict):
@@ -11,7 +10,7 @@ class formatDict(dict):
         return string
 
 
-def read_toml(file: str = "game.toml") -> dict[Any, Any]:
+def read_toml(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]:
     """
     Reads a TOML file.
 
@@ -20,10 +19,17 @@ def read_toml(file: str = "game.toml") -> dict[Any, Any]:
         The path to the TOML file which will be read.
         Defaults to "game.toml".
 
+        abs_path (bool, optional):
+        If true, the path to the file will be interpreted as absolute.
+        Otherwise, the path will be interpreted as relative to this directory.
+        Defaults to False.
+
     Returns:
         dict[Any, Any]:
         A dictionary representation of the TOML file.
     """
+    if not abs_path:
+        file: str = os.path.join(os.path.dirname(__file__), file)
     if not os.path.exists(file):
         return {}
     else:
@@ -71,7 +77,7 @@ def replace_text(text: str) -> str:
         "\\X1b": "\033",
         "\\X1B": "\033",
     }
-    for k,v in escape_chars.items():
+    for k, v in escape_chars.items():
         text: str = text.replace(k, v)
     return text
 
@@ -92,13 +98,13 @@ def ansi_replace(gamedata: dict) -> dict:
 
         if "AlternateText" in gamedata[i]:
             gamedata[i]["AlternateText"] = replace_text(gamedata[i]["AlternateText"])
-        
+
         if "ItemText" in gamedata[i]:
             gamedata[i]["ItemText"] = replace_text(gamedata[i]["ItemText"])
-        
+
         if "KeyItemText" in gamedata[i]:
             gamedata[i]["KeyItemText"] = replace_text(gamedata[i]["KeyItemText"])
-        
+
         if "Desc" in gamedata[i]:
             gamedata[i]["Desc"] = replace_text(gamedata[i]["Desc"])
 
@@ -126,7 +132,7 @@ def strtoint_key(gamedata: dict) -> dict:
     return new_gamedata
 
 
-def read_gamedata(file: str = "game.toml") -> dict:
+def read_gamedata(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]:
     """
     Reads gamedata from a TOML file.
 
@@ -135,13 +141,21 @@ def read_gamedata(file: str = "game.toml") -> dict:
         The path to the gamedata TOML file which will be read.
         Defaults to "game.toml".
 
+        abs_path (bool, optional):
+        If true, the path to the file will be interpreted as absolute.
+        Otherwise, the path will be interpreted as relative to this directory.
+        Defaults to False.
+
     Returns:
         dict: The parsed game data as a Python dictionary.
     """
+    if not abs_path:
+        file: str = os.path.join(os.path.dirname(__file__), file)
+        file: str = os.path.abspath(file)
     if not os.path.exists(file):
         return {}
     else:
-        gamedata = read_toml(file)
+        gamedata = read_toml(file, abs_path=True)
         ansi_replace(gamedata)
         gamedata = strtoint_key(gamedata)
         return gamedata

@@ -1,11 +1,10 @@
-from datetime import datetime
 import json
 import os.path
 import shutil
-from typing import Any
 import unicodedata
 import uuid
-
+from datetime import datetime
+from typing import Any
 
 # TODO: Save version 2: box
 
@@ -71,12 +70,14 @@ def normalise_type(value: Any) -> int | float | str | bool | list | dict | None:
     else:
         return None
 
+
 def filename_compat(file_name: str) -> str:
     illegal_chars = str.maketrans(r'\/?%*:|"<>,;= ', "..._._.___.._.")
     file_name = file_name.translate(illegal_chars)
-    file_name = "".join(ch for ch in file_name if unicodedata.category(ch)[0]!="C")
+    file_name = "".join(ch for ch in file_name if unicodedata.category(ch)[0] != "C")
     file_name = file_name.encode(encoding="ascii", errors="ignore").decode()
     return file_name
+
 
 def write_json(saveFile: str, file_name: str = "game.sav") -> None:
     """file_name should include the file extension"""
