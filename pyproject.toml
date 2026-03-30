@@ -1,6 +1,6 @@
 [project]
 name = "TheShopkeepersQuest"
-version = "1.2-dev5"
+version = "1.2-dev7"
 description = "The Shopkeeper's Quest - an open-source, text-based adventure game."
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
@@ -30,6 +30,15 @@ classifiers = [
 [build-system]
 requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ["py311", "py312", "py313", "py314"]
+
+[tool.isort]
+line_length = 88
+profile = "black"
+py_version = 311
 
 
 
