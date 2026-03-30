@@ -3,7 +3,8 @@ import os
 import platform
 import sys
 
-from src import shm, title, toml_reader
+from src import title, toml_reader
+from src.typing import FormatDict
 
 
 def main() -> None:
@@ -16,7 +17,7 @@ def main() -> None:
             match arg:
                 case "--about" | "--help" | "-h":
                     gameInfo = toml_reader.read_toml("cli_info.toml")
-                    gameInfo = shm.formatDict(gameInfo)
+                    gameInfo = FormatDict(gameInfo)
                     if not gameInfo["Patch"] or gameInfo["Patch"][0] == "-":
                         gameInfo["PatchConnector"] = ""
                     else:

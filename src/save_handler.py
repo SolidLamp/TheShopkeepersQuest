@@ -6,10 +6,12 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+from src.typing import GameInfo, Save
+
 # TODO: Save version 2: box
 
 
-def save_validifier(saveFile: dict) -> bool:
+def save_validifier(saveFile: Save) -> bool:
     if not isinstance(saveFile, dict):
         return False
     if "Game" not in saveFile or not isinstance(saveFile["Game"], str):
@@ -30,7 +32,7 @@ def remove_extension(file_name: str) -> str:
     return file_name
 
 
-def read_json(file_name: str = "file.json") -> dict:
+def read_json(file_name: str = "file.json") -> dict[Any, Any]:
     """Reads json from a the file `file_name`"""
     if not os.path.exists(file_name):
         return {}
@@ -40,15 +42,16 @@ def read_json(file_name: str = "file.json") -> dict:
         return gamedata
 
 
-def read_save(file_name: str = "game") -> dict:
+def read_save(file_name: str = "game") -> Save:
     """
     Reads the save from {game}.sav.
     file_name should not include the .sav file extension
     """
     file_name = remove_extension(file_name)
     file_name += ".sav"
-    gamedata = read_json(file_name)
-    return gamedata
+    gamedata: dict[Any, Any] = read_json(file_name)
+    casted_gamedata: Save = Save(**gamedata)
+    return casted_gamedata
 
 
 def normalise_type(value: Any) -> int | float | str | bool | list | dict | None:
@@ -89,7 +92,7 @@ def write_json(saveFile: str, file_name: str = "game.sav") -> None:
 
 def write_save(
     game_state,
-    gameInfo: dict,
+    gameInfo: GameInfo,
     room: int,
     history: list[int],
     file_name: str = "game",

@@ -13,113 +13,17 @@ from importlib.util import module_from_spec, spec_from_file_location
 from itertools import chain
 from random import randrange as rand
 from types import ModuleType
-from typing import Any, NotRequired, TypedDict
+from typing import Any
 
 from _frozen_importlib import ModuleSpec
 
 from src import save_handler, toml_reader, tui
-from src.box import Box
+from src.typing import BattleHooks, Box, Enemy, EngineInfo, FormatDict, Save
 from src.tui import print3
 
 HISTORY_MAX_LEN: int = 10
 AUTOMOVE_DELAY: float = 1.0
 ENDING_DELAY: float = 0.5
-
-
-class Room(TypedDict, total=False):
-    # NOTE: Type checking would require the 'extra_items' attribute from Python 3.15;
-    # Python 3.15 has not yet had a stable release yet as I am writing this comment;
-    # thus, this TypedDict cannot be used for type checking;
-    # it is thus solely used for documentation
-    # NOTE #2: Do not code at 11 PM or you will start hallucinating like AI slop
-    """
-    This is the canonical format for rooms in the SHM Engine 1.2.
-    This has a main purpose of showing the supported keys, not type checking.
-    This TypedDict supports additional fields, although compromising type checking,
-    as fields such as Option[]Requirements are variable, where # represents an int.
-    Rooms within a game are recommended to use this order for their attributes.
-    """
-    Text: str
-    Requirements: Callable[[], bool]
-    AlternateText: str
-    TextSpeed: float
-    Desc: str
-    titlebarCentre: str
-    titlebarLeft: str
-    titlebarRight: str
-    Script: Callable[[], None]
-    Item: str
-    ItemRequirements: Callable[[], bool]
-    ItemText: str
-    KeyItem: str
-    KeyItemRequirements: Callable[[], bool]
-    KeyItemText: str
-    Enemy: int | list[int]  # Refers to the ID of the enemy
-    Options: list[str]
-    Option0Requirements: Callable[[], bool]
-    Move: list[int | tuple[str, int]]
-    Automove: int | tuple[str, int]
-    InstantAutomove: bool
-    Inventory: bool
-    CanSave: bool
-    Lose: str
-    Ending: str
-
-
-class Save(TypedDict):
-    """This is the canonical format for save files with save version 1."""
-
-    Game: str
-    Saved: str
-    save_version: int
-    RoomID: int
-    History: list[int]
-    game_state: dict[str, Any]
-    inventory: dict[str, list[str]]
-    game_id: NotRequired[int | str]
-    save_id: int | str
-
-
-class EngineInfo(TypedDict):
-    Name: str
-    MajorVersion: str
-    Patch: str
-    Indev: bool
-    PythonVer: float
-    ReleaseDate: str
-    Dist: str
-    Link: str
-    SaveVersion: int
-    DefaultBorderStyle: int
-
-
-class FormatDict(dict):
-    """A subclass of a dictionary which will not replace any key not present
-    when format_map is used, preventing exceptions."""
-
-    def __missing__(self, key: str) -> str:
-        string = "{" + key + "}"
-        return string
-
-
-class BattleHooks(TypedDict):
-    level_hook: Box[int]
-    exp_hook: Box[int]
-    power_hook: Box[int]
-    health_hook: Box[int]
-    get_money_hook: Callable[[curses.window, int], None]
-    loss_text: str
-    level_up_xp: NotRequired[Callable[[], int | Box[int]] | int | Box[int]]
-    power_increase: NotRequired[Callable[[], int | Box[int]] | int | Box[int]]
-    health_increase: NotRequired[Callable[[], int | Box[int]] | int | Box[int]]
-
-
-class Enemy(TypedDict):
-    name: str
-    health: int
-    exp: int
-    money: int
-    power: int
 
 
 class BattleHandler:

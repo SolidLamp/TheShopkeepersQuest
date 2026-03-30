@@ -1,7 +1,7 @@
 import os.path
 import sys
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Callable, NoReturn
 
 try:
     import curses
@@ -22,7 +22,10 @@ class MiniSHM:
     """
 
     def __init__(
-        self, win: curses.window, options_dict: dict, title_string: str = "SHM Engine"
+        self,
+        win: curses.window,
+        options_dict: dict[int | str, dict[str, int | Callable[[], NoReturn | None]]],
+        title_string: str = "SHM Engine",
     ) -> None:
         """
         Initialises MiniSHM
@@ -38,11 +41,13 @@ class MiniSHM:
             The string to display to the user while navigating the title screen.
             Defaults to "SHM Engine".
         """
-        self.options_dict = options_dict
-        self.title_string = title_string
-        self.win = win
+        self.options_dict: dict[
+            int | str, dict[str, int | Callable[[], NoReturn | None]]
+        ] = options_dict
+        self.title_string: str = title_string
+        self.win: curses.window = win
 
-    def _option(self, key: int | str = 0) -> None:
+    def _option(self, key: str | int = 0) -> int:
         """
         Displays an option to the user
 
@@ -54,8 +59,8 @@ class MiniSHM:
         Returns:
             int: The chosen option by the user.
         """
-        choices: Any = self.options_dict[key]
-        options: list[Any] = list(choices.keys())
+        choices: dict[str, int | Callable[[], None]] = self.options_dict[key]
+        options: list[str] = list(choices.keys())
         query: int | str = tui.option(self.win, self.title_string, options, False)
         if isinstance(query, str):
             sys.exit(0)
@@ -63,9 +68,9 @@ class MiniSHM:
 
     def screen(self, task: int | str | Callable[[], None] = 0) -> None:
         while isinstance(task, int) or isinstance(task, str):
-            query = self._option(task)
-            choices = self.options_dict[task]
-            task = list(choices.values())[query]
+            query: str | int = self._option(task)
+            choices: dict[str, int | Callable[[], None]] = self.options_dict[task]
+            task: int | Callable[[], None] = list(choices.values())[query]
         if callable(task):
             task()
 
@@ -137,7 +142,7 @@ def main(win: curses.window) -> None:
                                                        """
         + "\033[0m"
     )
-    screen_options = {
+    screen_options: dict[int | str, dict[str, int | Callable[[], NoReturn | None]]] = {
         0: {
             "Play The Shopkeeper's Quest": 1,
             "Quit": lambda: sys.exit(),
