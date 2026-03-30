@@ -113,6 +113,11 @@ The following categories of commit are recommended:
 | Packaging     | A commit which affects how the project is packaged, or      |
 |               | another similar process such as compilation, etc.           |
 +---------------+-------------------------------------------------------------+
+| Workspace     | A commit which affects the project workspace, such as       |
+|               | configuration for tools, such as .vscode or .isort.cfg.     |
+|               | Note that it is not recommended to use this for changes to  |
+|               | pyproject.toml.                                             |
++---------------+-------------------------------------------------------------+
 
 *Note that the distinction between Enhancement and Feature is often blurred.
 Generally, a new room attribute or API are considered to be a Feature.
