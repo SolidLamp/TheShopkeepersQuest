@@ -110,6 +110,9 @@ The following categories of commit are recommended:
 |               | or the SHM Engine, being limited to only code clean up and  |
 |               | styling fixes.                                              |
 +---------------+-------------------------------------------------------------+
+| Packaging     | A commit which affects how the project is packaged, or      |
+|               | another similar process such as compilation, etc.           |
++---------------+-------------------------------------------------------------+
 
 *Note that the distinction between Enhancement and Feature is often blurred.
 Generally, a new room attribute or API are considered to be a Feature.
