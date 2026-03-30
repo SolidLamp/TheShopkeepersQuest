@@ -1,11 +1,5 @@
-# #!/usr/bin/env python3
-# import sys
-# from contextlib import chdir
+#!/usr/bin/env python3
 
-# from src.__main__ import main
+import runpy
 
-# if __name__ == "__main__":
-#     with chdir("./src"): 
-#         main()
-# I have no idea what I am doing
-
+runpy.run_module(mod_name="src", run_name="__main__")
