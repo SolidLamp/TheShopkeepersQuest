@@ -10,6 +10,7 @@ from datetime import datetime
 from importlib.machinery import ModuleSpec
 from importlib.util import module_from_spec, spec_from_file_location
 from itertools import chain
+from random import randrange as rand
 from types import ModuleType
 from typing import Any
 
@@ -21,8 +22,6 @@ from src.typing import BattleHooks, Enemy, EngineInfo, FormatDict, Save
 HISTORY_MAX_LEN: int = 10
 AUTOMOVE_DELAY: float = 1.0
 ENDING_DELAY: float = 0.5
-
-
 
 
 class MainHandler:
@@ -786,6 +785,80 @@ class MainHandler:
         else:
             loss_text: str = DEFAULT_LOSS_TEXT
         self.ui_lose(loss_text)
+
+    def fn_battle_get_enemy(self) -> Enemy | None:
+        """
+        _summary_
+
+        Returns:
+            Enemy | None:
+            None indicates that there is no enemy, or if an error 
+            was encountered and an enemy was unable to be obtained.
+            Enemy is a dict (see typeddicts.py) that represents the enemy.
+        """
+        # If Enemies and EnemyChances do not exist, we cannot pick an enemy
+        if "Enemies" not in self.room or "EnemyChances" not in self.room:
+            return
+        if not isinstance(self.room["Enemies"], list):
+            return
+        if not isinstance(self.room["EnemyChances"], list):
+            return
+        # If Enemies and EnemyChances are not the same length, then they are
+        # meaningless.
+        if not len(self.room["Enemies"]) == len(self.room["EnemyChances"]):
+            return
+
+        total_chance: float = 0.0  # sum of all chances
+
+        # number of digits after decimal point in longest float
+        # used to determine the required accuracy
+        longest_decimal: int = 0
+
+        for i in self.room["EnemyChances"]:
+            # If a chance is not a number, it is meaningless; quit
+            if not isinstance(i, float | int):
+                return
+            length: int = len(str(i)) - 2
+            if length > longest_decimal:
+                longest_decimal = length
+            total_chance += i
+
+        multiplier: float = 1.0
+        chances: list[float | int] = self.room["EnemyChances"].copy()
+
+        # If the developer put total chances at above 1, we need to sort this out
+        if total_chance > 1:
+            multiplier: float = 1 / total_chance
+
+        if multiplier != 1:
+            for i in chances:
+                i = i * multiplier
+                length: int = len(str(i)) - 2
+                if length > longest_decimal:
+                    longest_decimal = length
+        accuracy: int = int("1" + "0" * longest_decimal)
+        rng: int | float = rand(0, accuracy + 1)
+        rng /= accuracy
+        chosen_enemy: int = -1
+
+        # Get the randomly-chosen enemy
+        for i in range(len(chances)):
+            rng -= chances[i]
+            if rng <= 0:
+                chosen_enemy = i
+                break
+
+        # No enemy has been chosen; return None
+        if chosen_enemy == -1:
+            return
+
+        enemy = self.room["Enemies"][chosen_enemy]
+        # Enemy must be string
+        if not isinstance(enemy, str):
+            return
+
+        # TODO: Put the detection of dict(int, Enemy) in game, which name tBC
+
 
 
 # battle_hooks = player power, level, money,
