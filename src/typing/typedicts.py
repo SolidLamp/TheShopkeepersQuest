@@ -89,7 +89,8 @@ class Room(TypedDict, total=False):
     KeyItem: str
     KeyItemRequirements: Callable[[], bool]
     KeyItemText: str
-    Enemy: int | list[int]  # Refers to the ID of the enemy
+    Enemies: list[int]  # Refers to the ID of the enemy
+    EnemyChances: list[float | int]
     Options: list[str]
     Option0Requirements: Callable[[], bool]
     Move: list[int | tuple[str, int]]

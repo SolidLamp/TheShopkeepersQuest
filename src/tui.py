@@ -142,7 +142,7 @@ def print3(
                 time.sleep(delay)
         i += 1
     win.refresh()
-    return ()
+    return
 
 
 def handleCSI_m(
