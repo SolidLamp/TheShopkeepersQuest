@@ -3,6 +3,7 @@ from curses import window
 from typing import Any, NotRequired, TypedDict
 
 from .box import Box
+from .room import Room
 
 
 class BattleHooks(TypedDict):
@@ -61,45 +62,18 @@ class GameInfo(TypedDict):
     disable_debug: bool
 
 
-class Room(TypedDict, total=False):
-    # NOTE: Type checking would require the 'extra_items' attribute from Python 3.15;
-    # Python 3.15 has not yet had a stable release yet as I am writing this comment;
-    # thus, this TypedDict cannot be used for type checking;
-    # it is thus solely used for documentation
-    # NOTE #2: Do not code at 11 PM or you will start hallucinating like AI slop
-    """
-    This is the canonical format for rooms in the SHM Engine 1.2.
-    This has a main purpose of showing the supported keys, not type checking.
-    This TypedDict supports additional fields, although compromising type checking,
-    as fields such as Option[]Requirements are variable, where # represents an int.
-    Rooms within a game are recommended to use this order for their attributes.
-    """
-    Text: str
-    Requirements: Callable[[], bool]
-    AlternateText: str
-    TextSpeed: float
-    Desc: str
-    titlebarCentre: str
-    titlebarLeft: str
-    titlebarRight: str
-    Script: Callable[[], None]
-    Item: str
-    ItemRequirements: Callable[[], bool]
-    ItemText: str
-    KeyItem: str
-    KeyItemRequirements: Callable[[], bool]
-    KeyItemText: str
-    Enemies: list[int]  # Refers to the ID of the enemy
-    EnemyChances: list[float | int]
-    Options: list[str]
-    Option0Requirements: Callable[[], bool]
-    Move: list[int | tuple[str, int]]
-    Automove: int | tuple[str, int]
-    InstantAutomove: bool
-    Inventory: bool
-    CanSave: bool
-    Lose: str
-    Ending: str
+class GameFile(TypedDict):
+    gameInfo: GameInfo
+    history: list[int]
+    defaultEnding: str
+    defaultLose: str
+    Inventory: NotRequired[type]
+    gameState: NotRequired[type]
+    game_state: Any
+    enemies: NotRequired[dict[str, Enemy]]
+    boss_list: NotRequired[list[str]]
+    battle_hooks: NotRequired[BattleHooks]
+    get_rooms: Callable[[window], dict[int, Room]]
 
 
 class Save(TypedDict):
