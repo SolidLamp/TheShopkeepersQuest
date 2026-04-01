@@ -31,6 +31,11 @@ classifiers = [
 requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
+[tool.basedpyright]
+include = ["src"]
+pythonPlatform = "All"
+pythonVersion = "3.11"
+
 [tool.black]
 line-length = 88
 target-version = ["py311", "py312", "py313"]
