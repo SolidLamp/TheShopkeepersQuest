@@ -713,8 +713,6 @@ class MainHandler:
             )
             string: str = string.format_map(subDict)
             self.err_log_error(error_type="Critical Error", error_msg=string)
-        with open("error.log", "a") as log:
-            log.write(str(rooms))
         if self.roomID in rooms:
             self.room = rooms[self.roomID]
         elif self.starting_room in rooms:
