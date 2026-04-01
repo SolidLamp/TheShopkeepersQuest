@@ -1,9 +1,17 @@
 from collections.abc import Callable
 from curses import window
-from typing import Any, NotRequired, TypedDict
+from typing import Any, Literal, NotRequired, Required, TypedDict
 
 from .box import Box
 from .room import Room
+
+
+class BattleItem(TypedDict, total=False):
+    description: str
+    item_type: Required[Literal["Damage", "Heal", "Escape", "Script"]]
+    magnitude: int # only used with "Damage" and "Heal" types
+    script: Callable[[], None] # only used with "Script" type
+    escape_chance: float # must be less than 1; only used with "Escape" type
 
 
 class BattleHooks(TypedDict):
@@ -70,9 +78,10 @@ class GameFile(TypedDict):
     Inventory: NotRequired[type]
     gameState: NotRequired[type]
     game_state: Any
-    enemies: NotRequired[dict[str, Enemy]]
+    enemies: NotRequired[dict[int | str, Enemy]]
     boss_list: NotRequired[list[str]]
     battle_hooks: NotRequired[BattleHooks]
+    battle_items: NotRequired[dict[str, BattleItem]]
     get_rooms: Callable[[window], dict[int, Room]]
 
 

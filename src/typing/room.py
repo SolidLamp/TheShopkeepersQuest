@@ -1,4 +1,4 @@
-from typing import Callable, TypedDict
+from typing import Callable, Required, TypedDict
 
 
 class Room(TypedDict, total=False):
@@ -10,10 +10,10 @@ class Room(TypedDict, total=False):
     This is the canonical format for rooms in the SHM Engine 1.2.
     This has a main purpose of showing the supported keys, not type checking.
     This TypedDict supports additional fields, although compromising type checking,
-    as fields such as Option[]Requirements are variable, where # represents an int.
+    as fields such as Option[int]Requirements are variable.
     Rooms within a game are recommended to use this order for their attributes.
     """
-    Text: str
+    Text: Required[str]
     Requirements: Callable[[], bool]
     AlternateText: str
     TextSpeed: float
@@ -28,7 +28,8 @@ class Room(TypedDict, total=False):
     KeyItem: str
     KeyItemRequirements: Callable[[], bool]
     KeyItemText: str
-    Enemies: list[int]  # Refers to the ID of the enemy
+    BattleText: str
+    Enemies: list[int | str]  # Refers to the ID or name of the enemy
     EnemyChances: list[float | int]
     Options: list[str]
     Option0Requirements: Callable[[], bool]

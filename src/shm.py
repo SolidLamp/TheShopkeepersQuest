@@ -249,6 +249,9 @@ class MainHandler:
             "KeyItem": str,
             "KeyItemRequirements": Callable,
             "KeyItemText": str,
+            "BattleText": str,
+            "Enemies": list,
+            "EnemyChances": list,
             "Options": list,
             "Inventory": bool | int,
             "Move": list,
@@ -733,7 +736,7 @@ class MainHandler:
             self.fn_itemHandler("Item")
         if "KeyItem" in self.room:
             self.fn_itemHandler("KeyItem")
-        if "Battle" in self.room:
+        if "Enemies" in self.room and "EnemyChances" in self.room:
             self.fn_battle_handler()
         if "Automove" in self.room:
             self.fn_roomIDHandler(self.room["Automove"])
@@ -757,9 +760,16 @@ class MainHandler:
 
     def fn_battle_handler(self, enemy_name: str = "Default Enemy") -> None:
         DEFAULT_LOSS_TEXT: str = "You have fallen in battle..."
+        TIME_BATTLETEXT_DISPLAYED: float = 0.5
 
         if not self.battle_hooks:
             return
+
+        self.fn_battle_get_enemy()
+
+        if "BattleText" in self.room and isinstance(self.room["BattleText"], str):
+            print3(self.win, self.room["BattleText"])
+            time.sleep(TIME_BATTLETEXT_DISPLAYED)
 
         # TODO: Get this stuff
 
@@ -853,8 +863,8 @@ class MainHandler:
             return
 
         enemy = self.room["Enemies"][chosen_enemy]
-        # Enemy must be string
-        if not isinstance(enemy, str):
+        # Enemy must be string or an integer
+        if not isinstance(enemy, str) and not isinstance(enemy, int):
             return
 
         # TODO: Put the detection of dict(int, Enemy) in game, which name tBC

@@ -6,7 +6,7 @@ from enum import IntEnum
 from random import randrange as rand
 
 from src import tui
-from src.typing import BattleHooks, Box, Enemy
+from src.typing import BattleItem, BattleHooks, Box, Enemy
 from src.tui import print3
 
 
@@ -20,6 +20,7 @@ class BattleHandler:
         enemy: Enemy,
         boss_list: list[str],
         variable_damage: bool,
+        battle_items: dict[str, BattleItem] | None = None
     ) -> None:
         self.win: curses.window = stdscr
 
@@ -47,6 +48,7 @@ class BattleHandler:
 
         self.boss_list: list[str] = boss_list
         self.variable_damage: bool = variable_damage
+        self.battle_items: dict[str, BattleItem] | None = battle_items
 
         self.in_fight: bool = True
         self.total_var: float = 0.0
@@ -146,6 +148,7 @@ class BattleHandler:
                 query: int | str = tui.option(self.win, text, options)
             if query == "i":
                 query = Options.Inventory
+
             if query == Options.Fight:
                 variance: float = self.player_power / VARIANCE_DIVISOR
                 abs_variance: int = rand(int(-1 * variance), int(variance))
@@ -159,12 +162,14 @@ class BattleHandler:
                 time.sleep(0.25)
                 in_menu = False
                 break
+
             elif query == Options.Inventory:
                 break
                 items: set[str] = set(self.game_state.inventory.items)
                 keyItems: set[str] = set(self.game_state.inventory.keyItems)
                 player_items: set[str] = items | keyItems
                 usables: set[str] = set(self.battle_items.keys()) & player_items
+
                 in_menu = bool(len(usables))
                 if not (in_menu):
                     print3(self.win, text="Your inventory is empty.")
