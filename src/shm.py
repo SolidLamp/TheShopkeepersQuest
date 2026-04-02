@@ -463,7 +463,7 @@ class MainHandler:
         Returns:
             str: The output string that has been formatted.
         """
-        subDict = {
+        key_dict = {
             "abbr": self.gameInfo.get("abbr", "{abbr}"),
             "arch": platform.machine(),
             "date": datetime.now().strftime("%Y-%m-%d"),
@@ -478,10 +478,18 @@ class MainHandler:
             "title": self.gameInfo.get("title", "{title}"),
             "utime": datetime.now().timestamp(),
         }
-        subDict = FormatDict(subDict)
+        battle_keys = {
+            "health": self.battle_hooks.get("health_hook", "{health}"),
+            "level": self.battle_hooks.get("level_hook", "{level}"),
+            "xp": self.battle_hooks.get("exp_hook", "{xp}"),
+        }
+        if self.battle_hooks:
+            key_dict.update(battle_keys)
+
+        key_dict = FormatDict(key_dict)
         if self.room and "Desc" in self.room:
-            subDict["desc"] = self.room["Desc"]
-        string = string.format_map(subDict)
+            key_dict["desc"] = self.room["Desc"]
+        string = string.format_map(key_dict)
         return string
 
     def ui_lose(self, lose: str) -> None:
