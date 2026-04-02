@@ -156,7 +156,8 @@ class BattleHandler:
                 time.sleep(0.25)
             avg_var: float = self.total_var / total_round
             gained_money: int = int(self.money * avg_var)
-            self.get_money(self.win, gained_money)
+            if gained_money != 0:
+                self.get_money(self.win, gained_money)
             self.win.refresh()
             time.sleep(0.75)
             return True
