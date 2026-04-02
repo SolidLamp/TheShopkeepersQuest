@@ -219,8 +219,11 @@ class BattleHandler:
                     in_menu = True
                     continue
 
-                # TODO: Update to reflect self.run_chance
-                if rand(start=0, stop=4) != 3:
+                length: int = len(str(float(self.run_chance))) - 2
+                precision: int = int("1" + "0" * length)
+                rng = rand(0, precision + 1) / precision
+
+                if rng >= self.run_chance:
                     print3(self.win, text="\nYou couldn't get away!")
                     self.win.refresh()
                     time.sleep(0.25)

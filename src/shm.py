@@ -821,7 +821,7 @@ class MainHandler:
         total_chance: float = 0.0  # sum of all chances
 
         # number of digits after decimal point in longest float
-        # used to determine the required accuracy
+        # used to determine the required precision
         longest_decimal: int = 0
 
         for i in self.room["EnemyChances"]:
