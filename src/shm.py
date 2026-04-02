@@ -3,6 +3,7 @@ import curses
 import os.path
 import platform
 import re
+from src.typing.typeddicts import Enemy
 import sys
 import time
 from collections.abc import Callable
@@ -764,14 +765,23 @@ class MainHandler:
         while 1:
             self.fn_gameLoop()
 
-    def fn_battle_handler(self, enemy_name: str = "Default Enemy") -> None:
+    def fn_battle_handler(self) -> None:
         DEFAULT_LOSS_TEXT: str = "You have fallen in battle..."
         TIME_BATTLETEXT_DISPLAYED: float = 0.5
 
         if not self.battle_hooks:
             return
 
-        self.fn_battle_get_enemy()
+        if not hasattr(self.game, "enemies"):
+            return
+
+        if not hasattr(self.game, "battle_hooks"):
+            return
+
+        enemy: Enemy | None = self.fn_battle_get_enemy()
+
+        if enemy is None:
+            return
 
         if "BattleText" in self.room and isinstance(self.room["BattleText"], str):
             print3(self.win, self.room["BattleText"])
@@ -779,7 +789,7 @@ class MainHandler:
 
         # TODO: Get this stuff
 
-        enemy: Enemy = {
+        """enemy: Enemy = {
             "name": "Enemy",
             "boss": False,
             "health": 20,
@@ -787,9 +797,7 @@ class MainHandler:
             "money": 10,
             "power": 30,
             "run_chance": 0.75,
-        }
-
-        boss_list = []
+        }"""
 
         variable_damage = True
 
@@ -870,15 +878,14 @@ class MainHandler:
         if chosen_enemy == -1:
             return
 
-        enemy = self.room["Enemies"][chosen_enemy]
+        enemy_id = self.room["Enemies"][chosen_enemy]
         # Enemy must be string or an integer
-        if not isinstance(enemy, str) and not isinstance(enemy, int):
+        if not isinstance(enemy_id, str) and not isinstance(enemy_id, int):
             return
 
-        # TODO: Put the detection of dict(int, Enemy) in game, which name tBC
+        enemy: Enemy | None = self.game.enemies.get(enemy_id, None)
 
-
-# battle_hooks = player power, level, money,
+        return enemy
 
 
 def run(
