@@ -28,10 +28,12 @@ class BattleHooks(TypedDict):
 
 class Enemy(TypedDict):
     name: str
+    boss: bool
     health: int
     exp: int
     money: int
     power: int
+    run_chance: float
 
 
 class EngineInfo(TypedDict):
@@ -79,7 +81,6 @@ class GameFile(TypedDict):
     gameState: NotRequired[type]
     game_state: Any
     enemies: NotRequired[dict[int | str, Enemy]]
-    boss_list: NotRequired[list[str]]
     battle_hooks: NotRequired[BattleHooks]
     battle_items: NotRequired[dict[str, BattleItem]]
     get_rooms: Callable[[window], dict[int, Room]]

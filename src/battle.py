@@ -6,8 +6,8 @@ from enum import IntEnum
 from random import randrange as rand
 
 from src import tui
-from src.typing import BattleItem, BattleHooks, Box, Enemy
 from src.tui import print3
+from src.typing import BattleHooks, BattleItem, Box, Enemy
 
 
 class BattleHandler:
@@ -18,12 +18,12 @@ class BattleHandler:
         stdscr: curses.window,
         hook_dict: BattleHooks,
         enemy: Enemy,
-        boss_list: list[str],
         variable_damage: bool,
-        battle_items: dict[str, BattleItem] | None = None
+        battle_items: dict[str, BattleItem] | None = None,
     ) -> None:
         self.win: curses.window = stdscr
 
+        # Setup hooks
         self.hooks: BattleHooks = hook_dict
         self.player_level: Box[int] = self.hooks["level_hook"]
         self.player_exp: Box[int] = self.hooks["exp_hook"]
@@ -34,22 +34,50 @@ class BattleHandler:
         self.get_money = self.hooks["get_money_hook"]
         # self.loss_text: str = self.hooks["loss_text_hook"]
 
+        # Default values for enemies
+        DEFAULT_NAME: str = "Default Enemy"
+        DEFAULT_HEALTH: int = 100
+        DEFAULT_EXP: int = 30
+        DEFAULT_MONEY: int = 5
+        DEFAULT_POWER: int = 50
+        DEFAULT_RUN_CHANCE: float = 0.75
+
+        # Unpack Enemy and setup enemy values
         self.enemy: Enemy = enemy
-        self.enemy_name: str = self.enemy.get("name", "Default Enemy")
-        self.enemy_health: int = self.enemy.get("health", 100)
-        self.max_enemy_health: int = self.enemy.get("health", 100)
-        self.enemy_exp: int = self.enemy.get("exp", 30)
-        self.money: int = self.enemy.get("money", 5)
-        self.enemy_power: int = self.enemy.get("power", 580)
+        self.enemy_name: str = self.enemy.get("name", DEFAULT_NAME)
+        self.is_boss: bool = self.enemy.get("boss", False)
+        self.enemy_health: int = self.enemy.get("health", DEFAULT_HEALTH)
+        self.max_enemy_health: int = self.enemy.get("health", DEFAULT_HEALTH)
+        self.enemy_exp: int = self.enemy.get("exp", DEFAULT_EXP)
+        self.money: int = self.enemy.get("money", DEFAULT_MONEY)
+        self.enemy_power: int = self.enemy.get("power", DEFAULT_POWER)
+        self.run_chance: float = self.enemy.get("run_chance", DEFAULT_RUN_CHANCE)
 
-        self.level_up_xp: int | Box[int] = 0
-        self.power_increase: int | Box[int] = 0
-        self.health_increase: int | Box[int] = 0
+        # Validate enemy values, and set to default values if invalid
+        if not isinstance(self.enemy_name, str):
+            self.enemy_name = DEFAULT_NAME
+        if not isinstance(self.is_boss, (bool, int)):
+            self.is_boss = False
+        if not isinstance(self.enemy_health, int):
+            self.enemy_health = DEFAULT_HEALTH
+            self.max_enemy_health = DEFAULT_HEALTH
+        if not isinstance(self.enemy_exp, int):
+            self.enemy_exp = DEFAULT_EXP
+        if not isinstance(self.money, int):
+            self.money = DEFAULT_MONEY
+        if not isinstance(self.enemy_power, int):
+            self.enemy_power = DEFAULT_POWER
+        if not isinstance(self.run_chance, (float, int)):
+            self.run_chance = DEFAULT_RUN_CHANCE
 
-        self.boss_list: list[str] = boss_list
+        # Setup other parameters
         self.variable_damage: bool = variable_damage
         self.battle_items: dict[str, BattleItem] | None = battle_items
 
+        # Setup important attributes which will be used by internal methods.
+        self.level_up_xp: int | Box[int] = 0
+        self.power_increase: int | Box[int] = 0
+        self.health_increase: int | Box[int] = 0
         self.in_fight: bool = True
         self.total_var: float = 0.0
 
@@ -184,7 +212,15 @@ class BattleHandler:
                 # self.battle_items[query]()
 
             elif query == Options.Run:
-                if rand(start=0, stop=4) != 3 or self.enemy_name in self.boss_list:
+                if self.is_boss:
+                    print3(self.win, text="\nYou cannot run from a boss!")
+                    self.win.refresh()
+                    time.sleep(0.25)
+                    in_menu = True
+                    continue
+
+                # TODO: Update to reflect self.run_chance
+                if rand(start=0, stop=4) != 3:
                     print3(self.win, text="\nYou couldn't get away!")
                     self.win.refresh()
                     time.sleep(0.25)
@@ -229,4 +265,3 @@ class BattleHandler:
 
         text: str = f"{enemy_hud}\n\n{player_hud}\n"
         return text
-

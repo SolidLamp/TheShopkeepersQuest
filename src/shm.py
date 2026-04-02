@@ -773,10 +773,12 @@ class MainHandler:
 
         enemy: Enemy = {
             "name": "Enemy",
+            "boss": False,
             "health": 20,
             "exp": 15,
             "money": 10,
             "power": 30,
+            "run_chance": 0.75,
         }
 
         boss_list = []
@@ -784,7 +786,7 @@ class MainHandler:
         variable_damage = True
 
         battle: BattleHandler = BattleHandler(
-            self.win, self.battle_hooks, enemy, boss_list, variable_damage
+            self.win, self.battle_hooks, enemy, variable_damage
         )
         if battle.battle_handler():
             return
@@ -800,7 +802,7 @@ class MainHandler:
 
         Returns:
             Enemy | None:
-            None indicates that there is no enemy, or if an error 
+            None indicates that there is no enemy, or if an error
             was encountered and an enemy was unable to be obtained.
             Enemy is a dict (see typeddicts.py) that represents the enemy.
         """
@@ -866,7 +868,6 @@ class MainHandler:
             return
 
         # TODO: Put the detection of dict(int, Enemy) in game, which name tBC
-
 
 
 # battle_hooks = player power, level, money,

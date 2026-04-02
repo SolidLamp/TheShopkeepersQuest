@@ -1,7 +1,7 @@
 import os.path
 import sys
 from collections.abc import Callable
-from typing import Any, Callable, NoReturn
+from typing import Any, NoReturn
 
 try:
     import curses
