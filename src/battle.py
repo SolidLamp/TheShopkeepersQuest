@@ -20,6 +20,7 @@ class BattleHandler:
         enemy: Enemy,
         variable_damage: bool,
         battle_items: dict[str, BattleItem] | None = None,
+        items: list[str] | None = None
     ) -> None:
         self.win: curses.window = stdscr
 
@@ -156,7 +157,7 @@ class BattleHandler:
                 time.sleep(0.25)
             avg_var: float = self.total_var / total_round
             gained_money: int = int(self.money * avg_var)
-            if gained_money != 0:
+            if gained_money > 0:
                 self.get_money(self.win, gained_money)
             self.win.refresh()
             time.sleep(0.75)
@@ -169,14 +170,20 @@ class BattleHandler:
         self.win.clear()
         text: str = self.create_hud()
         in_menu: bool = True
-        while in_menu:
+        if self.battle_items:
             options: list[str] = ["Fight", "Item", "Escape"]
             Options = IntEnum("Options", [("Fight", 0), ("Inventory", 1), ("Run", 2)])
+        else:
+            options: list[str] = ["Fight", "Escape"]
+            Options = IntEnum("Options", [("Fight", 0), ("Inventory", 3), ("Run", 1)])
+        while in_menu:
             query = "q"
             while not (isinstance(query, int)) and query != "i":
                 query: int | str = tui.option(self.win, text, options)
-            if query == "i":
+            if query == "i" and self.battle_items:
                 query = Options.Inventory
+            elif query == "i" and not self.battle_items:
+                continue
 
             if query == Options.Fight:
                 variance: float = self.player_power / VARIANCE_DIVISOR
@@ -192,13 +199,12 @@ class BattleHandler:
                 in_menu = False
                 break
 
-            elif query == Options.Inventory:
-                break
+            elif query == Options.Inventory and isinstance(self.battle_items, dict):
+                continue
                 items: set[str] = set(self.game_state.inventory.items)
                 keyItems: set[str] = set(self.game_state.inventory.keyItems)
                 player_items: set[str] = items | keyItems
                 usables: set[str] = set(self.battle_items.keys()) & player_items
-
                 in_menu = bool(len(usables))
                 if not (in_menu):
                     print3(self.win, text="Your inventory is empty.")
