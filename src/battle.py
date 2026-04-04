@@ -1,5 +1,6 @@
 import curses
 import math
+from re import L
 import time
 from collections.abc import Callable
 from enum import IntEnum
@@ -11,7 +12,37 @@ from src.typing import BattleHooks, BattleItem, Box, Enemy
 
 
 class BattleHandler:
-    """This class handles battles within the SHM Engine."""
+    """
+    The handler for battles within the SHM Engine.
+    Does not handle finding enemies, but only the battles themselves.
+
+    Args:
+        * stdscr (curses.window):
+        A curses window instance.
+
+        * hook_dict (BattleHooks): 
+        The dictionary containing the battle hooks from the gamefile.
+        Must be in the dict format BattleHooks.
+
+        * enemy (Enemy):
+        A dictionary representing the enemy to be encountered,
+        in the Enemy TypedDict format.
+
+        * variable_damage (bool):
+        A boolean value represetning if there should be a partial RNG
+        factor to damage.
+
+        * battle_items (dict[str, BattleItem] | None, optional):
+        A dictionary representing all items which can be used in battles.
+        The keys of the dictionary should be the name of the item.
+        The values of the dictionary are BattleItem TypedDicts.
+        Defaults to None.
+
+        * items (list[str] | None, optional):
+        A list of items which the player has.
+        Should only include items which are valid for battles.
+        Defaults to None.
+    """
 
     def __init__(
         self,
@@ -22,6 +53,37 @@ class BattleHandler:
         battle_items: dict[str, BattleItem] | None = None,
         items: list[str] | None = None
     ) -> None:
+        """
+        The handler for battles within the SHM Engine.
+        Does not handle finding enemies, but only the battles themselves.
+
+        Args:
+            * stdscr (curses.window):
+            A curses window instance.
+
+            * hook_dict (BattleHooks): 
+            The dictionary containing the battle hooks from the gamefile.
+            Must be in the dict format BattleHooks.
+
+            * enemy (Enemy):
+            A dictionary representing the enemy to be encountered,
+            in the Enemy TypedDict format.
+
+            * variable_damage (bool):
+            A boolean value represetning if there should be a partial RNG
+            factor to damage.
+
+            * battle_items (dict[str, BattleItem] | None, optional):
+            A dictionary representing all items which can be used in battles.
+            The keys of the dictionary should be the name of the item.
+            The values of the dictionary are BattleItem TypedDicts.
+            Defaults to None.
+
+            * items (list[str] | None, optional):
+            A list of items which the player has.
+            Should only include items which are valid for battles.
+            Defaults to None.
+        """
         self.win: curses.window = stdscr
 
         # Setup hooks
@@ -33,7 +95,6 @@ class BattleHandler:
         self.player_health: int = int(self.max_player_health)
         self.get_money: Callable[[curses.window, int], None]
         self.get_money = self.hooks["get_money_hook"]
-        # self.loss_text: str = self.hooks["loss_text_hook"]
 
         # Default values for enemies
         DEFAULT_NAME: str = "Default Enemy"
@@ -74,6 +135,7 @@ class BattleHandler:
         # Setup other parameters
         self.variable_damage: bool = variable_damage
         self.battle_items: dict[str, BattleItem] | None = battle_items
+        self.player_items: list[str] | None = items
 
         # Setup important attributes which will be used by internal methods.
         self.level_up_xp: int | Box[int] = 0
@@ -200,7 +262,13 @@ class BattleHandler:
                 break
 
             elif query == Options.Inventory and isinstance(self.battle_items, dict):
-                continue
+                if not self.player_items or len(self.player_items) == 0:
+                    print3(self.win, "You have no items available for battle!")
+                    continue
+                item = self.show_inventory(text)
+                if not item:
+                    continue
+                break
                 items: set[str] = set(self.game_state.inventory.items)
                 keyItems: set[str] = set(self.game_state.inventory.keyItems)
                 player_items: set[str] = items | keyItems
@@ -275,3 +343,22 @@ class BattleHandler:
 
         text: str = f"{enemy_hud}\n\n{player_hud}\n"
         return text
+
+    def show_inventory(self, text: str) -> str | None:
+        options: list[str] = []
+        options.append("Back")
+        query = "a"
+        while not (isinstance(query, int)) and query != "i" and query != "q":
+            query: int | str = tui.option(self.win, text, options)
+        if query == "i" or query == "q":
+            query = len(options) - 1
+
+        if query == len(options) - 1:
+            return
+        
+        chosen_item: str = options[query]
+
+        if chosen_item == "Back":
+            return
+
+        return chosen_item

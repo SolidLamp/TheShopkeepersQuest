@@ -912,22 +912,22 @@ def run(
         The name of the save file to write to when the game is saved.
         Defaults to "game".
 
-        saveFile (dict, optional):
-        The save file.
-        Defaults to {}.
-
-        gameFile_name (str, optional):
+        saveFile (dict[None, None] | Save | None, optional):
+        The save file to be loaded, as a dict in the Save format.
+        Defaults to None.
+        
+        gameFile_name (str, optional): 
         The name of the module name which corresponds to the gamefile to be loaded.
         Defaults to "game".
-
+        
         gameFile_path (str, optional):
         The file path of the gamefile to be loaded.
         Accepts both relative and absolute paths.
         May not include the file itself or only the directory.
         If the file extension is not specified, defaults to '.py'.
         Defaults to "./".
-
     """
+    
     curses.curs_set(0)
     win.scrollok(True)
     tui.colorsetup(win)
