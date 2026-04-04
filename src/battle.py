@@ -29,7 +29,7 @@ class BattleHandler:
         in the Enemy TypedDict format.
 
         * variable_damage (bool):
-        A boolean value represetning if there should be a partial RNG
+        A boolean value representing if there should be a partial RNG
         factor to damage.
 
         * battle_items (dict[str, BattleItem] | None, optional):
@@ -70,7 +70,7 @@ class BattleHandler:
             in the Enemy TypedDict format.
 
             * variable_damage (bool):
-            A boolean value represetning if there should be a partial RNG
+            A boolean value representing if there should be a partial RNG
             factor to damage.
 
             * battle_items (dict[str, BattleItem] | None, optional):
@@ -345,7 +345,11 @@ class BattleHandler:
         return text
 
     def show_inventory(self, text: str) -> str | None:
-        options: list[str] = []
+        if not self.battle_items or not self.player_items:
+            return
+
+        items: set[str] = set(self.player_items) & set(self.battle_items.keys())
+        options: list[str] = list(items)
         options.append("Back")
         query = "a"
         while not (isinstance(query, int)) and query != "i" and query != "q":

@@ -3,7 +3,6 @@ import curses
 import os.path
 import platform
 import re
-from src.typing.typeddicts import Enemy
 import sys
 import time
 from collections.abc import Callable
@@ -18,7 +17,7 @@ from typing import Any
 from src import save_handler, toml_reader, tui
 from src.battle import BattleHandler
 from src.tui import print3
-from src.typing import BattleHooks, Enemy, EngineInfo, FormatDict, Save
+from src.typing import BattleHooks, BattleItem, Enemy, EngineInfo, FormatDict, Save
 
 HISTORY_MAX_LEN: int = 10
 AUTOMOVE_DELAY: float = 1.0
@@ -787,23 +786,31 @@ class MainHandler:
             print3(self.win, self.room["BattleText"])
             time.sleep(TIME_BATTLETEXT_DISPLAYED)
 
-        # TODO: Get this stuff
+        if hasattr(self.game, "battle_items") and isinstance(
+            self.game.battle_items, dict
+        ):
+            battle_items: dict[str, BattleItem] | None = self.game.battle_items
+        else:
+            battle_items: dict[str, BattleItem] | None = None
 
-        """enemy: Enemy = {
-            "name": "Enemy",
-            "boss": False,
-            "health": 20,
-            "exp": 15,
-            "money": 10,
-            "power": 30,
-            "run_chance": 0.75,
-        }"""
+        try:
+            items: list[str] = self.game_state.inventory.items.copy()
+        except:
+            items: list[str] = []
 
-        variable_damage = True
+        if not isinstance(items, list):
+            self.err_log_error(error_type="Error", error_msg="Unable to get items.")
+            return
+
+        items: list[str] = [item for item in items if item in battle_items.keys()]
+
+        if "variable_damage" in self.gameInfo:
+            variable_damage: bool = self.gameInfo["variable_damage"]
+        else:
+            variable_damage: bool = False
 
         battle: BattleHandler = BattleHandler(
-            self.win, self.battle_hooks, enemy, variable_damage
-        )
+            self.win, self.battle_hooks, enemy, variable_damage, battle_items, items       )
         if battle.battle_handler():
             return
         elif "loss_text" in self.battle_hooks:
@@ -814,7 +821,7 @@ class MainHandler:
 
     def fn_battle_get_enemy(self) -> Enemy | None:
         """
-        _summary_
+        Gets an enemy for an encounter, based on the current room.
 
         Returns:
             Enemy | None:
@@ -824,14 +831,32 @@ class MainHandler:
         """
         # If Enemies and EnemyChances do not exist, we cannot pick an enemy
         if "Enemies" not in self.room or "EnemyChances" not in self.room:
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: Enemies or EnemyChances"
+                + "do not exist.",
+            )
             return
         if not isinstance(self.room["Enemies"], list):
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: Enemies is not a list.",
+            )
             return
         if not isinstance(self.room["EnemyChances"], list):
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: EnemyChances is not a list.",
+            )
             return
         # If Enemies and EnemyChances are not the same length, then they are
         # meaningless.
         if not len(self.room["Enemies"]) == len(self.room["EnemyChances"]):
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: Enemies and EnemyChances"
+                + "are not the same length.",
+            )
             return
 
         total_chance: float = 0.0  # sum of all chances
@@ -915,11 +940,11 @@ def run(
         saveFile (dict[None, None] | Save | None, optional):
         The save file to be loaded, as a dict in the Save format.
         Defaults to None.
-        
-        gameFile_name (str, optional): 
+
+        gameFile_name (str, optional):
         The name of the module name which corresponds to the gamefile to be loaded.
         Defaults to "game".
-        
+
         gameFile_path (str, optional):
         The file path of the gamefile to be loaded.
         Accepts both relative and absolute paths.
@@ -927,7 +952,7 @@ def run(
         If the file extension is not specified, defaults to '.py'.
         Defaults to "./".
     """
-    
+
     curses.curs_set(0)
     win.scrollok(True)
     tui.colorsetup(win)
