@@ -104,7 +104,8 @@ def write_save(
     file_name = remove_extension(file_name)
     existing_save = read_save(file_name)
     if existing_save and existing_save.get("save_id", "2") != save_id:
-        copy_save(file_name, existing_save)
+        new_suffix: str = existing_save.get("Saved", "copy")
+        copy_save(file_name, new_suffix)
     file_name += ".sav"
 
     json_game_state = {
@@ -132,11 +133,18 @@ def write_save(
     write_json(output, file_name)
 
 
-def copy_save(file_name: str, existing_save: dict) -> None:
+def copy_save(file_name: str, new_suffix: str) -> None:
+    """
+    Copies an existing 
+
+    Args:
+        file_name (str): The file name of the existing file to copy.
+        new_suffix (str): A suffix to be appended to the end of the file name.
+    """
     file_name: str = remove_extension(file_name)
     old_save: str = os.path.abspath(file_name + ".sav")
     old_copy: str = (
-        os.path.abspath(file_name) + "-" + existing_save.get("Saved", "copy") + ".sav"
+        os.path.abspath(file_name) + "-" + new_suffix + ".sav"
     )
     old_copy = filename_compat(old_copy)
     shutil.copyfile(old_save, old_copy)
