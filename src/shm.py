@@ -9,6 +9,7 @@ Typical usage example:
 
 shm.run(win, starting_room=1, gameFile_name="game", gameFile_path="./")
 """
+
 import curses
 import os.path
 import platform
@@ -62,7 +63,7 @@ class MainHandler:
             Defaults to None.
 
             gameFile_name (str, optional):
-            The name of the module name which corresponds to the gamefile to 
+            The name of the module name which corresponds to the gamefile to
             be loaded.
             Defaults to "game".
 
@@ -148,12 +149,12 @@ class MainHandler:
         """Sets up the current game state based on the save file provided.
 
         The save file is a dictionary in the Save format (see typing), and
-        should already be loaded from a file. This function only handles 
-        interpreting the save file. The save file should correspond to the 
+        should already be loaded from a file. This function only handles
+        interpreting the save file. The save file should correspond to the
         current game_state,  which should already be set up. However, the
-        UUID and title of the game, as stored in the save file, are both 
+        UUID and title of the game, as stored in the save file, are both
         checked so that they match the current loaded gamefile. A save file
-        with the UUID and title of a game that does not correspond to the 
+        with the UUID and title of a game that does not correspond to the
         gamefile with the same identifiers will cause unexpected behaviour.
 
         Args:
@@ -359,8 +360,8 @@ class MainHandler:
 
     def err_roomIDerror(self) -> None:
         """Handle an error when an invalid room is attempted to be loaded
-        
-        Displays an error to the user, using err_log_error(), and changes 
+
+        Displays an error to the user, using err_log_error(), and changes
         the current roomID to the starting_room, which should always be a
         valid room in a correct gamefile.
         """
@@ -756,7 +757,7 @@ class MainHandler:
 
     def fn_gameLoop(self) -> None:
         """The main loop of the game and calls all other functions.
-        
+
         Handles all attributes and parsing a room.
         """
         rooms = self.game.get_rooms(self.win)
@@ -853,7 +854,7 @@ class MainHandler:
             battle_items: dict[str, BattleItem] | None = None
 
         try:
-            items: list[str] = self.game_state.inventory.items.copy()
+            items: list[str] = self.game_state.inventory.items
         except:
             items: list[str] = []
 
@@ -861,16 +862,21 @@ class MainHandler:
             self.err_log_error(error_type="Error", error_msg="Unable to get items.")
             return
 
-        items: list[str] = [item for item in items if item in battle_items.keys()]
-
         if "variable_damage" in self.gameInfo:
             variable_damage: bool = self.gameInfo["variable_damage"]
         else:
             variable_damage: bool = False
 
         battle: BattleHandler = BattleHandler(
-            self.win, self.battle_hooks, enemy, variable_damage, battle_items, items       )
+            stdscr=self.win,
+            hook_dict=self.battle_hooks,
+            enemy=enemy,
+            variable_damage=variable_damage,
+            battle_items=battle_items,
+            items=items
+        )
         if battle.battle_handler():
+            self.ui_drawtitlebar()
             return
         elif "loss_text" in self.battle_hooks:
             loss_text: str = self.battle_hooks.get("loss_text")

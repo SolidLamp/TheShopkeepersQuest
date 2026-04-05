@@ -107,7 +107,7 @@ class BattleHandler:
         enemy: Enemy,
         variable_damage: bool,
         battle_items: dict[str, BattleItem] | None = None,
-        items: list[str] | None = None
+        items: list[str] | None = None,
     ) -> None:
         """
         The handler for battles within the SHM Engine.
@@ -117,7 +117,7 @@ class BattleHandler:
             stdscr (curses.window):
             A curses window instance.
 
-            hook_dict (BattleHooks): 
+            hook_dict (BattleHooks):
             The dictionary containing the battle hooks from the gamefile.
             Must be in the dict format BattleHooks.
 
@@ -137,7 +137,7 @@ class BattleHandler:
 
             items (list[str] | None, optional):
             A list of items which the player has.
-            Should only include items which are valid for battles.
+            Should be the exact inventory item list, not a copy.
             Defaults to None.
         """
         self.win: curses.window = stdscr
@@ -201,8 +201,7 @@ class BattleHandler:
         self.total_var: float = 0.0
 
     def setup_level_up_stats(self) -> None:
-        """Sets up the stats increase and requirements, from hooks.
-        """
+        """Sets up the stats increase and requirements, from hooks."""
         POWER_INCREASE: int = 10
         HEALTH_INCREASE: int = 10
         LEVEL_UP_XP: int = 100
@@ -291,8 +290,7 @@ class BattleHandler:
             return False
 
     def do_turn(self) -> None:
-        """Completes one turn of the battle.
-        """
+        """Completes one turn of the battle."""
         VARIANCE_DIVISOR: int = 10
         self.win.clear()
         text: str = self.create_hud()
@@ -328,11 +326,18 @@ class BattleHandler:
 
             elif query == Options.Inventory and isinstance(self.battle_items, dict):
                 if not self.player_items or len(self.player_items) == 0:
-                    print3(self.win, "You have no items available for battle!")
+                    self.win.clear()
+                    tui.option(
+                        self.win,
+                        text=f"{text}\nYou have no items available for battle!",
+                        options=["Back"],
+                    )
                     continue
                 item = self.show_inventory(text)
                 if not item:
                     continue
+                if item in self.player_items:
+                    self.player_items.remove(item)
                 break
                 items: set[str] = set(self.game_state.inventory.items)
                 keyItems: set[str] = set(self.game_state.inventory.keyItems)
@@ -439,7 +444,7 @@ class BattleHandler:
 
         if query == len(options) - 1:
             return
-        
+
         chosen_item: str = options[query]
 
         if chosen_item == "Back":
