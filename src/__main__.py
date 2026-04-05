@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""The entry point for the program.
+
+This should never be used outside of being entry point for the module.
+"""
+
 import os
 import platform
 import sys
@@ -8,6 +13,7 @@ from src.typing import FormatDict
 
 
 def main() -> None:
+    """The main function to be loaded. Handles arguments. Loads title screen."""
     if platform.system() != "Windows" and os.getuid() == 0:
         print("\033[31mCritical Error: root should not be running user processes")
         sys.exit(1)

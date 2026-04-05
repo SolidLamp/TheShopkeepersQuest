@@ -1,18 +1,22 @@
+"""Handles most TOML operations in the SHM Engine.
+
+Uses tomllib, and read-only. Requires Python 3.11+
+
+Typical usage example:
+
+toml_dict = toml_reader.read_toml("config.toml")
+gamedata = toml_reader.read_gamedata("game.toml")
+"""
+
 import os
 import tomllib
 from pathlib import Path
 from typing import Any
 
-
-class formatDict(dict):
-    def __missing__(self, key: str) -> str:
-        string = "{" + key + "}"
-        return string
-
+from src.typing import FormatDict
 
 def read_toml(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]:
-    """
-    Reads a TOML file.
+    """Reads a TOML file.
 
     Args:
         file (str, optional):
@@ -39,8 +43,7 @@ def read_toml(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]
 
 
 def replace_text(text: str) -> str:
-    r"""
-    Converts escaped ANSI escape codes to non-escaped variants.
+    r"""Converts escaped ANSI escape codes to non-escaped variants.
 
     Supported ANSI escape codes:
         * "\a"
@@ -175,7 +178,7 @@ def get_engine_info(
         str: The string after all keys have been replaced.
     """
     engineInfo = read_toml("engine_info.toml")
-    engineInfo = formatDict(engineInfo)
+    engineInfo = FormatDict(engineInfo)
     if not engineInfo["Patch"] or engineInfo["Patch"][0] == "-":
         engineInfo["PatchConnector"] = ""
     else:

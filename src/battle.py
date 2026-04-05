@@ -1,6 +1,12 @@
+"""Handles the battles within the SHM Engine
+
+Typical usage example:
+    battle = BattleHandler(win, hook_dict, enemy, True)
+    battle_result = battle.battle_handler()
+"""
+
 import curses
 import math
-from re import L
 import time
 from collections.abc import Callable
 from enum import IntEnum
@@ -12,36 +18,86 @@ from src.typing import BattleHooks, BattleItem, Box, Enemy
 
 
 class BattleHandler:
-    """
-    The handler for battles within the SHM Engine.
+    """The handler for battles within the SHM Engine.
+
     Does not handle finding enemies, but only the battles themselves.
 
-    Args:
-        * stdscr (curses.window):
-        A curses window instance.
+    Attributes:
+        win (curses.window):
+        A Curses window instance.
 
-        * hook_dict (BattleHooks): 
-        The dictionary containing the battle hooks from the gamefile.
-        Must be in the dict format BattleHooks.
+        hooks (BattleHooks):
+        A dict in the BattleHooks format, which contains hooks.
 
-        * enemy (Enemy):
-        A dictionary representing the enemy to be encountered,
-        in the Enemy TypedDict format.
+        player_level (Box[int]):
+        The player's level, in a Box (see box.py for more info).
 
-        * variable_damage (bool):
-        A boolean value representing if there should be a partial RNG
-        factor to damage.
+        player_exp (Box[int]):
+        The player's exp, in a Box (see box.py for more info).
 
-        * battle_items (dict[str, BattleItem] | None, optional):
-        A dictionary representing all items which can be used in battles.
-        The keys of the dictionary should be the name of the item.
-        The values of the dictionary are BattleItem TypedDicts.
-        Defaults to None.
+        player_power (Box[int]):
+        The player's power/damage, in a Box (see box.py for more info).
 
-        * items (list[str] | None, optional):
-        A list of items which the player has.
-        Should only include items which are valid for battles.
-        Defaults to None.
+        player_health (Box[int]):
+        The player's current health, in a Box (see box.py for more info).
+
+        max_player_health (Box[int]):
+        The player's maximum health, in a Box (see box.py for more info).
+
+        get_money (Callable[[curses.window, int], None]):
+        A hook provided by the gamefile, which is a function for getting money,
+        which takes a curses window and an integer, and returns None.
+
+        enemy (Enemy):
+        The current enemy being encountered, in the Enemy TypedDict format.
+
+        enemy_name (str):
+        The enemy name, obtained from the enemy dict.
+
+        is_boss (bool):
+        If the enemy is a boss, obtained from the enemy dict.
+
+        enemy_health (int):
+        The health which the enemy currently has, from the enemy dict.
+
+        max_enemy_health (int):
+        The enemy's maximum health, obtained from the enemy dict.
+
+        enemy_exp (int):
+        The exp which the enemy yields, obtained from the enemy dict.
+
+        money (int):
+        The money which the enemy yields, obtained from the enemy dict.
+
+        enemy_power (int):
+        How much damage the enemy does, obtained from the enemy dict.
+
+        run_chance (float):
+        The chance which the player has of running, from the enemy dict.
+
+        variable_damage (bool):
+        Whether there is an RNG factor to damage, passed as parameter.
+
+        battle_items (dict[str, BattleItem] | None):
+        The dictionary of battle items which the gamefile has.
+
+        player_items (list[str] | None):
+        The list of items which the player has.
+
+        level_up_xp (int | Box[int]):
+        The amount of xp which the player must get to level up.
+
+        power_increase (int | Box[int]):
+        The increase in player's power upon level up.
+
+        health_increase (int | Box[int]):
+        The increase in player's health upon level up.
+
+        in_fight (bool):
+        Whether the fight has concluded or not.
+
+        total_var (float):
+        The total variance in the RNG factor if variable_damage is True.
     """
 
     def __init__(
@@ -58,28 +114,28 @@ class BattleHandler:
         Does not handle finding enemies, but only the battles themselves.
 
         Args:
-            * stdscr (curses.window):
+            stdscr (curses.window):
             A curses window instance.
 
-            * hook_dict (BattleHooks): 
+            hook_dict (BattleHooks): 
             The dictionary containing the battle hooks from the gamefile.
             Must be in the dict format BattleHooks.
 
-            * enemy (Enemy):
+            enemy (Enemy):
             A dictionary representing the enemy to be encountered,
             in the Enemy TypedDict format.
 
-            * variable_damage (bool):
+            variable_damage (bool):
             A boolean value representing if there should be a partial RNG
             factor to damage.
 
-            * battle_items (dict[str, BattleItem] | None, optional):
+            battle_items (dict[str, BattleItem] | None, optional):
             A dictionary representing all items which can be used in battles.
             The keys of the dictionary should be the name of the item.
             The values of the dictionary are BattleItem TypedDicts.
             Defaults to None.
 
-            * items (list[str] | None, optional):
+            items (list[str] | None, optional):
             A list of items which the player has.
             Should only include items which are valid for battles.
             Defaults to None.
@@ -145,6 +201,8 @@ class BattleHandler:
         self.total_var: float = 0.0
 
     def setup_level_up_stats(self) -> None:
+        """Sets up the stats increase and requirements, from hooks.
+        """
         POWER_INCREASE: int = 10
         HEALTH_INCREASE: int = 10
         LEVEL_UP_XP: int = 100
@@ -183,6 +241,11 @@ class BattleHandler:
             self.health_increase = HEALTH_INCREASE
 
     def battle_handler(self) -> bool:
+        """Main battle handler, and should be called to start the battle.
+
+        Returns:
+            bool: If False, the battle was lost.
+        """
         self.setup_level_up_stats()
 
         total_round: int = 0
@@ -228,6 +291,8 @@ class BattleHandler:
             return False
 
     def do_turn(self) -> None:
+        """Completes one turn of the battle.
+        """
         VARIANCE_DIVISOR: int = 10
         self.win.clear()
         text: str = self.create_hud()
@@ -331,6 +396,11 @@ class BattleHandler:
         return
 
     def create_hud(self) -> str:
+        """Creates the HUD to display in the battle.
+
+        Returns:
+            str: The created HUD as a string.
+        """
         get_hp_bar = lambda hp, maxhp: str("▊" * math.floor(hp / maxhp * 10))
         make_hud = lambda name, hp, maxhp, hpbar: f"{name}: {hp}/{maxhp}    {hpbar}"
         make_ui = lambda name, hp, maxhp: make_hud(
@@ -345,6 +415,16 @@ class BattleHandler:
         return text
 
     def show_inventory(self, text: str) -> str | None:
+        """Handles the inventory.
+
+        Args:
+            text (str): The HUD to display.
+
+        Returns:
+            str | None:
+            Either the string representing the item chosen;
+            or None, representing no chosen item and the player backs out.
+        """
         if not self.battle_items or not self.player_items:
             return
 

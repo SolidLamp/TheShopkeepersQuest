@@ -1,3 +1,12 @@
+"""Handles many curses functions.
+
+Typical usage example:
+
+tui.print3(win, "Example Text")
+tui.newline(win)
+newwin = tui.create_newwin(win, padding, padx1, padx2, pady1, pady2)
+"""
+
 import curses
 import math
 import os
@@ -19,6 +28,11 @@ _ENDBYTE_CHARS = [
 
 
 def colorsetup(win: curses.window) -> None:
+    """Sets up colours for a curses window.
+
+    Args:
+        win (curses.window): A curses window instance to set up colours on.
+    """
     curses.start_color()  # curses.A_NORMAL | curses.A_BOLD
     curses.use_default_colors()
     #### curses._use_ansi_colors = True
@@ -40,8 +54,7 @@ def colorsetup(win: curses.window) -> None:
 
 
 def _ESCtoRGB(ESC_code: str | int) -> tuple[int, int, int]:
-    """
-    Converts an 8-bit escape code to a 24-bit RGB value 
+    """Converts an 8-bit escape code to a 24-bit RGB value.
 
     Args:
         ESC_code (str | int): A 8-bit colour escape code, as a string or integer.
@@ -65,7 +78,9 @@ def print3(
     skip_text: bool = True,
     break_lines: bool = True,
 ) -> None:
-    r"""Function to print string `text` to the provided curses window using a
+    r"""A typewriter printing function for curses with neat features.
+    
+    Function to print string `text` to the provided curses window using a
     typewriter effect. Also handles control and escape codes.
     When skip_text is true (true by default), pressing a key skips all delay.
     If break_lines is true (default), words will not be broken along lines.
@@ -154,13 +169,28 @@ def handleCSI_m(
     textPos: int,
     attr: int = 0,
 ) -> tuple[int, int, int, int, int]:
-    r"""
-    Handles Control Sequence Introducer (CSI) _m codes ("\x1b[" or "\033[").
+    r"""Handles Control Sequence Introducer (CSI; "\033[")_m codes.
+    
     Send the text to this function and the position after the "[" character.
     Handles 3-bit, 4-bit and 8-bit Select Graphic Rendition (SGR) colours.
 
+    Args:
+        win (curses.window): A curses window instance.
+        text (str): The full text, not just the code.
+        ansi_code (int): The colour pair code to display.
+        fg (int): The foreground colour, in ANSI format.
+        bg (int): The background colour, in ANSI format.
+        textPos (int): A pointer to the start of the escape code.
+        attr (int, optional): Curses attributes e.g. bold. Defaults to 0.
+
+    Returns:
+        tuple[int, int, int, int, int]:
+        - textPos (int): new text position, after the CSI_m code.
+        - ansi_code (int): The new colour pair code.
+        - fg (int): The new foreground colour, in ANSI format.
+        - bg (int): The new background colour, in ANSI format.
+        - attr (int): The curses attribute e.g. bold.
     """
-    # textPos is the start of the escape code
     code = []
     i = textPos - 1
     while (
@@ -222,8 +252,14 @@ def handleCSI_m(
 
 
 def newline(win: curses.window) -> None:
-    """Move the cursor to the next line, automatically scrolling if needed,
-    to prevent ERR."""
+    """Creates a newline for a curses window, automatically scrolling.
+
+    Move the cursor to the next line, automatically scrolling if needed,
+    to prevent ERR. Should be used wherever possible.
+
+    Args:
+        win (curses.window): A curses window instance.
+    """
     win.scrollok(True)
     max_y, max_x = win.getmaxyx()
     y, x = win.getyx()
@@ -240,6 +276,12 @@ def newline(win: curses.window) -> None:
 
 
 def centre_text(win: curses.window, text: str) -> None:
+    """Centres text by moving to a new position to begin printing.
+
+    Args:
+        win (curses.window): A curses window instance.
+        text (str): The text to centre.
+    """
     max_y, max_x = win.getmaxyx()
     y, x = win.getyx()
     new_x = max((max_x - len(text) - 1) // 2, 0)
@@ -252,6 +294,28 @@ def option(
     options: list[str],
     break_lines: bool = True,
 ) -> int | str:
+    """Creates a choice for the user to choose, on a curses window.
+
+    Args:
+        win (curses.window):
+        A curses window instance.
+
+        text (str):
+        The text to display as a title to the options menu.
+
+        options (list[str]):
+        A list of options to print to the user.
+
+        break_lines (bool, optional):
+        A boolean value if lines should be broken by words being too long,
+        or if lines should be preserved.
+        Defaults to True.
+
+    Returns:
+        int | str:
+        An integer representing the index in the options which was chosen;
+        or a string representing the key which the user pressed.
+    """
     value = 0
     win.nodelay(False)
     while 1:
@@ -317,6 +381,27 @@ def draw_titlebar(
     rightString: str = "",
     style: int = 1,
 ) -> None:
+    """Draws a titlebar around the screen.
+
+    Args:
+        win (curses.window):
+        A curses window screen.
+
+        title (str):
+        The string to display in the centre of the titlebar.
+
+        leftString (str, optional):
+        The string to display on the left side of the titlebar.
+        Defaults to "".
+
+        rightString (str, optional):
+        The string to display on the right side of the titlebar.
+        Defaults to "".
+
+        style (int, optional):
+        The style of the titlebar. Possible values: 0-11.
+        Defaults to 1.
+    """
     styles = {
         0: ["|", "|", "-", "-", "+", "+", "+", "+"],
         1: ["║", "║", "═", "═", "╔", "╗", "╚", "╝"],
@@ -385,6 +470,36 @@ def create_newwin(
     pady1: int = 0,
     pady2: int = 0,
 ) -> curses.window:
+    """Creates a smaller curses window, with padding on the sides.
+
+    Args:
+        win (curses.window):
+        The complete curses window instance of which is the parent of the
+        subwin to be created.
+
+        padding (int, optional):
+        The padding which should be around the window.
+        Defaults to 1.
+
+        padx1 (int, optional):
+        The padding on the left side of the window.
+        Defaults to 0.
+
+        padx2 (int, optional):
+        The padding on the right side of the window.
+        Defaults to 0.
+
+        pady1 (int, optional):
+        The padding which should be from the top of the subwin to the parent.
+        Defaults to 0.
+
+        pady2 (int, optional):
+        The padding on the bottom of the created subwin.
+        Defaults to 0.
+
+    Returns:
+        curses.window: The created subwin that has been created.
+    """
     max_y, max_x = win.getmaxyx()
     if max_y < 5 or max_x < 5:
         return win

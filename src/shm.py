@@ -1,4 +1,14 @@
-#!/usr/bin/env python3
+"""The main SHM Engine.
+
+After loading the SHM Engine, all execution will be offloaded to it.
+Does not return, but will terminate the program with sys.exit().
+Most usage should be shm.run(), which handles setting up MainHandler
+automatically.
+
+Typical usage example:
+
+shm.run(win, starting_room=1, gameFile_name="game", gameFile_path="./")
+"""
 import curses
 import os.path
 import platform
@@ -36,8 +46,7 @@ class MainHandler:
         gameFile_path: str = "./game.py",
         saveFileName: str = "game",
     ) -> None:
-        """
-        Set up an instance of the SHM Engine with a given gamefile.
+        """Set up an instance of the SHM Engine with a given gamefile.
 
         Args:
             win (curses.window):
@@ -53,13 +62,14 @@ class MainHandler:
             Defaults to None.
 
             gameFile_name (str, optional):
-            The name of the module name which corresponds to the gamefile to be loaded.
+            The name of the module name which corresponds to the gamefile to 
+            be loaded.
             Defaults to "game".
 
             gameFile_path (str, optional):
             The file path of the gamefile to be loaded.
             Accepts both relative and absolute paths.
-            If the file extension is not specified, defaults to '.py'.
+            If the file extension is not specified, defaults to ".py"
             Defaults to "./game.py".
 
             saveFileName (str, optional):
@@ -100,19 +110,22 @@ class MainHandler:
             self.battle_hooks: dict[None, None] = {}
 
     def setup_gameFile(self, module_name: str, file_path: str) -> ModuleType:
-        """
-        Imports a module and allows it to be publicly available.
-        This function is used to import the gamefile in context of the SHM Engine.
+        """The method which handles importing the .py gamefile.
+
+        Uses importlib.util to dynamically load a Python module, which should
+        correspond to the desired gamefile to load.
+        The imported module is then returned, so that it can be available
+        outside of this method and publicly available within the class.
 
         Args:
             module_name (str): The name of the module to import.
             file_path (str): The path of the module to import.
 
-        Raises:
-            ImportError: This error is raised if the specified module is nonexistent.
-
         Returns:
             ModuleType: The module which has just been imported.
+
+        Raises:
+            ImportError: The specified module could not be imported.
         """
         file_path = os.path.abspath(file_path)
         if file_path[-3:] != ".py":
@@ -132,12 +145,19 @@ class MainHandler:
         return module
 
     def setup_loadSave(self, saveFile: Save | None) -> None:
-        """
-        Sets up the save file and sets up the game state by copying values
-        from the save file.
+        """Sets up the current game state based on the save file provided.
+
+        The save file is a dictionary in the Save format (see typing), and
+        should already be loaded from a file. This function only handles 
+        interpreting the save file. The save file should correspond to the 
+        current game_state,  which should already be set up. However, the
+        UUID and title of the game, as stored in the save file, are both 
+        checked so that they match the current loaded gamefile. A save file
+        with the UUID and title of a game that does not correspond to the 
+        gamefile with the same identifiers will cause unexpected behaviour.
 
         Args:
-            saveFile (Save | None): A dictionary in the SHM Engine save file format.
+            saveFile (Save | None): A dictionary in the Save format.
         """
 
         if not isinstance(saveFile, dict):
@@ -179,7 +199,7 @@ class MainHandler:
         self.win = tui.create_newwin(self.stdscr, padding, padx1, padx2, pady1, pady2)
 
     def db_debug(self) -> None:
-        """The debug menu"""
+        """Creates the debug menu and displays it to the player."""
         if "disable_debug" in self.gameInfo and self.gameInfo["disable_debug"]:
             return
         debug_options = ["Test room IDs", "Enable debug mode", "Test room attributes"]
@@ -193,9 +213,14 @@ class MainHandler:
                 self.db_test_attributes()
 
     def db_test_roomIDs(self) -> None:
-        """Debug menu - test all room IDs in the game file and check for any
-        invalid room IDs, and report any errors.
-        Also notes when (history, -x)-style references when complevel == 2"""
+        """Debug menu - tests room IDs and check for validity.
+
+        Tests each room ID inside "Move" and "Automove" attributes, to check
+        if they all correspond to a valid room ID within the gamefile, or if
+        they correspond to the negative IDs, where they should not correspond
+        to a room ID. Also notes when (history, -x)-style (complevel 1)
+        negative ID references when a complevel 2 file is loaded.
+        """
         text = ""
         rooms = self.game.get_rooms(self.win)
         idnos = []
@@ -229,9 +254,11 @@ class MainHandler:
         self.win.getch()
 
     def db_test_attributes(self) -> None:
-        """
-        Debug menu - check all attribute types within a room, and log whenever
-        an incorrect type is found.
+        """Debug menu - validates the types of all room attributes.
+
+        In the current loaded gamefile, checks every attribute in every room,
+        and compares the type to the correct type the attribute should have,
+        and reports a notice for incorrect types.
         """
         attribute_types = {
             "Text": str,
@@ -289,17 +316,20 @@ class MainHandler:
         error_type: str,
         error_msg: str,
     ) -> None:
-        """
-        Log an error - that's basically it.
+        """Logs an error - displays to the user and writes to error.log.
 
         Args:
             error_type (str):
             The type of error to display.
             Valid values: "Alert", "Critical Error", "Error", "Warning"
-
+            If the current gamefile has hide_warnings as True, then an error
+            with the type "Warning" will only be written to error.log, and
+            not visually displayed to the user.
 
             error_msg (str):
-            The message to display to the user.
+            The message to display to the user and write to file, explaining
+            the error encountered. Should not include an error prefix (which
+            should instead be provided by the error_type).
         """
         colours: dict[str, str] = {
             "Alert": "\033[36m",
@@ -328,7 +358,12 @@ class MainHandler:
             tui.option(self.win, text=error_txt, options=["Dismiss"])
 
     def err_roomIDerror(self) -> None:
-        """Handle an error when an invalid room is attempted to be loaded"""
+        """Handle an error when an invalid room is attempted to be loaded
+        
+        Displays an error to the user, using err_log_error(), and changes 
+        the current roomID to the starting_room, which should always be a
+        valid room in a correct gamefile.
+        """
         self.err_log_error(
             error_type="Error", error_msg=f"Invalid RoomID: {self.roomID}"
         )
@@ -340,12 +375,17 @@ class MainHandler:
         leftOverride: str | None = None,
         rightOverride: str | None = None,
     ) -> None:
-        """
-        Handle the titlebar and set up the strings to be displayed.
-        Handles the 'titlebarCentre', 'titlebarLeft' and 'titlebarRight'
-        attributes within a room, as well as the default titlebar strings set
-        in game info.
-        Also passes the border style as defined within game info, to tui.draw_titlebar.
+        """Draws the titlebar and border around the main screen.
+
+        Handles the titlebar and set up the strings to be displayed.
+        The strings will be chosen by the following priority:
+        1. The 'centreOverride', 'leftOverride' and 'rightOverride' arguments.
+        2. The 'titlebarCentre', 'titlebarLeft' and 'titlebarRight'
+        attributes within a room.
+        3. The default titlebar string set within the gamefile info.
+        4. Default string values if not defined.
+        This method also handles the border style defined within game_info,
+        which is passed to tui.draw_titlebar().
 
         Args:
             centreOverride (str | None, optional):
@@ -360,7 +400,7 @@ class MainHandler:
             Overrides the text displayed in the left corner of the titlebar.
             Defaults to None.
         """
-        leftString = " F1 - Help "
+        leftString = " D - Debug Menu "
         rightString = " Q - Quit "
         if self.room and "Desc" in self.room:
             title_string = " {abbr} | {desc} "
@@ -397,13 +437,16 @@ class MainHandler:
         )
 
     def ui_ending(self, end: str) -> None:
-        """
-        Handles endings in a game, including autosaving.
+        """Handles endings in a game, including autosaving.
+
+        Displays the defined ending text for the specific ending, and the
+        generic ending text, and saves the current game state to file.
 
         Args:
             end (str):
             The ending which the user has received.
-            The ending text is set within the gamefile, under the endingText attribute.
+            Can correspond to the endings in the endingText attribute within
+            the gamefile.
         """
         titlebar_centre = "{title}"
         titlebar_left = ""
@@ -434,27 +477,31 @@ class MainHandler:
         time.sleep(3.5)
 
     def ui_format_string(self, string: str) -> str:
-        """
+        """Formats a string with predefined keys.
+
         Formats the string with the various available keys;
         used to format the titlebar and the text of rooms.
         Keys are in the format '{key}' embedded within a string.
 
         Supported keys:
-         - 'abbr' - the abbreviation set by the game, if present.
-         - 'arch' - the architecure of the machine, uses platform.machine().
-         - 'date' - returns the current date in Y-M-D format.
-         - 'engine_info' - returns the current version of the SHM Engine.
-         - 'game_state' - the entire current game_state;
-             - call individual parts of game_state
-         - 'iso_date' - returns the current date in iso-format.
-         - 'python_implementation' - returns the current Python implementation
-         - 'python_version' - returns the current Python version
-         - 'self' - returns the entire self object;
-             - [see 'game_state' above] - recommended to only call children.
-         - 'system' - returns the current OS, using platform.system().
-         - 'time' - returns the current time in H:M.
-         - 'title' - returns the game title.
-         - 'utime' - returns the current time in Unix timestamp.
+            - 'abbr' - the abbreviation set by the gamefile, if present.
+            - 'arch' - displays the architecure of the machine. Uses
+            platform.machine().
+            - 'date' - displays the current date in Y-M-D format.
+            - 'engine_info' - displays the current version of the SHM Engine.
+            - 'game_state' - the entire current game_state;
+                - call child attributes of game_state; do not use it bare.
+            - 'iso_date' - displays the current date in iso-format.
+            - 'python_implementation' - displays the current Python
+            implementation, e.g. CPython, PyPy. Uses
+            platform.python_implementation()
+            - 'python_version' - displays the current Python version
+            - 'self' - displays the entire self object;
+                - call child attributes of self; do not use it bare.
+            - 'system' - displays the current OS, using platform.system().
+            - 'time' - displays the current time in H:M.
+            - 'title' - displays the game title.
+            - 'utime' - displays the current time in Unix timestamp.
 
 
         Args:
@@ -493,13 +540,16 @@ class MainHandler:
         return string
 
     def ui_lose(self, lose: str) -> None:
-        """
-        Handles losing the game.
+        """Handles losing the game.
+
+        Displays the defined losing text for the specific loss, and the
+        generic losing text.
 
         Args:
             lose (str):
             The loss which the user has received.
-            The loss text is set within the gamefile, under the loseText attribute.
+            Can correspond to the loss text is set within the gamefile,
+            under the loseText attribute.
         """
         time.sleep(0.25)
         if hasattr(self.game, "loseText") and lose in self.game.loseText:
@@ -516,8 +566,9 @@ class MainHandler:
             self.roomID = self.starting_room
 
     def ui_text_handler(self) -> str:
-        """
-        Handle the text of a room, between Text, AlternateText, etc.
+        """Handles getting the text within a room.
+
+        Handles the text of a room, between Text, AlternateText, etc.
         Prints the text and returns the text.
 
         Returns:
@@ -537,16 +588,19 @@ class MainHandler:
         return text
 
     def ui_option(self, text: str, options: list[str], Inventory: bool = True) -> int:
-        """
-        Handle options for the SHM Engine, as a wrapper for tui.option();
-        - Handles quit option
-        - Handles inventory optio
+        """Handle options for the SHM Engine, as a wrapper for tui.option();
+
+        Should be used for most operations, for user interaction. Adds the
+        additional features:
+        - (pressing q) Handles quit option
+        - (pressing i and additonal choice) Handles inventory option
+        - Always returns an integer.
 
         Args:
             text (str):
             The text to display to the user.
 
-            choices (list[str]):
+            options (list[str]):
             The list of options to display to the user.
 
             Inventory (bool, optional):
@@ -554,7 +608,8 @@ class MainHandler:
             Defaults to True.
 
         Returns:
-            int: The user's chosen option, as corresponds to place in the lists.
+            int: The user's chosen option, as corresponds to the place within
+            the options list.
         """
         choices = options.copy()
         if not hasattr(self.game_state, "inventory"):
@@ -620,14 +675,13 @@ class MainHandler:
         return query
 
     def fn_itemHandler(self, attr: str) -> None:
-        """
-        Handles items within a room, including item requirements.
+        """Handles items within a room, including item requirements.
 
         Args:
             attr (str):
             A string that represents an attribute of the room;
             should be present in the room, e.g. 'Item'.
-            The official possible values as of SHM 1.2 are: 'Item', 'KeyItem'
+            The possible values as of SHM 1.2 are: 'Item', 'KeyItem'
         """
         if not (
             f"{attr}Requirements" in self.room
@@ -651,12 +705,13 @@ class MainHandler:
         self.win.getch()
 
     def fn_mainRoomHandler(self, text: str) -> None:
-        """
-        The main handler of a room;
-        handles the moving between rooms and showing the options menu.
+        """The main handler of a room.
+
+        Handles the moving between rooms and showing the options menu.
 
         Args:
-            text (str): The text to be displayed to the user at the option menu.
+            text (str): The text to be displayed to the user while options are
+            being displayed below.
         """
         OptionsIndex = []
         Options = []
@@ -682,12 +737,11 @@ class MainHandler:
         self.fn_roomIDHandler(OptionsIndex[query])
 
     def fn_roomIDHandler(self, room_id: int | tuple[str, int]) -> None:
-        """
-        Handles room IDs and moving between rooms.
+        """Handles room IDs and moving between rooms.
 
-        * Handles raw ID numbers, e.g. 2;
-        * Handles negative ID numbers, e.g. -2 (which are references to history);
-        * Handles history tuples, e.g. (history, -2)
+        * Handles raw ID numbers, e.g. 2; moves to the room with that ID.
+        * Handles negative ID numbers, e.g. -2; moves to previous room.
+        * Handles history tuples, e.g. (history, -2); same as above.
 
         Args:
             tmpID (int | tuple[str, int]): The ID number to be parsed.
@@ -701,9 +755,8 @@ class MainHandler:
             self.roomID = room_id
 
     def fn_gameLoop(self) -> None:
-        """
-        The main part of the engine;
-        the main loop of the game and calls all other functions.
+        """The main loop of the game and calls all other functions.
+        
         Handles all attributes and parsing a room.
         """
         rooms = self.game.get_rooms(self.win)
@@ -765,6 +818,12 @@ class MainHandler:
             self.fn_gameLoop()
 
     def fn_battle_handler(self) -> None:
+        """Handles battles in the SHM Engine.
+
+        The attribute battle_hooks should be set up before calling this.
+        The gamefile should also have the attributes 'enemies' and
+        'battle_hooks'.
+        """
         DEFAULT_LOSS_TEXT: str = "You have fallen in battle..."
         TIME_BATTLETEXT_DISPLAYED: float = 0.5
 
@@ -820,8 +879,7 @@ class MainHandler:
         self.ui_lose(loss_text)
 
     def fn_battle_get_enemy(self) -> Enemy | None:
-        """
-        Gets an enemy for an encounter, based on the current room.
+        """Gets an enemy for an encounter, based on the current room.
 
         Returns:
             Enemy | None:
@@ -921,8 +979,7 @@ def run(
     gameFile_name: str = "game",
     gameFile_path: str = "./",
 ) -> None:
-    """
-    The wrapper to start the SHM Engine.
+    """The wrapper to start the SHM Engine.
 
     Args:
         win (curses.window):
@@ -942,14 +999,15 @@ def run(
         Defaults to None.
 
         gameFile_name (str, optional):
-        The name of the module name which corresponds to the gamefile to be loaded.
+        The name of the module name which corresponds to the gamefile
+        to be loaded.
+        If the file extension is not specified, defaults to '.py'.
         Defaults to "game".
 
         gameFile_path (str, optional):
         The file path of the gamefile to be loaded.
         Accepts both relative and absolute paths.
         May not include the file itself or only the directory.
-        If the file extension is not specified, defaults to '.py'.
         Defaults to "./".
     """
 

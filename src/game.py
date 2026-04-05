@@ -1,3 +1,9 @@
+"""The SHM gamefile for The Shopkeeper's Quest.
+
+Typical usage example:
+    rooms = game.get_rooms(win)
+"""
+
 import curses
 import random
 import sys
@@ -153,14 +159,14 @@ def overwrite_rooms(rooms: dict, extrarooms: dict) -> dict:
 
 
 def get_rooms(win: curses.window) -> dict[int, dict]:
-    """
-    The most important part; returns a dict of rooms to the engine.
+    """The most important part; returns a dict of rooms to the engine.
 
     Args:
         win (curses.window): A curses window instance.
 
     Returns:
-        dict[int, dict]: The dictionary of rooms; for more info see room_format.rst
+        dict[int, dict]: The dictionary of rooms.
+        (For more info see room_format.rst)
     """
     hasItem = game_state.inventory.hasItem
     rooms: dict[int | str, dict] = toml_reader.read_gamedata("game.toml")

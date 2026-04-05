@@ -1,3 +1,11 @@
+"""The title screen to be displayed to the user.
+
+Typical usage example:
+
+title.title()
+title_screen = MiniSHM(win, options_dict, title_string)
+"""
+
 import os.path
 import sys
 from collections.abc import Callable
@@ -13,9 +21,10 @@ from src import save_handler, shm, toml_reader, tui
 
 
 class MiniSHM:
-    """
-    MiniSHM is a tiny engine designed to run the title screen and nothing else.
-    It expects a dictionary of 'rooms' with every key is either an int, str or lambda.
+    """Tiny engine designed to run the title screen and nothing else.
+
+    It expects a dictionary of 'rooms' with every key is either an
+    int, str or lambda.
     When the key is an int or str, that option will take you to that room;
     when the key is a lambda, it is executed. It has ZERO error checking.
     For more features, use the real SHM Engine.
@@ -27,18 +36,18 @@ class MiniSHM:
         options_dict: dict[int | str, dict[str, int | Callable[[], NoReturn | None]]],
         title_string: str = "SHM Engine",
     ) -> None:
-        """
-        Initialises MiniSHM
+        """Initialises MiniSHM.
 
         Args:
             win (curses.window):
             A curses window instance.
 
-            options_dict (dict):
+            options_dict (dict[int | str, dict]):
             The dictionary containing all options for the menu.
 
             title_string (str, optional):
-            The string to display to the user while navigating the title screen.
+            The string to display to the user while navigating the title
+            screen.
             Defaults to "SHM Engine".
         """
         self.options_dict: dict[
@@ -48,8 +57,7 @@ class MiniSHM:
         self.win: curses.window = win
 
     def _option(self, key: str | int = 0) -> int:
-        """
-        Displays an option to the user
+        """Displays an option to the user. Internal use only.
 
         Args:
             key (int | str, optional):
@@ -67,6 +75,14 @@ class MiniSHM:
         return query
 
     def screen(self, task: int | str | Callable[[], None] = 0) -> None:
+        """Executes the current task of the chosen option.
+
+        Args:
+            task (int | str | Callable[[], None], optional):
+            If an int or str, moves to that room.
+            If a Callable, executes the task.
+            Defaults to 0.
+        """
         while isinstance(task, int) or isinstance(task, str):
             query: str | int = self._option(task)
             choices: dict[str, int | Callable[[], None]] = self.options_dict[task]
@@ -78,8 +94,7 @@ class MiniSHM:
 def handle_save(
     win: curses.window, game_path: str = "game", save_path: str = "game"
 ) -> None:
-    """
-    Handles the save files
+    """Handles the save files.
 
     Args:
         win (curses.window): A curses window instance.
@@ -112,6 +127,11 @@ def handle_save(
 
 
 def main(win: curses.window) -> None:
+    """The main title screen, must be loaded with curses.wrapper.
+
+    Args:
+        win (curses.window): A curses window instance.
+    """
     curses.curs_set(0)
     win.scrollok(True)
     win.nodelay(True)
@@ -160,6 +180,8 @@ def main(win: curses.window) -> None:
 
 
 def title() -> None:
+    """Sets up a curses wrapper and creates the title screen.
+    """
     print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)
