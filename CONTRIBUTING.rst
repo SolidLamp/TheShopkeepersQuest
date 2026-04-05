@@ -60,13 +60,7 @@ should be as follows:
 * Avoid implicit string concatenation in most cases, except on assignment of 
   the string to a variable without operators.
 * Return statements should have redundant parentheses.
-* Docstrings should within the format created by autoDocstring
-
-  * Whenever a given argument requires multiple lines, all arguments should
-    be seperated by line, and the default value should also be provided on 
-    a new line.
-  * Docstrings should have the triple quotes (``"""``) on seperate lines from 
-    the docstring itself.
+* Docstrings should be in the `Google docstring format`_.
 
 
 Commit Styling
@@ -131,9 +125,12 @@ See Also
 * `PEP 257`_
 * `PEP 484`_
 * `Black`_
+* `Google docstring format`_
 
 
 .. _Black: https://github.com/psf/black
+.. _Google Docstring Format: https://google.github.io/styleguide/pyguide.html
+  #38-comments-and-docstrings
 .. _PEP 7: https://peps.python.org/pep-0007/
 .. _PEP 8: https://peps.python.org/pep-0008/
 .. _PEP 257: https://peps.python.org/pep-0257/
