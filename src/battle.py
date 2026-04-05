@@ -7,6 +7,8 @@ Typical usage example:
 
 import curses
 import math
+from typing import Callable, Literal
+from src.typing.typeddicts import BattleItem
 import time
 from collections.abc import Callable
 from enum import IntEnum
@@ -311,16 +313,7 @@ class BattleHandler:
                 continue
 
             if query == Options.Fight:
-                variance: float = self.player_power / VARIANCE_DIVISOR
-                abs_variance: int = rand(int(-1 * variance), int(variance))
-                abs_variance = abs_variance if self.variable_damage else 0
-                damage: int = self.player_power + abs_variance
-                self.enemy_health -= damage
-                self.win.clear()
-                print3(self.win, "\n" + text, delay=0)
-                print3(self.win, f"\nYou did {damage} damage to {self.enemy_name}!")
-                self.win.refresh()
-                time.sleep(0.25)
+                self._attack_enemy(int(self.player_power), text)
                 in_menu = False
                 break
 
@@ -338,23 +331,8 @@ class BattleHandler:
                     continue
                 if item in self.player_items:
                     self.player_items.remove(item)
+                self.do_item(item, text)
                 break
-                items: set[str] = set(self.game_state.inventory.items)
-                keyItems: set[str] = set(self.game_state.inventory.keyItems)
-                player_items: set[str] = items | keyItems
-                usables: set[str] = set(self.battle_items.keys()) & player_items
-                in_menu = bool(len(usables))
-                if not (in_menu):
-                    print3(self.win, text="Your inventory is empty.")
-                    time.sleep(0.35)
-                    continue
-                options: list[str] = list(usables)
-                options.append("Back")
-                while not (isinstance(query, int)) and query != "i":
-                    query: int | str = tui.option(self.win, text, options)
-                if query == "i":
-                    query = len(options) - 1
-                # self.battle_items[query]()
 
             elif query == Options.Run:
                 if self.is_boss:
@@ -364,25 +342,13 @@ class BattleHandler:
                     in_menu = True
                     continue
 
-                length: int = len(str(float(self.run_chance))) - 2
-                precision: int = int("1" + "0" * length)
-                rng = rand(0, precision + 1) / precision
-
-                if rng >= self.run_chance:
-                    print3(self.win, text="\nYou couldn't get away!")
-                    self.win.refresh()
-                    time.sleep(0.25)
-                    in_menu = False
-                    break
-                else:
-                    print3(self.win, text="\nYou managed to get away!")
-                    self.win.refresh()
-                    time.sleep(0.65)
-                    self.win.clear()
-                    self.in_fight = False
-                    return
+                self._run(self.run_chance)
+                break
             else:
                 continue
+
+        if not self.in_fight:
+            return
 
         if self.enemy_health <= 0:
             return
@@ -451,3 +417,93 @@ class BattleHandler:
             return
 
         return chosen_item
+
+    def do_item(self, item: str, hud: str) -> None:
+        """Handles items in battles.
+
+        Args:
+            item (str): The name of the item to handle.
+            hud (str): The HUD in string format.
+        """
+        if self.battle_items is None:
+            return
+
+        if item not in self.battle_items:
+            return
+
+        battle_item: BattleItem = self.battle_items[item]
+
+        if "item_type" not in battle_item:
+            return
+
+        item_type: str = battle_item["item_type"]
+
+        match item_type:
+            case "Damage":
+                magnitude: int = battle_item.get("magnitude", 0)
+                self._attack_enemy(magnitude, hud)
+            case "Heal":
+                magnitude: int = battle_item.get("magnitude", 0)
+                magnitude = min(magnitude, self.max_player_health - self.player_health)
+                print3(self.win, f"\033[34m\nYou healed {magnitude} HP!\033[0m")
+                self.player_health += magnitude
+            case "Escape" if "escape_chance" in battle_item:
+                escape_chance: float = battle_item.get("escape_chance", 0.0)
+                self._run(escape_chance)
+            case "Escape" if "escape_chance_modifier" in battle_item:
+                escape_chance_modifier: float = battle_item["escape_chance_modifier"]
+                escape_chance: float = self.run_chance * escape_chance_modifier
+                self._run(escape_chance)
+            case "Script":
+                script: Callable[[], None] = battle_item.get("script", lambda: None)
+                script()
+
+    def _run(self, chance: float) -> None:
+        """Runs from an enemy.
+
+        Args:
+            chance (float): Chance of running from the enemy.
+        """
+        if self.is_boss:
+            print3(self.win, text="\nYou cannot run from a boss!")
+            self.win.refresh()
+            time.sleep(0.25)
+            return
+
+        length: int = len(str(float(chance))) - 2
+        precision: int = int("1" + "0" * length)
+        rng = rand(0, precision + 1) / precision
+
+        if rng >= chance:
+            print3(self.win, text="\nYou couldn't get away!")
+            self.win.refresh()
+            time.sleep(0.25)
+        else:
+            print3(self.win, text="\nYou managed to get away!")
+            self.win.refresh()
+            time.sleep(0.65)
+            self.win.clear()
+            self.in_fight = False
+        return
+
+    def _attack_enemy(self, damage: int, hud: str) -> None:
+        """Damages the enemy.
+
+        Args:
+            damage (int): The damage to deal to the enemy.
+            hud (str): The hud to display.
+        """
+        VARIANCE_DIVISOR: int = 10
+        variance: float = damage / VARIANCE_DIVISOR
+        try:
+            abs_variance: int = rand(int(-1 * variance), int(variance))
+        except (ValueError, TypeError):
+            abs_variance: int = 0
+        abs_variance: int = abs_variance if self.variable_damage else 0
+        damage: int = damage + abs_variance
+        self.enemy_health -= damage
+        self.win.clear()
+        print3(self.win, text=f"\n{hud}", delay=0)
+        print3(self.win, text=f"\nYou did {damage} damage to {self.enemy_name}!")
+        self.win.refresh()
+        time.sleep(0.25)

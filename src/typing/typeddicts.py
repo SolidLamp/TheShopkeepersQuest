@@ -12,6 +12,7 @@ class BattleItem(TypedDict, total=False):
     magnitude: int # only used with "Damage" and "Heal" types
     script: Callable[[], None] # only used with "Script" type
     escape_chance: float # must be less than 1; only used with "Escape" type
+    escape_chance_modifier: float # only used with "Escape" type
 
 
 class BattleHooks(TypedDict):
