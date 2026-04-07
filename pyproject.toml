@@ -41,7 +41,7 @@ line-length = 88
 target-version = ["py311", "py312", "py313"]
 
 [tool.isort]
-line_length = 88
+line_length = 87
 profile = "black"
 py_version = 311
 
