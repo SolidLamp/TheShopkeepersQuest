@@ -8,8 +8,6 @@ from typing import Any
 
 from src.typing import GameInfo, Save
 
-# TODO: Save version 2: box
-
 
 def save_validifier(saveFile: Save) -> bool:
     if not isinstance(saveFile, dict):
@@ -135,7 +133,7 @@ def write_save(
 
 def copy_save(file_name: str, new_suffix: str) -> None:
     """
-    Copies an existing 
+    Copies an existing
 
     Args:
         file_name (str): The file name of the existing file to copy.
@@ -143,8 +141,6 @@ def copy_save(file_name: str, new_suffix: str) -> None:
     """
     file_name: str = remove_extension(file_name)
     old_save: str = os.path.abspath(file_name + ".sav")
-    old_copy: str = (
-        os.path.abspath(file_name) + "-" + new_suffix + ".sav"
-    )
+    old_copy: str = os.path.abspath(file_name) + "-" + new_suffix + ".sav"
     old_copy = filename_compat(old_copy)
     shutil.copyfile(old_save, old_copy)

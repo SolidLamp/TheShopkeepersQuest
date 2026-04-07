@@ -14,6 +14,7 @@ import curses
 import os.path
 import platform
 import re
+from src.typing.box import Box
 import sys
 import time
 from collections.abc import Callable
@@ -28,7 +29,15 @@ from typing import Any
 from src import save_handler, toml_reader, tui
 from src.battle import BattleHandler
 from src.tui import print3
-from src.typing import BattleHooks, BattleItem, Enemy, EngineInfo, FormatDict, Save
+from src.typing import (
+    BattleHooks,
+    BattleItem,
+    Box,
+    Enemy,
+    EngineInfo,
+    FormatDict,
+    Save,
+)
 
 HISTORY_MAX_LEN: int = 10
 AUTOMOVE_DELAY: float = 1.0
@@ -156,6 +165,8 @@ class MainHandler:
         checked so that they match the current loaded gamefile. A save file
         with the UUID and title of a game that does not correspond to the
         gamefile with the same identifiers will cause unexpected behaviour.
+        Automatically handles if an attribute is Box[int] or Box[float],
+        although
 
         Args:
             saveFile (Save | None): A dictionary in the Save format.
@@ -179,8 +190,21 @@ class MainHandler:
 
         self.history.extend(saveFile["History"])
 
+        # Test for if the given attribute is a box.
+
         for item in saveFile["game_state"]:
-            setattr(self.game_state, item, saveFile["game_state"][item])
+            if not hasattr(self.game_state, item):
+                continue
+            if type(getattr(self.game_state, item)) != Box:
+                setattr(self.game_state, item, saveFile["game_state"][item])
+            elif type(saveFile["game_state"][item]) == int:
+                boxed_item = getattr(self.game_state, item)
+                boxed_item -= boxed_item
+                boxed_item += saveFile["game_state"][item]
+            elif type(saveFile["game_state"][item]) == float:
+                boxed_item = getattr(self.game_state, item)
+                boxed_item -= boxed_item
+                boxed_item += saveFile["game_state"][item]
 
         if hasattr(self.game_state, "inventory") and "inventory" in saveFile:
             for item in saveFile["inventory"]["items"]:
@@ -873,7 +897,7 @@ class MainHandler:
             enemy=enemy,
             variable_damage=variable_damage,
             battle_items=battle_items,
-            items=items
+            items=items,
         )
         if battle.battle_handler():
             self.ui_drawtitlebar()

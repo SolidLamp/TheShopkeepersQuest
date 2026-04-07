@@ -218,3 +218,6 @@ class Box(Generic[T]):
     def copy(self) -> Self:
         copied_box = self.__copy__()
         return copied_box
+
+    def unbox(self) -> T:
+        return self.value

@@ -7,8 +7,7 @@ Typical usage example:
 
 import curses
 import math
-from typing import Callable, Literal
-from src.typing.typeddicts import BattleItem
+from typing import Literal
 import time
 from collections.abc import Callable
 from enum import IntEnum
