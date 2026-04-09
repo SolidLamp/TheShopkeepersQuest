@@ -1,4 +1,4 @@
-from typing import Callable, Required, TypedDict
+from typing import Callable, TypedDict
 
 
 class Room(TypedDict, total=False):
@@ -13,7 +13,7 @@ class Room(TypedDict, total=False):
     as fields such as Option[int]Requirements are variable.
     Rooms within a game are recommended to use this order for their attributes.
     """
-    Text: Required[str]
+    Text: str
     Requirements: Callable[[], bool]
     AlternateText: str
     TextSpeed: float

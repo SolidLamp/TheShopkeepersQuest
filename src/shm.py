@@ -599,11 +599,22 @@ class MainHandler:
         Returns:
             str: The appropriate text of the room to be used.
         """
-        text = ""
-        if "Requirements" in self.room and not self.room["Requirements"]():
-            text = self.room["AlternateText"]
-        else:
-            text = self.room["Text"]
+        text: str = ""
+
+        recent_rooms: list[int] = self.history[-5:-1]
+        if "ShopEntrance" in self.room and not self.roomID in recent_rooms:
+            if isinstance(self.room["ShopEntrance"], str):
+                text = self.room["ShopEntrance"]
+            elif isinstance(self.room["ShopEntrance"], list):
+                random_index: int = rand(len(self.room["ShopEntrance"]))
+                random_string = self.room["ShopEntrance"][random_index]
+                text: str = str(random_string)
+
+        elif "Requirements" in self.room and not self.room["Requirements"]():
+            text: str = str(self.room["AlternateText"])
+        elif "Text" in self.room:
+            text: str = str(self.room["Text"])
+
         tui.newline(self.win)
         if "\n" not in text:
             tui.centre_text(self.win, text)
@@ -729,7 +740,7 @@ class MainHandler:
             self.game_state.inventory.getItem(self.room[attr], self.win)
         self.win.getch()
 
-    def fn_mainRoomHandler(self, text: str) -> None:
+    def fn_main_option_handler(self, text: str) -> None:
         """The main handler of a room.
 
         Handles the moving between rooms and showing the options menu.
@@ -738,28 +749,107 @@ class MainHandler:
             text (str): The text to be displayed to the user while options are
             being displayed below.
         """
-        OptionsIndex = []
-        Options = []
-        for i in self.room["Move"]:
+
+        item_names = self.room.get("ShopItems", [])
+        item_costs = self.room.get("ShopItemCosts", [])
+        item_room = self.room.get("ShopItemMove", [])
+
+        # Check shop attributes are correct if present.
+        for attr in ["ShopItems", "ShopItemCosts", "ShopItemMove"]:
+            if attr not in self.room:
+                continue
+            if not isinstance(self.room[attr], list):
+                self.room[attr] = [self.room[attr]]
+
+        for i in range(len(item_costs)):
+            try:
+                int(item_costs[i])
+            except TypeError:
+                self.err_log_error(
+                    error_type="Warning",
+                    error_msg=f"Invalid type in item_costs in {self.roomID}.",
+                )
+                item_costs[i] = int(bool(item_costs[i]))
+
+        for i in range(len(item_room)):
+            try:
+                int(item_room[i])
+            except TypeError:
+                self.err_log_error(
+                    error_type="Warning",
+                    error_msg=f"Invalid type in item_room in {self.roomID}.",
+                )
+                item_room[i] = int(bool(item_room[i]))
+
+        # Get longest item name
+        longest_name_length: int = 0
+        for i in item_names:
+            if len(i) > longest_name_length:
+                longest_name_length: int = len(i)
+
+        # Get longest price
+        longest_price: int = 0
+        for i in item_costs:
+            cost_length: str = f"{i}"
+            if len(cost_length) > longest_price:
+                longest_price: int = len(cost_length)
+
+        # Get list of items to display to the user
+        shop_items: list[str] = []
+        currency_name: str = str(self.gameInfo.get("currency_name", "Money"))
+        for i in range(len(item_names)):
+            # Check that lists are the same length, thus being a sensible value
+            if len(item_names) != len(item_costs):
+                break
+            if len(item_names) != len(item_room) and item_room:
+                break
+
+            name_length_difference: int = longest_name_length - len(item_names[i])
+            cost_length_difference: int = longest_price - len(f"{item_costs[i]}")
+
+            if item_costs[i] == 0:
+                string: str = f"Purchase {item_names[i]}"
+                string: str = string + " " * name_length_difference
+                string: str = string + " " * len(" - ")
+                string: str = string + " " * longest_price
+                string: str = string + " " * 1
+                string: str = string + " " * len(currency_name)
+            else:
+                string: str = f"Purchase {item_names[i]}"
+                string: str = string + " " * name_length_difference
+                string: str = string + f" - {item_costs[i]}"
+                string: str = string + " " * cost_length_difference
+                string: str = string + " "
+                string: str = string + f"{currency_name}"
+            shop_items.append(string)
+
+        options_index: list[int | tuple[str, int]] = []
+        options: list[str] = []
+        for i in self.room.get("Move", []):
             OptionRequirements = (
                 "Option" + str(self.room["Move"].index(i)) + "Requirements"
             )
             if OptionRequirements not in self.room or self.room[OptionRequirements]():
-                OptionsIndex.append(i)
+                options_index.append(i)
                 optionText = self.room["Options"][self.room["Move"].index(i)]
                 if self.globaldebug:
-                    Options.append(optionText + " - RoomID: " + str(i))
+                    options.append(optionText + " - RoomID: " + str(i))
                 else:
-                    Options.append(optionText)
+                    options.append(optionText)
+
+        choices: list[str] = shop_items + options
+
         if (
             "Inventory" in self.room
             and self.game_state.inventory
             and not self.room["Inventory"]
         ):
-            query = self.ui_option(text, Options, Inventory=False)
+            query = self.ui_option(text, choices, Inventory=False)
         else:
-            query = self.ui_option(text, Options)
-        self.fn_roomIDHandler(OptionsIndex[query])
+            query = self.ui_option(text, choices)
+
+        if query > len(shop_items) - 1:
+            self.fn_roomIDHandler(options_index[query - len(shop_items)])
 
     def fn_roomIDHandler(self, room_id: int | tuple[str, int]) -> None:
         """Handles room IDs and moving between rooms.
@@ -828,7 +918,7 @@ class MainHandler:
             automove_delay = AUTOMOVE_DELAY * automove_delay
             time.sleep(int(automove_delay))
         elif "Move" in self.room:
-            self.fn_mainRoomHandler(text)
+            self.fn_main_option_handler(text)
         if "Ending" in self.room:
             automove_delay = not (self.room.get("InstantAutomove", False))
             automove_delay = ENDING_DELAY * automove_delay

@@ -71,6 +71,7 @@ class GameInfo(TypedDict):
     variable_damage: bool
     hide_warnings: bool
     disable_debug: bool
+    currency_name: str
 
 
 class GameFile(TypedDict):
