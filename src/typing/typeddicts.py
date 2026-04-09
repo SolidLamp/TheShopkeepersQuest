@@ -77,14 +77,18 @@ class GameInfo(TypedDict):
 class GameFile(TypedDict):
     gameInfo: GameInfo
     history: list[int]
+    endingText: NotRequired[dict[str, str]]
     defaultEnding: str
+    loseText: NotRequired[dict[str, str]]
     defaultLose: str
+    keyItems: NotRequired[list[str]]
     Inventory: NotRequired[type]
     gameState: NotRequired[type]
     game_state: Any
     enemies: NotRequired[dict[int | str, Enemy]]
     battle_hooks: NotRequired[BattleHooks]
     battle_items: NotRequired[dict[str, BattleItem]]
+    money_hook: Box[int]
     get_rooms: Callable[[window], dict[int, Room]]
 
 

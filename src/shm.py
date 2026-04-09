@@ -15,6 +15,8 @@ import os.path
 import platform
 import re
 from src.typing.box import Box
+from src.typing.box import Box
+from src.typing.box import Box
 import sys
 import time
 from collections.abc import Callable
@@ -729,16 +731,36 @@ class MainHandler:
         if f"{attr}Text" in self.room:
             errorMsg = "An error has occurred. This message should not appear."
             print3(self.win, "\n" + self.room.get(f"{attr}Text", errorMsg))
-        if (
-            hasattr(self.game_state, "inventory")
-            and self.game.keyItems
-            and self.room[attr] in self.game.keyItems
-            and self.room[attr] not in self.game_state.inventory.keyItems
-        ):
-            self.game_state.inventory.getKeyItem(self.room[attr], self.win)
-        elif hasattr(self.game_state, "inventory"):
-            self.game_state.inventory.getItem(self.room[attr], self.win)
-        self.win.getch()
+        self.fn_get_item(self.room[attr])
+
+    def fn_get_item(self, item: str) -> bool:
+        """Function to obtain an item.
+
+        Args:
+            item (str): The item to obtain
+
+        Returns:
+            bool: A boolean return value representing if the operation
+            succeeded, or if an error was encountered.
+        """
+        try:
+            if (
+                hasattr(self.game_state, "inventory")
+                and hasattr(self.game, "keyItems")
+                and item in self.game.keyItems
+                and item not in self.game_state.inventory.keyItems
+            ):
+                self.game_state.inventory.getKeyItem(item, self.win)
+            elif hasattr(self.game_state, "inventory"):
+                self.game_state.inventory.getItem(item, self.win)
+            self.win.getch()
+            return True
+        except AttributeError:
+            self.err_log_error(
+                error_type="Error",
+                error_msg="Inventory does not have the proper methods to obtain items.",
+            )
+            return False
 
     def fn_main_option_handler(self, text: str) -> None:
         """The main handler of a room.
@@ -750,9 +772,18 @@ class MainHandler:
             being displayed below.
         """
 
-        item_names = self.room.get("ShopItems", [])
-        item_costs = self.room.get("ShopItemCosts", [])
-        item_room = self.room.get("ShopItemMove", [])
+        item_names: list[str] = self.room.get("ShopItems", [])
+        item_costs: list[int] = self.room.get("ShopItemCosts", [])
+        item_room: list[int] = self.room.get("ShopItemMove", [])
+
+        # Get money hook
+        if hasattr(self.game, "money_hook") and isinstance(
+            getattr(self.game, "money_hook"), Box
+        ):
+            money_hook: Box[int] = getattr(self.game, "money_hook")
+        else:
+            money_hook: Box[int] = Box(0)
+            item_names: list[str] = []
 
         # Check shop attributes are correct if present.
         for attr in ["ShopItems", "ShopItemCosts", "ShopItemMove"]:
@@ -807,15 +838,19 @@ class MainHandler:
             name_length_difference: int = longest_name_length - len(item_names[i])
             cost_length_difference: int = longest_price - len(f"{item_costs[i]}")
 
+            string: str = f"Purchase {item_names[i]}"
+
+            # Deprecated because of curses: Check that you have enough money
+            # if item_costs[i] > money_hook:
+            #     string += "\033[9mNOT ENOUGH MONEY\033[0m"
+
             if item_costs[i] == 0:
-                string: str = f"Purchase {item_names[i]}"
                 string: str = string + " " * name_length_difference
                 string: str = string + " " * len(" - ")
                 string: str = string + " " * longest_price
                 string: str = string + " " * 1
                 string: str = string + " " * len(currency_name)
             else:
-                string: str = f"Purchase {item_names[i]}"
                 string: str = string + " " * name_length_difference
                 string: str = string + f" - {item_costs[i]}"
                 string: str = string + " " * cost_length_difference
@@ -844,12 +879,24 @@ class MainHandler:
             and self.game_state.inventory
             and not self.room["Inventory"]
         ):
-            query = self.ui_option(text, choices, Inventory=False)
+            query: int = self.ui_option(text, choices, Inventory=False)
         else:
-            query = self.ui_option(text, choices)
+            query: int = self.ui_option(text, choices)
 
+        # This variable is used to test if the purchase operation was
+        # successful, just in case of any errors.
+        purchased_item: bool = False
+
+        # Query is a move to location option
         if query > len(shop_items) - 1:
             self.fn_roomIDHandler(options_index[query - len(shop_items)])
+
+        elif item_costs[query] <= money_hook:
+            chosen_item: str = str(item_names[query])
+            self.win.clear()
+            purchased_item: bool = self.fn_get_item(chosen_item)
+        if purchased_item:
+            money_hook -= item_costs[query]
 
     def fn_roomIDHandler(self, room_id: int | tuple[str, int]) -> None:
         """Handles room IDs and moving between rooms.
