@@ -62,6 +62,64 @@ Quick Reference Table
 +-----------------------+--------------------+---------------------------------+
 | KeyItemText           | str                | Alias for 'ItemText'.           |
 +-----------------------+--------------------+---------------------------------+
+| ShopItems             | list[str]          | Defines the list of items sold  |
+|                       |                    | within a shop in this room.     |
++-----------------------+--------------------+---------------------------------+
+| ShopItemCosts         | list[int]          | The list of costs for items     |
+|                       |                    | within the shop. Indexes        |
+|                       |                    | correspond to ShopItems, and    |
+|                       |                    | both lists should always be the |
+|                       |                    | same length.                    |
++-----------------------+--------------------+---------------------------------+
+| ShopItemMove          | list[int |         | The room to move to if the item |
+|                       |   tuple[str, int]] | is purchased. Indexes always    |
+|                       |                    | correspond to ShopItems, and    |
+|                       |                    | both lists should always be the |
+|                       |                    | same length. To disable, set to |
+|                       |                    | -1, as such a room would        |
+|                       |                    | correspond to the current room, |
+|                       |                    | and thus would not do anything  |
+|                       |                    | regardless.                     |
++-----------------------+--------------------+---------------------------------+
+| ShopEntrance          | str | list[str]    | The string to display when      |
+|                       |                    | entering the shop. If it is a   |
+|                       |                    | list of strings, then the       |
+|                       |                    | string to display will be       |
+|                       |                    | randomly chosen from the list.  |
++-----------------------+--------------------+---------------------------------+
+| ShopExit              | str | list[str]    | The string to display when      |
+|                       |                    | exiting the shop. If it is a    |
+|                       |                    | list of strings, then the       |
+|                       |                    | string to display will be       |
+|                       |                    | randomly chosen from the list.  |
++-----------------------+--------------------+---------------------------------+
+| BattleText            | str                | The string to display when      |
+|                       |                    | a battle initiates. Not         |
+|                       |                    | required for a battle, but      |
+|                       |                    | recommended.                    |
++-----------------------+--------------------+---------------------------------+
+| Enemies               | list[int | str]    | A list of identifiers,          |
+|                       |                    | corresponding to the identifier |
+|                       |                    | of an enemy given by the        |
+|                       |                    | enemies dict in the gamefile.   |
++-----------------------+--------------------+---------------------------------+
+| EnemyChances          | list[float | int]  | A list of chances for an enemy  |
+|                       |                    | to appear, with each chance     |
+|                       |                    | corresponding to the enemy with |
+|                       |                    | the index within the Enemies    |
+|                       |                    | list. If the sum of chances in  |
+|                       |                    | the list is less than 1, then   |
+|                       |                    | the float values is the exact   |
+|                       |                    | chance of an enemy appearing.   |
+|                       |                    | However, if the sum of chances  |
+|                       |                    | is greater than 1, then an      |
+|                       |                    | enemy is guaranteed to appear,  |
+|                       |                    | and it the chances are          |
+|                       |                    | calculated by the sum of total  |
+|                       |                    | chances, finding the multiplier |
+|                       |                    | to get to 1, and multiplying    |
+|                       |                    | each chance by this multiplier. |
++-----------------------+--------------------+---------------------------------+
 | Options               | list[str]          | A list of the text options      |
 |                       |                    | available to the player, in the |
 |                       |                    | same positions as 'Move'.       |
