@@ -15,7 +15,7 @@
 - [x] Fix error handling
 - [x] update print3 to stop splitting words across lines (unsure if should flick to next line upon reaching edge, or start printing on the next line and leave space; likely the latter, as more attractive and I surmise it to be simpler to code)
 - [x] Allow choices to have the same name without breaking
-- [ ] Add shop system
+- [x] Add shop system
 - [x] RPG Battle System (copy from Morshu: The Game???)
 - [x] Update to src/ layout
 - [x] Typing file

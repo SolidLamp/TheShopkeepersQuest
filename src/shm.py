@@ -603,8 +603,17 @@ class MainHandler:
         """
         text: str = ""
 
+        # Detect if this room is a shop
+        is_shop: bool = (
+            "ShopItems" in self.room
+            and isinstance(self.room["ShopItems"], list)
+            and "ShopItemCosts" in self.room
+            and isinstance(self.room["ShopItemCosts"], list)
+            and "ShopEntrance" in self.room
+        )
+
         recent_rooms: list[int] = self.history[-5:-1]
-        if "ShopEntrance" in self.room and not self.roomID in recent_rooms:
+        if is_shop and not self.roomID in recent_rooms:
             if isinstance(self.room["ShopEntrance"], str):
                 text = self.room["ShopEntrance"]
             elif isinstance(self.room["ShopEntrance"], list):
@@ -616,6 +625,19 @@ class MainHandler:
             text: str = str(self.room["AlternateText"])
         elif "Text" in self.room:
             text: str = str(self.room["Text"])
+
+        # Get money hook
+        if hasattr(self.game, "money_hook") and isinstance(
+            getattr(self.game, "money_hook"), Box
+        ):
+            money_hook: Box[int] = getattr(self.game, "money_hook")
+        else:
+            money_hook: Box[int] = Box(0)
+
+        currency_name: str = str(self.gameInfo.get("currency_name", "Money"))
+
+        if is_shop:
+            text += f"\nCurrent {currency_name}: {money_hook}"
 
         tui.newline(self.win)
         if "\n" not in text:
@@ -771,10 +793,23 @@ class MainHandler:
             text (str): The text to be displayed to the user while options are
             being displayed below.
         """
+        TIME_TO_SHOW_SHOP_EXIT_TEXT: float = 0.4 # Why 0.4? idk
 
         item_names: list[str] = self.room.get("ShopItems", [])
         item_costs: list[int] = self.room.get("ShopItemCosts", [])
         item_room: list[int] = self.room.get("ShopItemMove", [])
+
+        # Detect if this room is a shop
+        is_shop: bool = (
+            "ShopItems" in self.room
+            and isinstance(self.room["ShopItems"], list)
+            and "ShopItemCosts" in self.room
+            and isinstance(self.room["ShopItemCosts"], list)
+            and "ShopEntrance" in self.room
+            and isinstance(item_room, list)
+            and len(item_names) == len(item_costs)
+            and (len(item_names) == len(item_room) or not item_room)
+        )
 
         # Get money hook
         if hasattr(self.game, "money_hook") and isinstance(
@@ -840,7 +875,8 @@ class MainHandler:
 
             string: str = f"Purchase {item_names[i]}"
 
-            # Deprecated because of curses: Check that you have enough money
+            # If it were not for curses, there would be a strikethrough
+            # Check that you have enough money
             # if item_costs[i] > money_hook:
             #     string += "\033[9mNOT ENOUGH MONEY\033[0m"
 
@@ -872,6 +908,21 @@ class MainHandler:
                 else:
                     options.append(optionText)
 
+        # Add ShopExit option and options_index
+        if is_shop and not (
+            "Back" in options
+            or "Exit" in options
+            or "Exit Shop" in options
+            or "Go Back" in options
+            # or "Leave" in options
+            or "Leave Shop" in options
+            or "Quit" in options
+            # Check that complevel 2 is supported, or errors occur
+            and self.game.gameInfo["complevel"] >= 2
+        ):
+            options.append("Leave Shop")
+            options_index.append(-2)
+
         choices: list[str] = shop_items + options
 
         if (
@@ -897,6 +948,32 @@ class MainHandler:
             purchased_item: bool = self.fn_get_item(chosen_item)
         if purchased_item:
             money_hook -= item_costs[query]
+
+        # Check that it is a shop
+        if not is_shop:
+            return
+
+        # Implements ShopItemMove
+        if query <= len(shop_items) - 1 and item_room and item_room[query] != -1:
+            self.fn_roomIDHandler(int(item_room[query]))
+
+        # If chosen option is the last option, then the chosen option must be 
+        #  that of leaving the shop; then check if there is an exit phrase.
+        if query != len(choices) - 1 or "ShopExit" not in self.room:
+            return
+        
+        shop_exit_text: str = ""
+        if isinstance(self.room["ShopExit"], str):
+            shop_exit_text: str = self.room["ShopExit"]
+        elif isinstance(self.room["ShopExit"], list):
+            random_index: int = rand(len(self.room["ShopExit"]))
+            shop_exit_text: str = str(self.room["ShopExit"][random_index])
+        self.win.clear()
+        print3(self.win, "\n")
+        tui.centre_text(self.win, shop_exit_text)
+        print3(self.win, shop_exit_text)
+        time.sleep(TIME_TO_SHOW_SHOP_EXIT_TEXT)
+        return
 
     def fn_roomIDHandler(self, room_id: int | tuple[str, int]) -> None:
         """Handles room IDs and moving between rooms.
@@ -948,7 +1025,7 @@ class MainHandler:
         self.history.append(self.roomID)
         if len(self.history) > HISTORY_MAX_LEN:
             self.history.pop(0)
-        text = self.ui_text_handler()
+        text: str = self.ui_text_handler()
         if self.globaldebug:
             text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(self.history)
         if "Script" in self.room:
