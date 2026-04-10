@@ -1,0 +1,22 @@
+- [x] Saving (toml? xml? json? maybe use toml as already used in project, but call .sav. wait no we need to write and toml not supported so probably go with json)
+- [x] Titlebar
+- [x] Centre choices
+- [x] Fix the text code parser for \033[52;43m or whatever, and don't override bg and fg colour when the other is changed (make more configurable?)
+- [x] Import game from other locations and names - put inside class
+- [x] More save slots ? (allow title.py to specify save file)
+- [x] engine_info.toml (doesn't need to be explained; the name explains itself)
+- [x] Add KeyItem for SHM 1.2
+- [x] Allow reference to negative roomIDs be interpreted as history calls, and also allow this for Move, not just Automove
+- [x] Save history to file
+- [x] Put toml_reader and engine_info together (yes)
+- [x] Fix starting room to read from game.py from shm.py
+- [x] Add UUIDs to save files
+- [x] Add feature to control text speed in each room
+- [x] Fix error handling
+- [x] update print3 to stop splitting words across lines (unsure if should flick to next line upon reaching edge, or start printing on the next line and leave space; likely the latter, as more attractive and I surmise it to be simpler to code)
+- [x] Allow choices to have the same name without breaking
+- [x] Add shop system
+- [x] RPG Battle System (copy from Morshu: The Game???)
+- [x] Update to src/ layout
+- [x] Typing file
+- [x] Write documentation for the engine

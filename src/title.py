@@ -1,18 +1,153 @@
+"""The title screen to be displayed to the user.
+
+Typical usage example:
+
+title.title()
+title_screen = MiniSHM(win, options_dict, title_string)
+"""
+
+import os.path
 import sys
-import tui
-from shm import gameLoop
+from collections.abc import Callable
+from typing import Any, NoReturn
+
 try:
     import curses
 except ImportError as e:
-    print(f"The curses module was not found. If you are running Windows, please install windows-curses with pip.\nError: {e}")
+    print(f"The curses module was not found.\nError: {e}")
     sys.exit(1)
 
-def main(win):
-    win.clear()
+from src import save_handler, shm, toml_reader, tui
+
+
+class MiniSHM:
+    """Tiny engine designed to run the title screen and nothing else.
+
+    It expects a dictionary of 'rooms' with every key is either an
+    int, str or lambda.
+    When the key is an int or str, that option will take you to that room;
+    when the key is a lambda, it is executed. It has ZERO error checking.
+    For more features, use the real SHM Engine.
+    """
+
+    def __init__(
+        self,
+        win: curses.window,
+        options_dict: dict[int | str, dict[str, int | Callable[[], NoReturn | None]]],
+        title_string: str = "SHM Engine",
+    ) -> None:
+        """Initialises MiniSHM.
+
+        Args:
+            win (curses.window):
+            A curses window instance.
+
+            options_dict (dict[int | str, dict]):
+            The dictionary containing all options for the menu.
+
+            title_string (str, optional):
+            The string to display to the user while navigating the title
+            screen.
+            Defaults to "SHM Engine".
+        """
+        self.options_dict: dict[
+            int | str, dict[str, int | Callable[[], NoReturn | None]]
+        ] = options_dict
+        self.title_string: str = title_string
+        self.win: curses.window = win
+
+    def _option(self, key: str | int = 0) -> int:
+        """Displays an option to the user. Internal use only.
+
+        Args:
+            key (int | str, optional):
+            The particular menu of the title screen to display.
+            Defaults to 0.
+
+        Returns:
+            int: The chosen option by the user.
+        """
+        choices: dict[str, int | Callable[[], None]] = self.options_dict[key]
+        options: list[str] = list(choices.keys())
+        query: int | str = tui.option(self.win, self.title_string, options, False)
+        if isinstance(query, str):
+            sys.exit(0)
+        return query
+
+    def screen(self, task: int | str | Callable[[], None] = 0) -> None:
+        """Executes the current task of the chosen option.
+
+        Args:
+            task (int | str | Callable[[], None], optional):
+            If an int or str, moves to that room.
+            If a Callable, executes the task.
+            Defaults to 0.
+        """
+        while isinstance(task, int) or isinstance(task, str):
+            query: str | int = self._option(task)
+            choices: dict[str, int | Callable[[], None]] = self.options_dict[task]
+            task: int | Callable[[], None] = list(choices.values())[query]
+        if callable(task):
+            task()
+
+
+def handle_save(
+    win: curses.window, game_path: str = "game", save_path: str = "game"
+) -> None:
+    """Handles the save files.
+
+    Args:
+        win (curses.window): A curses window instance.
+
+        game_path (str, optional):
+        The relative path to the gamefile.
+        Defaults to "game".
+
+        save_path (str, optional):
+        The relative path to the savefile.
+        Defaults to "game".
+
+    """
+    if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
+        save_handler.read_save(save_path)
+    ):
+        saveFile: dict[Any, Any] = save_handler.read_save(save_path)
+        shm.run(
+            win,
+            starting_room=0,
+            saveFileName=save_path,
+            saveFile=saveFile,
+            gameFile_name=game_path,
+            gameFile_path="./src",
+        )
+    else:
+        shm.run(
+            win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./src"
+        )
+
+
+def main(win: curses.window) -> None:
+    """The main title screen, must be loaded with curses.wrapper.
+
+    Args:
+        win (curses.window): A curses window instance.
+    """
     curses.curs_set(0)
     win.scrollok(True)
+    win.nodelay(True)
     tui.colorsetup(win)
-    win.addstr(r"""
+    curses.cbreak()
+    engineInfo = toml_reader.get_engine_info()
+    tui.draw_titlebar(win, engineInfo)
+    padding = 1
+    padx1 = 0
+    padx2 = 0
+    pady1 = 0
+    pady2 = 1
+    newwin = tui.create_newwin(win, padding, padx1, padx2, pady1, pady2)
+    string = (
+        "\033[1;38;5;75m"
+        + r"""
         ___ _  _ ____
          |  |__| |___
          |  |  | |___
@@ -24,26 +159,29 @@ def main(win):
                                ____ _  _ ____ ____ ___
                                |  | |  | |___ [__   |
                                |_\| |__| |___ ___]  |
-                                                       """)
-    query = tui.option(win, "\033[36m\n___ _  _ ____\n |  |__| |___ \n |  |  | |___ \n\n____ _  _ ____ ___  _  _ ____ ____ ___  ____ ____ ____ '\n[__  |__| |  | |__] |_/  |___ |___ |__] |___ |__/ [__  \n___] |  | |__| |    | \_ |___ |___ |    |___ |  \ ___] \n\n                       ____ _  _ ____ ____ ___ \n                       |  | |  | |___ [__   |  \n                       |_\| |__| |___ ___]  |  \n                                               \033[0m",["Begin", "Skip Intro", "Quit"])
-    win.clear()
-    win.move(0,0)
-    curses.curs_set(0)
-    loop = 0
-    if query == 0:
-        tui.print3(win, "You are a travelling merchant, approaching a new village to sell your wares in another region.\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \nSuddently, a man appears, and walks in your direction.\nThe man speaks, \033[33m'Greetings. I'm a local shopkeeper, just on the outskirts of our little village.\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them.\nAny that resided within the main parts of the village limits last night have disappeared.'\033[0m\nThe man grunts and scratches his chin.\nHe looks back at the village with a longing expression, before turning his gaze back to you. \n\033[33m'It worries me, you know?'\033[0m he continues, \033[33m'There's an old legend that if all seems to disappear overnight, then it marks a dark path for the world.'\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \033[33m'I do have some experience with magic.\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\nWith those three items, I believe I can bring everything back to normal.\nI would get them myself, but my adventuring days are behind me.\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the main limits of the village.\nWhen you obtain the items, come see me in my shop.\nI shall be seeing you, then.'\033[0m\nThe man leaves.\nPress any key to continue...", 0, 0.02)
-        win.refresh()
-        win.getch()
-        loop = gameLoop(win, 1)
-    elif query == 1:
-        loop = gameLoop(win, 2)
-    else:
-        sys.exit()
-    while loop == 0:
-        loop = gameLoop(win)
-        win.addstr(str(loop))
+                                                       """
+        + "\033[0m"
+    )
+    screen_options: dict[int | str, dict[str, int | Callable[[], NoReturn | None]]] = {
+        0: {
+            "Play The Shopkeeper's Quest": 1,
+            "Quit": lambda: sys.exit(),
+        },
+        1: {
+            "Save 1": lambda: handle_save(win, game_path="game", save_path="game1"),
+            "Save 2": lambda: handle_save(win, game_path="game", save_path="game2"),
+            "Save 3": lambda: handle_save(win, game_path="game2", save_path="game3"),
+            "Back": 0,
+        },
+    }
+    title = MiniSHM(newwin, screen_options, string)
+    title.screen(0)
+    sys.exit(0)
 
-def title():
-    print("If you can read this, the game is not displaying. The most likely scenario is that you have closed the game.")
+
+def title() -> None:
+    """Sets up a curses wrapper and creates the title screen.
+    """
+    print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)

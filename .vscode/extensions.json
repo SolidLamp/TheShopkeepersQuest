@@ -1,0 +1,16 @@
+{
+    "recommendations": [
+        "alefragnani.bookmarks",
+        "edwinhuish.better-comments-next",
+        "gruntfuggly.todo-tree",
+        "ibm.output-colorizer",
+        "oderwat.indent-rainbow",
+        "detachhead.basedpyright",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "njpwerner.autodocs",
+        "tamasfe.even-better-toml"
+    ]
+}

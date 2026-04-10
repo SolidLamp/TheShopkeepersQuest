@@ -1,0 +1,889 @@
+[game_info]
+Name = "The Shopkeeper's Quest"
+Version = "Experimental"
+ReleaseDate = "2026-03-30"
+Licence = "MIT License"
+Creator = "SolidLamp"
+Link = "https://github.com/solidlamp"
+game_id = "5b64188f-31ce-42cc-ac52-2e6881de3951"
+complevel = 2
+abbr = "TSQ"
+title = "The Shopkeeper's Quest"
+desc = "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident."
+starting_room = 140
+default_titlebar_left = " F1 - Help "
+default_titlebar_centre = " {abbr} - {desc} "
+default_titlebar_right = " Q - Quit "
+default_textspeed = 0.01
+# border_style = 1
+variable_damage = true
+
+
+[0]
+Text = "\\033[32m[Debug] This is the Debug Room.\\033[0m"
+Desc = "Debug"
+Options = ['Go to 2', 'Go to 3']
+Move = [2, 3]
+Lose = "you fail"
+
+[1]
+Text = "You are standing at the outskirts of the village. There is a road to the north, leading to the main parts of the village, a forest to the east, a cave to the south, a shop and bazaar to the west."
+Desc = "Outskirts of the Village"
+Options = [
+      'Go to the forest',
+      'Follow the road to the village',
+      'Explore the cave',
+      "Go to {game_state.shopkeeperName}'s shop",
+      'Go to the bazaar',
+]
+Move = [3, 9, 88, 66, 73]
+
+[2]
+Text = "You are standing at the outskirts of the village."
+Desc = "Outskirts of the Village"
+Options = [
+      'Go to the forest',
+      'Follow the road to the village',
+      'Explore the cave',
+      "Go to {game_state.shopkeeperName}'s shop",
+      'Go to the bazaar',
+]
+Move = [3, 9, 88, 66, 73]
+
+[3]
+Text = "You come to the opening of the forest. The forest is vast and the trees tower over you."
+Desc = "Inside the Forest"
+Options = ['Go further in', 'Leave']
+Move = [4, 2]
+
+[4]
+Text = "You are deep in the forest. It is dim, and difficult to see."
+Desc = "Deep in the Forest"
+Options = ['Go further in', 'Leave']
+Move = [5, 3]
+
+[5]
+Text = "You come to a clearing, deep in the forest. There is a bonobo sitting, facing you."
+Desc = "At the Clearing"
+Options = ['Fight the bonobo', 'Fight the bonobo', 'Leave']
+Move = [6, 7, 8]
+
+[6]
+Text = "You attempt to fight the bonobo, but it easily overpowers you. You are killed."
+Desc = "At the Clearing"
+Lose = "What did you think was going to happen?"
+
+[7]
+Text = "You manage to defeat the bonobo, using your weapon.\\nYou manage to find a chest, containing the \\033[1mRusted Sword\\033[0m."
+Desc = "At the Clearing"
+KeyItem = "Rusted Sword"
+Automove = 4
+
+[8]
+Text = "You attempt to leave, but the bonobo catches you. You are killed."
+Desc = "At the Clearing"
+Lose = "Bonobos are quite aggressive."
+
+[9]
+Text = "You are standing within the village. It seems barren and no one is there."
+Desc = "Within the Village"
+Options = [
+      'Follow the High Steet',
+      'Sit on a bench for a while',
+      'Return to the outskirts of the village',
+]
+Move = [11, 10, 2]
+
+[10]
+Text = "You sit on a bench for a while."
+Desc = "Within the Village"
+Automove = 9
+
+[11]
+Text = "You are in the high steet of the village. The village centre is to your north, and the way back to the village outskirts is to your south."
+Desc = "In the High Street"
+Options = ['Follow the high street', 'Leave the Village']
+Move = [12, 9]
+
+[12]
+Text = "You are in the centre of the village. There are paths each direction, with a fountain in the middle."
+Desc = "In the High Street"
+Options = ['Go North', 'Go East', 'Go South', 'Go West', 'Go to the Fountain']
+Move = [18, 16, 11, 39, 13]
+
+[13]
+Text = "You are at the fountain in the village centre."
+Desc = "Village Centre"
+Options = ['Admire it', 'Throw a ruby in for good luck', 'Go back']
+Move = [14, 15, 12]
+
+[14]
+Text = "You admire the fountain."
+Desc = "Village Centre"
+KeyItem = "Ancient Key"
+KeyItemText = "Out of the fountain, an \\033[1mAncient Key\\033[0m rises to the surface of the water."
+Automove = 13
+
+[15]
+Text = "You throw a ruby into the fountain for good luck."
+Desc = "Village Centre"
+KeyItem = "Ancient Key"
+KeyItemText = "Out of the fountain, an \\033[1mAncient Key\\033[0m rises to the surface of the water."
+Automove = 13
+
+[16]
+Text = "You are in a small village square, where a tree stands in the centre. There is a note on the floor."
+Desc = "Village Square"
+Options = ['Read the note', 'Return']
+Move = [17, 12]
+
+[17]
+Text = "You read the note. It reads, 'None can stop me now. At 38, they will know. North, North, South, South, West, East, West, East.'"
+Desc = "Village Square"
+Options = ['Read the note again', 'Place it back down']
+Move = [17, 16]
+
+[18]
+Text = "You find yourself amongst an empty street of market stalls. A northern route leads to a smaller street."
+Desc = "Village Market"
+Options = ['Go down the smaller street', 'Go to the Village Centre.']
+Move = [19, 12]
+
+[19]
+Text = "You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?"
+Desc = "Mysterious Door"
+Options = [
+      'Unlock the door with the Ancient Key',
+      'Attempt to turn the handle',
+      'Go back',
+]
+Move = [21, 20, 18]
+
+[20]
+Text = "You attempt to turn the handle, but it does not budge."
+Desc = "Mysterious Door"
+Options = ['Try Again', 'Go Back']
+Move = [20, 19]
+
+[21]
+Text = "You unlock the mysterious door with the \\033[1mAncient Key\\033[0m."
+Desc = "Mysterious Door"
+Options = ['Continue']
+Inventory = false
+Move = [22]
+
+[22]
+Text = "You go through the door. It is pitch-black. You feel that you can no longer control yourself."
+Desc = "Mysterious Tunnel"
+Options = ['Continue']
+Inventory = false
+Move = [23]
+
+[23]
+Text = "As you continue, the tunnel around you appears to be darker than what you thought possible."
+Desc = "Mysterious Tunnel"
+Options = ['Continue']
+Inventory = false
+Move = [24]
+
+[24]
+Text = "As you continue, you see a light at the end."
+Desc = "Mysterious Tunnel"
+Options = ['Continue']
+Inventory = false
+Move = [25]
+
+[25]
+Text = "Eventually, you get to the end, and can go through the illuminated exit."
+Desc = "Mysterious Tunnel"
+Options = ['Continue']
+Inventory = false
+Move = [26]
+
+[26]
+Text = "It is the back room of {game_state.shopkeeperName}'s shop. It is full of rubies and products. There is a letter on a nearby desk."
+Desc = "Inside the Shop"
+Options = [
+      'Take some rubies',
+      'Take some lamp oil',
+      'Take some rope',
+      'Take some bombs',
+      'Go through to the front',
+      'Inspect the letter',
+]
+Inventory = false
+Move = [27, 28, 29, 30, 32, 31]
+
+[27]
+Text = "You take some rubies."
+Desc = "Inside the Shop"
+Automove = 26
+
+[28]
+Text = "You take some lamp oil."
+Desc = "Inside the Shop"
+Item = "Lamp Oil"
+Automove = 26
+
+[29]
+Text = "You take some rope."
+Desc = "Inside the Shop"
+Item = "Rope"
+Automove = 26
+
+[30]
+Text = "You take some bombs."
+Desc = "Inside the Shop"
+Item = "Bomb"
+Automove = 26
+
+[31]
+Text = "The envelope is sealed with a luxurious seal. The letter is addressed to 'The Overseer', and has the number 38 written on it. There is no letter inside the envelope."
+Desc = "Inside the Shop"
+Automove = 26
+
+[32]
+Text = "You are in the front room of {game_state.shopkeeperName}'s shop."
+Desc = "Inside the Shop"
+Options = ['Become {game_state.shopkeeperName}']
+Inventory = false
+Move = [33]
+
+[33]
+Text = "You become {game_state.shopkeeperName}."
+Desc = "The End"
+Inventory = false
+Automove = 38
+Ending = "Secret"
+
+[34]
+Text = "Dead end."
+Desc = "Maze"
+Automove = -2
+
+[35]
+Text = "Dead end."
+Desc = "Maze"
+Automove = -2
+
+[36]
+Text = "Dead end."
+Desc = "Maze"
+Automove = -2
+
+[38]
+Text = "You cannot go back now."
+Desc = "The End"
+titlebarCentre = "{title}"
+Inventory = false
+Automove = 38
+
+[39]
+Text = "There is a large square, with houses all around. There is an alley."
+Desc = "Alley Opening"
+Options = ['Go down the alley', 'Go to the Town Centre']
+Move = [43, 12]
+
+[40]
+Text = "Dead end."
+Desc = "Maze"
+Automove = -2
+
+[41]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [46, 40, 34, 35]
+
+[42]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [47, 43, 34, 35]
+
+[43]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [48, 44, 39, 42]
+
+[44]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [49, 40, 35, 43]
+
+[45]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [50, 40, 34, 35]
+
+[46]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 47, 41, 35]
+
+[47]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 48, 42, 46]
+
+[48]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 49, 43, 47]
+
+[49]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [54, 40, 44, 48]
+
+[50]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [55, 40, 45, 35]
+
+[51]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [56, 40, 35, 36]
+
+[52]
+Text = "You are in a maze of twisty little alleys, all alike. There is a cave opening here. Something about this seems familiar."
+AlternateText = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west', 'Go into the cave']
+Move = [40, 53, 35, 36, 99]
+
+[53]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [58, 40, 35, 52]
+
+[54]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 55, 49, 35]
+
+[55]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [60, 40, 50, 54]
+
+[56]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [61, 57, 51, 40]
+
+[57]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+KeyItem = "Amber Necklace"
+KeyItemText = "You see, on the ground, a beautiful \\033[1mAmber Necklace\\033[0m."
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 35, 36, 56]
+
+[58]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [63, 40, 53, 35]
+
+[59]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 60, 35, 36]
+
+[60]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [65, 40, 55, 35]
+
+[61]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 62, 56, 35]
+
+[62]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 63, 35, 61]
+
+[63]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 64, 58, 62]
+
+[64]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 65, 35, 63]
+
+[65]
+Text = "You are in a maze of twisty little alleys, all alike. Something about this seems familiar."
+Desc = "Maze"
+Options = ['Go north', 'Go east', 'Go south', 'Go west']
+Move = [40, 35, 60, 63]
+
+[66]
+Text = "\\033[33m'Have you checked out the bazaar? There's a fisherman there who sells excellent-quality rods.'\\033[0m\\nCurrent Rubies:0\\nLamp Oil - 15 Rubies\\nRope - 20 Rubies\\nBomb - 30 Rubies"
+Desc = "Inside the Shop"
+Options = [
+      'Purchase Lamp Oil',
+      'Purchase Rope',
+      'Purchase Bomb',
+      'Haggle',
+      'Ask about quest',
+      'Ask about quest',
+      'Ask about quest',
+      'Leave',
+]
+Move = [67, 68, 69, 72, 70, 130, 131, 71]
+
+[67]
+Text = "You purchased some Lamp Oil. [15 Rubies]"
+Desc = "Inside the Shop"
+Item = "Lamp Oil"
+Automove = 66
+
+[68]
+Text = "You purchased some Rope. [20 Rubies]"
+Desc = "Inside the Shop"
+Item = "Rope"
+Automove = 66
+
+[69]
+Text = "You purchased a Bomb. [30 Rubies]"
+Desc = "Inside the Shop"
+Item = "Bomb"
+Automove = 66
+
+[70]
+Text = ""
+Desc = "Inside the Shop"
+Ending = "Good"
+
+[71]
+Text = "\\033[33m'I wish you luck on your quest.'\\033[0m"
+Desc = "Inside the Shop"
+Automove = 2
+
+[72]
+Text = "\\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\\033[0m"
+Desc = "Inside the Shop"
+Automove = 66
+
+[73]
+Text = "You are in the bazaar. There are not many attended stalls around. There appears to be a fisherman, a fletcher, and a mineral collector, at three seperate stalls."
+AlternateText = "You are in the bazaar. There are not many attended stalls around. There appears to be a fisherman and a mineral collector at two seperate stalls."
+Desc = "The Bazaar"
+Options = [
+      'Go to the fisherman',
+      'Go to the fletcher',
+      'Go to the mineral collector',
+      'Go back to the village outskirts',
+]
+Move = [74, 82, 85, 2]
+
+[74]
+Text = "Current Rubies:0\\nFillet of Cod - 2 rubies\\nFillet of Salmon - 2 rubies\\nSmoked Trout - 9 rubies\\nJar of Tuna - 3 rubies\\nFillet of Smoked Haddock - 6 rubies\\n\\033[36m'What are you here to buy?'\\033[0m"
+Desc = "The Bazaar"
+Options = [
+      'Purchase a fillet of cod',
+      'Purchase a fillet of salmon',
+      'Purchase smoked trout',
+      'Purchase a jar of tuna',
+      'Purchase a fillet of smoked haddock',
+      'Haggle',
+      'Talk',
+      'Leave',
+]
+Move = [75, 76, 77, 78, 79, 80, 81, 73]
+
+[75]
+Text = "You purchased a Fillet of Cod [2 Rubies]"
+Desc = "The Bazaar"
+Item = "Fillet of Cod"
+Automove = 74
+
+[76]
+Text = "You purchased a Fillet of Salmon [2 Rubies]"
+Desc = "The Bazaar"
+Item = "Fillet of Salmon"
+Automove = 74
+
+[77]
+Text = "You purchased some Smoked Trout [9 Rubies]"
+Desc = "The Bazaar"
+Item = "Smoked Trout"
+Automove = 74
+
+[78]
+Text = "You purchased a Jar of Tuna [3 Rubies]"
+Desc = "The Bazaar"
+Item = "Jar of Tuna"
+Automove = 74
+
+[79]
+Text = "You purchased a Fillet of Smoked Haddock [6 Rubies]"
+Desc = "The Bazaar"
+Item = "Fillet of Smoked Haddock"
+Automove = 74
+
+[80]
+Text = "\\033[36m'If you aren't here to buy anything, then get out.'\\033[0m"
+Desc = "The Bazaar"
+Automove = 73
+
+[81]
+Text = ""
+Desc = "The Bazaar"
+Automove = 74
+
+[82]
+Text = "Current Rubies:0\\n\\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies."
+Desc = "The Bazaar"
+Options = ['Purchase the bow', 'Talk', 'Leave']
+Move = [83, 84, 73]
+
+[83]
+Text = "Be seeing you around. I'm going home to pack my stuff - there's nothing left for me here."
+AlternateText = "\\033[35m'Sorry, that's not really enough. I'd let it go for 75 rubies, maybe.'\\033[0m"
+Desc = "The Bazaar"
+KeyItem = "Bow and Arrow"
+Automove = 82
+
+[84]
+Text = "\\033[35m'You did it! I can't believe it! That's really it! That's my mother's \\033[1mSilver Amulet\\033[0;35m! I can't thank you enough! Here, have this bow, no charge! Thank you, thank you!"
+AlternateText = "\\033[35m'Hey, do you think you could do something for me? Since everyone disappeared last night, I miss my mother. Do you think you could see if you could find her \\033[1mSilver Amulet\\033[0;35m? I'd give you the bow for free if you did.'\\033[0m"
+Desc = "The Bazaar"
+KeyItem = "Bow and Arrow"
+Automove = 82
+
+[85]
+Text = "\\033[32m'Hello, I collect minerals. If you find any minerals, give them to me.'\\033[0m"
+Desc = "The Bazaar"
+Options = ['Sell minerals', 'Sell minerals', 'Leave']
+Move = [86, 87, 73]
+
+[86]
+Text = "\\033[32m'I'm sorry, but you don't appear to have any minerals. Good day.'\\033[0m"
+Desc = "The Bazaar"
+Automove = 73
+
+[87]
+Text = ""
+Desc = "The Bazaar"
+Automove = 73
+
+[88]
+Text = "You are at the cave's entrance."
+Desc = "Cave Entrance"
+Options = ['Enter the cave', 'Go back to the village outskirts']
+Move = [91, 2]
+
+[89]
+Text = "You blow up the rubble. Light shines through, and a path to the surface appears."
+Desc = "Within the Cave"
+Automove = 99
+
+[90]
+Text = "You fish in the fishing pond and find a \\033[1mSilver Amulet\\033[0m."
+AlternateText = "You fish in the fishing pond but you find nothing."
+Desc = "Pond in the Cave"
+KeyItem = "Silver Amulet"
+Automove = 127
+
+[91]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and south."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go south']
+Move = [92, 88]
+
+[92]
+Text = "You are within the cave. It is difficult to see. There is a path to your north, south and west."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go south', 'Go west']
+Move = [93, 91, 97]
+
+[93]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and south."
+Desc = "Within the Cave"
+Item = "A Funny-looking Rock"
+ItemText = "On the ground, you find a funny-looking rock."
+Options = ['Go north', 'Go south']
+Move = [94, 92]
+
+[94]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and south."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go south']
+Move = [95, 93]
+
+[95]
+Text = "You are within the cave. It is difficult to see. There is a path to your north, south and west."
+Desc = "Within the Cave"
+Item = "What you think is an Emerald"
+ItemText = "On the ground, you find what you think is an emerald."
+Options = ['Go north', 'Go south', 'Go west']
+Move = [96, 101, 94]
+
+[96]
+Text = "You are within the cave. It is difficult to see. There is a path to your south and west."
+Desc = "Within the Cave"
+Options = ['Go south', 'Go west']
+Move = [95, 100]
+
+[97]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and east."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go east']
+Move = [98, 92]
+
+[98]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and south."
+Desc = "Within the Cave"
+Item = "Some strange stone"
+ItemText = "On the ground, you find some strange stones."
+Options = ['Go north', 'Go south']
+Move = [99, 97]
+
+[99]
+Text = "You are within the cave. It is difficult to see. There is a path to your northeast, south and northwest."
+AlternateText = "You are within the cave. It is difficult to see. There is a path to your northeast and south. There is a lot of rubble to your northwest."
+Desc = "Within the Cave"
+Options = [
+      'Go northeast',
+      'Go south',
+      'Go northwest',
+      'Destroy the rubble with a bomb',
+]
+Move = [100, 98, 52, 89]
+
+[100]
+Text = "You are within the cave. It is difficult to see. There is a path to your north, east and southwest."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go east', 'Go southwest']
+Move = [129, 96, 99]
+
+[101]
+Text = "You are within the cave. It is difficult to see. There is a path to your north, northeast and south."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go northeast', 'Go south']
+Move = [95, 109, 102]
+
+[102]
+Text = "You are within the cave. It is difficult to see. There is a path to your north, northeast, southeast and south."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go northeast', 'Go southeast', 'Go south']
+Move = [101, 104, 103, 116]
+
+[103]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go west']
+Move = [105, 102]
+
+[104]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go west']
+Move = [107, 102]
+
+[105]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go west']
+Move = [106, 103]
+
+[106]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and west."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go west']
+Move = [108, 105]
+
+[107]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go west']
+Move = [108, 104]
+
+[108]
+Text = "You are within the cave. It is difficult to see. There is a path to your south and west."
+Desc = "Within the Cave"
+Options = ['Go south', 'Go west']
+Move = [106, 107]
+
+[109]
+Text = "You are within the cave. It is difficult to see. There is a path to your north, southeast and southwest."
+Desc = "Within the Cave"
+Item = "Some Tourmaline, maybe"
+ItemText = "On the ground, you find what might be some tourmaline."
+Options = ['Go north', 'Go southeast', 'Go southwest']
+Move = [110, 114]
+
+[110]
+Text = "You are within the cave. It is difficult to see. There is a path to your northeast and south."
+Desc = "Within the Cave"
+Options = ['Go northeast', 'Go south']
+Move = [111, 109]
+
+[111]
+Text = "You are within the cave. It is difficult to see. There is a path to your southeast and southwest."
+Desc = "Within the Cave"
+Options = ['Go southeast', 'Go southwest']
+Move = [112, 110]
+
+[112]
+Text = "You are within the cave. It is difficult to see. There is a path to your northwest and south."
+Desc = "Within the Cave"
+Options = ['Go northwest', 'Go south']
+Move = [111, 113]
+
+[113]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and southwest."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go southwest']
+Move = [112, 114]
+
+[114]
+Text = "You are within the cave. It is difficult to see. There is a path to your northeast and northwest."
+Desc = "Within the Cave"
+Item = "A Weird shard of something"
+ItemText = "On the ground, you find a weird shard of something."
+Options = ['Go northeast', 'Go northwest']
+Move = [113, 109]
+
+[116]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and south."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go south']
+Move = [102, 117]
+
+[117]
+Text = "You are within the cave. It is difficult to see. There is a path to your north, east and southeast."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go east', 'Go southeast']
+Move = [116, 118, 121]
+
+[118]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go west']
+Move = [119, 117]
+
+[119]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go west']
+Move = [120, 118]
+
+[120]
+Text = "You are within the cave. It is a dead-end. The only path is back where you came."
+Desc = "Dead-end in the Cave"
+KeyItem = "Golden Idol"
+KeyItemText = "You see a \\033[1mGolden Idol\\033[0m on the floor of the cave."
+Options = ['Go back']
+Move = [119]
+
+[121]
+Text = "You are within the cave. It is difficult to see. There is a path to your northwest and east."
+Desc = "Within the Cave"
+Options = ['Go northwest', 'Go east']
+Move = [117, 122]
+
+[122]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Item = "A Chunk of Marble"
+ItemText = "On the ground, you find a chunk of marble."
+Options = ['Go east', 'Go west']
+Move = [123, 121]
+
+[123]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go west']
+Move = [124, 122]
+
+[124]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and west."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go west']
+Move = [125, 123]
+
+[125]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and south."
+Desc = "Within the Cave"
+Options = ['Go north', 'Go south']
+Move = [126, 124]
+
+[126]
+Text = "You are within the cave. It is difficult to see. There is a path to your north and south."
+Desc = "Within the Cave"
+Item = "A Stone that looks kind of like a face"
+ItemText = "On the ground, you find a stone that looks kind of like a face."
+Options = ['Go north', 'Go south']
+Move = [127, 125]
+
+[127]
+Text = "You are within the cave. It is difficult to see. There is a path to your south and west. You can make out a small pond in front of you."
+Desc = "Pond in the Cave"
+Options = ['Go north', 'Go south', 'Fish in the pond']
+Move = [126, 128, 90]
+
+[128]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and west."
+Desc = "Within the Cave"
+Item = "A beautiful, azure blue rock"
+ItemText = "On the ground, you find a beautiful, azure blue rock."
+Options = ['Go east', 'Go west']
+Move = [127, 129]
+
+[129]
+Text = "You are within the cave. It is difficult to see. There is a path to your east and south."
+Desc = "Within the Cave"
+Options = ['Go east', 'Go south']
+Move = [128, 100]
+
+[130]
+Text = ""
+Desc = "The End"
+Automove = 66
+
+[131]
+Text = "\\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\\033[0m"
+Desc = "Inside the Shop"
+Automove = 66
+
+[140]
+Text = "You are a travelling merchant, approaching a new village to sell your wares in another region.\\nAs you approach the village, the atmosphere seems odd and eerily silent, almost frightening in a way. \\nSuddently, a man appears, and walks in your direction.\\nThe man speaks, \\033[93m'Greetings. I'm a local shopkeeper, just on the outskirts of our little village.\\nMany come for my high-quality wares, but none have done such today, for a mystical spell has bewitched them.\\nAny that resided within the main parts of the village limits last night have disappeared.'\\033[0m\nThe man grunts and scratches his chin.\\nHe looks back at the village with a longing expression, before turning his gaze back to you. \\n\\033[93m'It worries me, you know?'\\033[0m he continues, \\033[93m'There's an old legend that if all seems to disappear overnight, then it marks a dark path for the world.'\\033[0m\nThe man sighs deeply, and waits a moment before speaking again, \\033[93m'I do have some experience with magic.\\nI can reverse it, but I need 3 mystical items; the first, a rusted sword; the second, an amber necklace; and the third, a golden idol.\\nWith those three items, I believe I can bring everything back to normal.\\nI would get them myself, but my adventuring days are behind me.\\nIf it helps, I believe the bazaar was unaffected - it, too, was beyond the main limits of the village.\\nWhen you obtain the items, come see me in my shop.\\nI shall be seeing you, then.'\\033[0m\\nThe man leaves.\\n"
+TextSpeed = 0.015
+Desc = "Opening Cutscene"
+titlebarCentre = "{title}"
+Options = ['Continue']
+Inventory = false
+Move = [1]
+
+[999]
+Text = "Room"
+Desc = "Desc"
+Item = "Rusted Sword"
+Automove = 1

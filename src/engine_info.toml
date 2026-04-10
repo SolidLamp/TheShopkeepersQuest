@@ -1,0 +1,10 @@
+Name  = "SHM Engine"
+MajorVersion = "1.2"
+Patch = "-rc1"
+Indev = true
+PythonVer = 3.11
+ReleaseDate = "2026-04-10"
+Dist = "The Shopkeeper's Quest Experimental"
+Link = "https://github.com/solidlamp"
+SaveVersion = 1
+DefaultBorderStyle = 1
