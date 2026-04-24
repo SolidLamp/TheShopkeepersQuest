@@ -611,7 +611,7 @@ class MainHandler:
         )
 
         # Decide whether the user just entered the shop
-        if is_shop and self.shop_exit == 0:
+        if is_shop and self.shop_exit == self.history[-2]:
             if isinstance(self.room["ShopEntrance"], str):
                 text: str = self.room["ShopEntrance"]
             elif isinstance(self.room["ShopEntrance"], list):
