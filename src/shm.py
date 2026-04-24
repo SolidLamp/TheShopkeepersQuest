@@ -516,7 +516,10 @@ class MainHandler:
             - 'engine_info' - displays the current version of the SHM Engine.
             - 'game_state' - the entire current game_state;
                 - call child attributes of game_state; do not use it bare.
+            - 'health' - displays player health (requires battle support)
             - 'iso_date' - displays the current date in iso-format.
+            - 'level' - displays player level (requires battle support)
+            - 'money' - displays player money
             - 'python_implementation' - displays the current Python
             implementation, e.g. CPython, PyPy. Uses
             platform.python_implementation()
@@ -527,6 +530,7 @@ class MainHandler:
             - 'time' - displays the current time in H:M.
             - 'title' - displays the game title.
             - 'utime' - displays the current time in Unix timestamp.
+            - 'xp' - displays player experience (requires battle support)
 
 
         Args:
@@ -542,6 +546,7 @@ class MainHandler:
             "engine_info": self.SHMversion,
             "game_state": self.game_state,
             "iso_date": datetime.now().isoformat(),
+            "money": str(getattr(self.game, "money_hook", "{money}")),
             "python_implementation": platform.python_implementation(),
             "python_version": platform.python_version(),
             "self": self,
