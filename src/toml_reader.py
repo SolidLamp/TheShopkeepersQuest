@@ -10,10 +10,12 @@ gamedata = toml_reader.read_gamedata("game.toml")
 
 import os
 import tomllib
+from itertools import chain
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar, overload
 
-from src.typing import FormatDict
+from src.typing import FormatDict, Room
+
 
 def read_toml(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]:
     """Reads a TOML file.
@@ -42,31 +44,53 @@ def read_toml(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]
         return gamedata
 
 
-def replace_text(text: str) -> str:
+@overload
+def replace_text(text: str) -> str: ...
+
+
+@overload
+def replace_text(text: list[str]) -> list[str]: ...
+
+
+T = TypeVar("T")
+
+
+def replace_text(text: T) -> T:
     r"""Converts escaped ANSI escape codes to non-escaped variants.
 
-    Supported ANSI escape codes:
-        * "\a"
-        * "\b"
-        * "\f"
-        * "\n"
-        * "\r"
-        * "\t"
-        * "\v"
-        * "\033"
-        * "\x1b"
-        * "\x1B"
-        * "\X1b"
-        * "\X1B"
+    Accepts both strings and lists of strings as input - invalid inputs,
+    including that of lists with types other than strings, will result in
+    TypeError being raised. It is guaranteed that the output type will be
+    identical to that of the input type.
 
+    Supported ANSI escape codes:
+        - "\a"
+        - "\b"
+        - "\f"
+        - "\n"
+        - "\r"
+        - "\t"
+        - "\v"
+        - "\033"
+        - "\x1b"
+        - "\x1B"
+        - "\X1b"
+        - "\X1B"
 
     Args:
-        text (str): A string containing escaped ANSI escape codes.
+        text (str | list[str]):
+            The input text - either a string or a list of strings - containing
+            escaped (or 'cooked') ANSI escape codes.
 
     Returns:
-        str: The same string with non-escaped ANSI escape codes.
+        str | list[str]:
+            The text converted to raw ANSI escape codes. If the input is
+            invalid, simply returns the input.
+
+    Raises:
+        TypeError: The input was of incorrect type.
     """
-    escape_chars: dict[str, str] = {
+    ESCAPE_CHARS: dict[str, str] = {
         "\\a": "\a",
         "\\b": "\b",
         "\\f": "\f",
@@ -80,64 +104,138 @@ def replace_text(text: str) -> str:
         "\\X1b": "\033",
         "\\X1B": "\033",
     }
-    for k, v in escape_chars.items():
+
+    if not (isinstance(text, str) or isinstance(text, list)):
+        raise TypeError(
+            f"Invalid type ({type(text).__name__}) provided as str.\n"
+            + f"Provided Input: {text}"
+        )
+    if isinstance(text, str):
+        text = _replace_text_str(text, ESCAPE_CHARS)
+    if isinstance(text, list):
+        text = _replace_text_list(text, ESCAPE_CHARS)
+    return text
+
+
+def _replace_text_str(text: str, mapping_table: dict[str, str]) -> str:
+    """Replaces text within a single string via a mapping table.
+
+    Internal use only
+
+    Args:
+        text (str): The string to map onto
+        mapping_table (dict[str, str]): A table of substrings to map to.
+
+    Returns:
+        str: The input string mapped via the table.
+
+    Raises:
+        TypeError: Raised if text is not a str value.
+    """
+
+    if not isinstance(text, str):
+        raise TypeError(
+            f"Invalid type ({type(text).__name__}) provided as str.\n"
+            + f"Provided Input: {text}"
+        )
+    for k, v in mapping_table.items():
         text: str = text.replace(k, v)
     return text
 
 
-def ansi_replace(gamedata: dict) -> dict:
-    """
-    Goes through all strings and un-escapes their ANSI codes.
+def _replace_text_list(strings: list[str], mapping_table: dict[str, str]) -> list[str]:
+    """Replaces text within a list of strings via a mapping table.
+
+    Internal use only
 
     Args:
-        gamedata (dict): SHM 1.2 gamedata containing escaped ANSI codes.
+        strings (list[str]): A list of strings to convert.
+        mapping_table (dict[str, str]): A table of substrings to map to.
 
     Returns:
-        dict: SHM 1.2 gamedata containing unescaped ANSI codes.
+        list[str]: A list of strings, with each string mapped via the table.
+
+    Raises:
+        TypeError: Raised if strings contains a non-str value.
     """
-    for i in gamedata:
-        if "Text" in gamedata[i]:
-            gamedata[i]["Text"] = replace_text(gamedata[i]["Text"])
+    for k, v, i in chain.from_iterable(
+        ((k, v, i) for k, v in mapping_table.items()) for i in range(len(strings))
+    ):
+        if not isinstance(strings[i], str):
+            raise TypeError(
+                f"Invalid type ({type(strings[i]).__name__}) provided as str.\n"
+                + f"Provided Input: {strings[i]}"
+            )
+        strings[i] = strings[i].replace(k, v)
+    return strings
 
-        if "AlternateText" in gamedata[i]:
-            gamedata[i]["AlternateText"] = replace_text(gamedata[i]["AlternateText"])
 
-        if "ItemText" in gamedata[i]:
-            gamedata[i]["ItemText"] = replace_text(gamedata[i]["ItemText"])
+def ansi_replace(gamedata: dict[int | str, Room]) -> dict[int | str, Room]:
+    """Goes through all strings and un-escapes their ANSI codes.
 
-        if "KeyItemText" in gamedata[i]:
-            gamedata[i]["KeyItemText"] = replace_text(gamedata[i]["KeyItemText"])
+    Keys affected:
+        - Text
+        - AlternateText
+        - Desc
+        - ItemText
+        - KeyItemText
+        - ShopEntrance
+        - ShopExit
+        - BattleText
+        - Options
 
-        if "Desc" in gamedata[i]:
-            gamedata[i]["Desc"] = replace_text(gamedata[i]["Desc"])
+    Args:
+        gamedata (dict[int | str, Room]): A dict of rooms as defined for SHM
+        1.2, containing escaped ANSI codes in strings.
 
-        if "Options" in gamedata[i]:
-            for option in gamedata[i]["Options"]:
-                option = replace_text(option)
+    Returns:
+        (dict[int | str, Room]): A dict of rooms as defined for SHM 1.2,
+        containing unescaped ANSI codes in strings.
+    """
+    str_keys: list[str] = [
+        "Text",
+        "AlternateText",
+        "Desc",
+        "ItemText",
+        "KeyItemText",
+        "ShopEntrance",
+        "ShopExit",
+        "BattleText",
+        "Options",
+    ]
+
+    for key, room_id in chain.from_iterable(
+        ((key, room_id) for key in str_keys) for room_id in gamedata
+    ):
+        room: Room = gamedata[room_id]
+        if key in room:
+            room[key] = replace_text(room[key])
     return gamedata
 
 
-def strtoint_key(gamedata: dict) -> dict:
-    """
-    Converts all string keys to integer keys, and all non-int keys are dropped.
+def strtoint_key(gamedata: dict[int | str, Room]) -> dict[int, Room]:
+    """Converts all string keys to integer keys, and all non-int keys are dropped.
 
     Args:
-        gamedata (dict): SHM 1.2-compatible gamedata containing str | int keys.
+        gamedata (dict[int, Room]): SHM 1.2-compatible dict of Rooms
+        containing str or int keys.
 
     Returns:
-        dict: SHM 1.2-compatible gamedata containing only int keys.
+        dict[int, Room]: SHM 1.2-compatible dict of Rooms containing only int
+        keys.
     """
     new_gamedata = {}
     for key in gamedata.keys():
-        if key.isdigit():
+        try:
             new_key = int(key)
             new_gamedata.update({new_key: gamedata[key]})
+        except ValueError:
+            continue
     return new_gamedata
 
 
 def read_gamedata(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]:
-    """
-    Reads gamedata from a TOML file.
+    """Reads gamedata from a TOML file.
 
     Args:
         file (str, optional):
@@ -167,7 +265,7 @@ def read_gamedata(file: str = "game.toml", abs_path: bool = False) -> dict[Any, 
 def get_engine_info(
     infoString: str = "{Name} {MajorVersion}{PatchConnector}{Patch}",
 ) -> str:
-    """_summary_
+    """Provides information about the engine, as from engine_info.toml
 
     Args:
         infoString (str, optional):

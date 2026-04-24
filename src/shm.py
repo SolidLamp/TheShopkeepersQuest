@@ -612,21 +612,23 @@ class MainHandler:
             and "ShopEntrance" in self.room
         )
 
+        # Detect if the user just entered the shop
         recent_rooms: list[int] = self.history[-5:-1]
         if is_shop and not self.roomID in recent_rooms:
             if isinstance(self.room["ShopEntrance"], str):
-                text = self.room["ShopEntrance"]
+                text: str = self.room["ShopEntrance"]
             elif isinstance(self.room["ShopEntrance"], list):
                 random_index: int = rand(len(self.room["ShopEntrance"]))
                 random_string = self.room["ShopEntrance"][random_index]
                 text: str = str(random_string)
 
+        # Check for requirements if user is not within a shop
         elif "Requirements" in self.room and not self.room["Requirements"]():
             text: str = str(self.room["AlternateText"])
         elif "Text" in self.room:
             text: str = str(self.room["Text"])
 
-        # Get money hook
+        # Get money hook to display user money if they are within a shop
         if hasattr(self.game, "money_hook") and isinstance(
             getattr(self.game, "money_hook"), Box
         ):
