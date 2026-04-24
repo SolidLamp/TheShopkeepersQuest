@@ -11,12 +11,13 @@ abbr = "TSQ"
 title = "The Shopkeeper's Quest"
 desc = "An adventure game where you take control of a travelling merchant arriving in a town, when you shortly find that almost everyone has suddenly disappeared. A local shopkeeper sends you on a quest to recover three mystical items to resolve the incident."
 starting_room = 140
-default_titlebar_left = " F1 - Help "
+default_titlebar_left = " Rubies: {money} "
 default_titlebar_centre = " {abbr} - {desc} "
 default_titlebar_right = " Q - Quit "
 default_textspeed = 0.01
 # border_style = 1
 variable_damage = true
+currency_name = "Rubies"
 
 
 [0]
@@ -443,37 +444,36 @@ Options = ['Go north', 'Go east', 'Go south', 'Go west']
 Move = [40, 35, 60, 63]
 
 [66]
-Text = "\\033[33m'Have you checked out the bazaar? There's a fisherman there who sells excellent-quality rods.'\\033[0m\\nCurrent Rubies:0\\nLamp Oil - 15 Rubies\\nRope - 20 Rubies\\nBomb - 30 Rubies"
+Text = "\\033[93m'Anything else I can do for you? Don't mean to rush you or anything, but you *do* have a duty to be getting on with.'\\033[0m"
 Desc = "Inside the Shop"
-Options = [
-      'Purchase Lamp Oil',
-      'Purchase Rope',
-      'Purchase Bomb',
-      'Haggle',
-      'Ask about quest',
-      'Ask about quest',
-      'Ask about quest',
-      'Leave',
+
+ShopItems = ["Lamp Oil", "Rope", "Bomb"]
+ShopItemCosts = [15, 20, 30]
+ShopEntrance = [
+      "\\033[93m'Welcome!'\\033[0m",
+      "\\033[93m'Sit down, my friend. Stay a while.'\\033[0m",
+      "\\033[93m'You'll always be welcome here in my shop.'\\033[0m",
+      "\\033[93m'Have a look at my wares. They could prove to be useful.'\\033[0m",
+      "\\033[93m'Sorry I can't give discounts - I have a business to run, and I must make my money somehow.'\\033[0m",
+      "\\033[93m'I don't blame you for coming inside in this winter.'\\033[0m",
+      "\\033[93m'Sit down a while. I don't want you too stressed, my friend.'\\033[0m",
+      "\\033[93m'I always believe that everyone has a tale worth telling - maybe talk to more people.'\\033[0m",
+      "\\033[93m'Have you checked out the bazaar? There's a fisherman there who sells excellent-quality rods.'\\033[0m",
+      "\\033[93m'Have you heard the news about the King? It's said that he's fallen ill. He's a good man - I hope he fully recovers.'\\033[0m",
+      "\\033[93m'Have you seen the nearby forest? There's been some monkey sightings there.'\\033[0m",
 ]
-Move = [67, 68, 69, 72, 70, 130, 131, 71]
+ShopExit = [
+      "\\033[93m'Remember, tomorrow is another day.'\\033[0m",
+      "\\033[93m'Be seeing you.'\\033[0m",
+      "\\033[93m'I wish you the best of luck.'\\033[0m",
+      "\\033[93m'I give you my grace.'\\033[0m",
+      "\\033[93m'I wish you luck on your quest.'\\033[0m",
+      "\\033[93m'I'll get started on my tea.'\\033[0m",
+      "\\033[93m'May all the spirits be with you.'\\033[0m",
+]
 
-[67]
-Text = "You purchased some Lamp Oil. [15 Rubies]"
-Desc = "Inside the Shop"
-Item = "Lamp Oil"
-Automove = 66
-
-[68]
-Text = "You purchased some Rope. [20 Rubies]"
-Desc = "Inside the Shop"
-Item = "Rope"
-Automove = 66
-
-[69]
-Text = "You purchased a Bomb. [30 Rubies]"
-Desc = "Inside the Shop"
-Item = "Bomb"
-Automove = 66
+Options = ['Haggle', 'Ask about quest', 'Ask about quest', 'Ask about quest']
+Move = [72, 70, 130, 131]
 
 [70]
 Text = ""
@@ -481,12 +481,12 @@ Desc = "Inside the Shop"
 Ending = "Good"
 
 [71]
-Text = "\\033[33m'I wish you luck on your quest.'\\033[0m"
+Text = "\\033[93m'I wish you luck on your quest.'\\033[0m"
 Desc = "Inside the Shop"
 Automove = 2
 
 [72]
-Text = "\\033[33m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\\033[0m"
+Text = "\\033[93m'Sorry, my friend. You don't have enough rubies. I'd love to give you the items for free but I have a mouth to feed.'\\033[0m"
 Desc = "Inside the Shop"
 Automove = 66
 
@@ -503,49 +503,19 @@ Options = [
 Move = [74, 82, 85, 2]
 
 [74]
-Text = "Current Rubies:0\\nFillet of Cod - 2 rubies\\nFillet of Salmon - 2 rubies\\nSmoked Trout - 9 rubies\\nJar of Tuna - 3 rubies\\nFillet of Smoked Haddock - 6 rubies\\n\\033[36m'What are you here to buy?'\\033[0m"
+Text = "\\033[36m'Anything else?'\\033[0m"
 Desc = "The Bazaar"
-Options = [
-      'Purchase a fillet of cod',
-      'Purchase a fillet of salmon',
-      'Purchase smoked trout',
-      'Purchase a jar of tuna',
-      'Purchase a fillet of smoked haddock',
-      'Haggle',
-      'Talk',
-      'Leave',
+ShopItems = [
+      "Fillet of Cod",
+      "Fillet of Salmon",
+      "Smoked Trout",
+      "Jar of Tuna",
+      "Fillet of Smoked Haddock",
 ]
-Move = [75, 76, 77, 78, 79, 80, 81, 73]
-
-[75]
-Text = "You purchased a Fillet of Cod [2 Rubies]"
-Desc = "The Bazaar"
-Item = "Fillet of Cod"
-Automove = 74
-
-[76]
-Text = "You purchased a Fillet of Salmon [2 Rubies]"
-Desc = "The Bazaar"
-Item = "Fillet of Salmon"
-Automove = 74
-
-[77]
-Text = "You purchased some Smoked Trout [9 Rubies]"
-Desc = "The Bazaar"
-Item = "Smoked Trout"
-Automove = 74
-
-[78]
-Text = "You purchased a Jar of Tuna [3 Rubies]"
-Desc = "The Bazaar"
-Item = "Jar of Tuna"
-Automove = 74
-
-[79]
-Text = "You purchased a Fillet of Smoked Haddock [6 Rubies]"
-Desc = "The Bazaar"
-Item = "Fillet of Smoked Haddock"
-Automove = 74
+ShopItemCosts = [2, 2, 9, 3, 6]
+ShopEntrance = "\\033[36m'What are you here to buy?'\\033[0m"
+Options = ['Haggle', 'Talk']
+Move = [80, 81]
 
 [80]
 Text = "\\033[36m'If you aren't here to buy anything, then get out.'\\033[0m"
@@ -558,13 +528,13 @@ Desc = "The Bazaar"
 Automove = 74
 
 [82]
-Text = "Current Rubies:0\\n\\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies."
+Text = "\\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies.'\\033[0m\\nCurrent Rubies: {money}"
 Desc = "The Bazaar"
 Options = ['Purchase the bow', 'Talk', 'Leave']
 Move = [83, 84, 73]
 
 [83]
-Text = "Be seeing you around. I'm going home to pack my stuff - there's nothing left for me here."
+Text = "\\033[35m'Be seeing you around. I'm going home to pack my stuff - there's nothing left for me here.'\\033[0m"
 AlternateText = "\\033[35m'Sorry, that's not really enough. I'd let it go for 75 rubies, maybe.'\\033[0m"
 Desc = "The Bazaar"
 KeyItem = "Bow and Arrow"
@@ -869,7 +839,7 @@ Desc = "The End"
 Automove = 66
 
 [131]
-Text = "\\033[33m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\\033[0m"
+Text = "\\033[93m'Sorry, I can't help you much. I do know, however, that one of the items is somewhere in the town and another is in the nearby forest. That's all I know.'\\033[0m"
 Desc = "Inside the Shop"
 Automove = 66
 

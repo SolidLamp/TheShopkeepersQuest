@@ -6,6 +6,7 @@ Typical usage example:
 
 import curses
 import random
+from src.typing.box import Box
 import sys
 import time
 from collections.abc import Callable
@@ -13,6 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from src import toml_reader, tui
+from src.typing import Box
 
 print3: Callable[..., None] = tui.print3
 
@@ -128,7 +130,7 @@ class Inventory:
 @dataclass
 class gameState:
     inventory: Inventory
-    rubies: int = 0
+    rubies: Box[int] = field(default_factory=lambda: Box(0))
     shopkeeperName: str = "The Shopkeeper"
     position: float = 0.0
     beatenGame: bool = False
@@ -149,6 +151,9 @@ class gameState:
 
 
 game_state = gameState(inventory=Inventory(items=[]))
+
+
+money_hook: Box[int] = game_state.rubies
 
 
 def overwrite_rooms(rooms: dict, extrarooms: dict) -> dict:
@@ -213,27 +218,10 @@ def get_rooms(win: curses.window) -> dict[int, dict]:
             "KeyItemRequirements": lambda: not hasItem("Amber Necklace"),
         },
         66: {
-            "Text": "\033[93m'"
-            + random.choice(ShopkeeperQuotes)
-            + "'\033[0m\nCurrent Rubies: "
-            + str(game_state.rubies)
-            + "\nLamp Oil - 15 Rubies\nRope - 20 Rubies\nBomb - 30 Rubies",
-            "Option0Requirements": lambda: game_state.rubies >= 15,
-            "Option1Requirements": lambda: game_state.rubies >= 20,
-            "Option2Requirements": lambda: game_state.rubies >= 30,
-            "Option3Requirements": lambda: game_state.rubies < 30,
-            "Option4Requirements": lambda: itemEvaluation() == 3,
-            "Option5Requirements": lambda: itemEvaluation() > 1,
-            "Option6Requirements": lambda: itemEvaluation() == 0,
-        },
-        67: {
-            "Script": lambda: setattr(game_state, "rubies", game_state.rubies - 15),
-        },
-        68: {
-            "Script": lambda: setattr(game_state, "rubies", game_state.rubies - 20),
-        },
-        69: {
-            "Script": lambda: setattr(game_state, "rubies", game_state.rubies - 30),
+            "Option0Requirements": lambda: game_state.rubies < 30,
+            "Option1Requirements": lambda: itemEvaluation() == 3,
+            "Option2Requirements": lambda: itemEvaluation() > 1,
+            "Option3Requirements": lambda: itemEvaluation() == 0,
         },
         70: {
             "Script": lambda: (
@@ -249,18 +237,7 @@ def get_rooms(win: curses.window) -> dict[int, dict]:
             "Option1Requirements": lambda: game_state.fletcherOpen,
         },
         74: {
-            "Text": "Current Rubies:"
-            + str(game_state.rubies)
-            + "\nFillet of Cod - 2 rubies\nFillet of Salmon - 2 rubies\n"
-            + "Smoked Trout - 9 rubies\nJar of Tuna - 3 rubies\n"
-            + "Fillet of Smoked Haddock - 6 rubies\n"
-            + "\033[36m'What are you here to buy?'\033[0m",
-            "Option0Requirements": lambda: game_state.rubies >= 2,
-            "Option1Requirements": lambda: game_state.rubies >= 2,
-            "Option2Requirements": lambda: game_state.rubies >= 9,
-            "Option3Requirements": lambda: game_state.rubies >= 3,
-            "Option4Requirements": lambda: game_state.rubies >= 6,
-            "Option5Requirements": lambda: game_state.rubies < 9,
+            "Option0Requirements": lambda: game_state.rubies < 9,
         },
         75: {
             "Script": lambda: setattr(game_state, "rubies", game_state.rubies - 2),
@@ -281,9 +258,6 @@ def get_rooms(win: curses.window) -> dict[int, dict]:
             "Script": lambda: fishEvaluation(win),
         },
         82: {
-            "Text": "Current Rubies:"
-            + str(game_state.rubies)
-            + "\n\033[35m'Hey. I've got one bow in stock right now. It's 75 Rubies.",
             "Option0Requirements": lambda: not hasItem("Bow and Arrow"),
             "Option1Requirements": lambda: not hasItem("Bow and Arrow"),
         },
