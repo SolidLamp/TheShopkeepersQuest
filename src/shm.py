@@ -102,6 +102,7 @@ class MainHandler:
         self.room: dict[str, Any] = {}
         self.saveFileName: str = saveFileName
         self.SHMversion: str = toml_reader.get_engine_info()
+        self.shop_exit: int = -1
         self.starting_room: int = self.gameInfo.get("starting_room", 1)
         self.stdscr: curses.window = win
         self.text_speed: float = self.gameInfo.get("default_textspeed", 0.01)
@@ -612,9 +613,8 @@ class MainHandler:
             and "ShopEntrance" in self.room
         )
 
-        # Detect if the user just entered the shop
-        recent_rooms: list[int] = self.history[-5:-1]
-        if is_shop and not self.roomID in recent_rooms:
+        # Decide whether the user just entered the shop
+        if is_shop and self.shop_exit == 0:
             if isinstance(self.room["ShopEntrance"], str):
                 text: str = self.room["ShopEntrance"]
             elif isinstance(self.room["ShopEntrance"], list):
@@ -960,8 +960,15 @@ class MainHandler:
             self.fn_roomIDHandler(int(item_room[query]))
 
         # If chosen option is the last option, then the chosen option must be 
-        #  that of leaving the shop; then check if there is an exit phrase.
-        if query != len(choices) - 1 or "ShopExit" not in self.room:
+        # that of Leave Shop; then check if there is an exit phrase, and mark
+        # the shop as left, returning the user outside the shop.
+        if query != len(choices) - 1:
+            return
+
+        self.roomID = self.shop_exit
+        self.shop_exit = -1
+
+        if "ShopExit" not in self.room:
             return
         
         shop_exit_text: str = ""
@@ -1000,6 +1007,7 @@ class MainHandler:
 
         Handles all attributes and parsing a room.
         """
+        # Set up and get current room for access
         rooms = self.game.get_rooms(self.win)
         self.win.clear()
         self.ui_drawtitlebar()
@@ -1027,9 +1035,24 @@ class MainHandler:
         self.history.append(self.roomID)
         if len(self.history) > HISTORY_MAX_LEN:
             self.history.pop(0)
+
+        # Handle shop
+        is_shop: bool = (
+            "ShopItems" in self.room
+            and isinstance(self.room["ShopItems"], list)
+            and "ShopItemCosts" in self.room
+            and isinstance(self.room["ShopItemCosts"], list)
+            and "ShopEntrance" in self.room
+        )
+        if is_shop and self.shop_exit == -1:
+            self.shop_exit = self.history[-2]
+
+        # Handle room attributes
         text: str = self.ui_text_handler()
         if self.globaldebug:
-            text += "\nRoomID: " + str(self.roomID) + "\nHistory: " + str(self.history)
+            text += "\nRoomID: " + str(self.roomID)
+            text += "\nHistory: " + str(self.history)
+            text += "\nShop Exit: " + str(self.shop_exit)
         if "Script" in self.room:
             self.room["Script"]()
         if "Item" in self.room:
