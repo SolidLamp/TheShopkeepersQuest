@@ -94,7 +94,6 @@ class GameFile(TypedDict):
 
 class Save(TypedDict):
     """This is the canonical format for save files with save version 2."""
-
     Game: str
     Saved: str
     save_version: int
