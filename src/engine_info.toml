@@ -6,5 +6,5 @@ PythonVer = 3.11
 ReleaseDate = "2026-04-24"
 Dist = "The Shopkeeper's Quest Experimental"
 Link = "https://github.com/solidlamp"
-SaveVersion = 1
+SaveVersion = 2
 DefaultBorderStyle = 1

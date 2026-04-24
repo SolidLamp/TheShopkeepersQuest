@@ -157,7 +157,7 @@ class MainHandler:
         spec.loader.exec_module(module)  # pyright: ignore
         return module
 
-    def setup_loadSave(self, saveFile: Save | None) -> None:
+    def setup_loadSave(self, saveFile: Save | None) -> bool:
         """Sets up the current game state based on the save file provided.
 
         The save file is a dictionary in the Save format (see typing), and
@@ -173,10 +173,13 @@ class MainHandler:
 
         Args:
             saveFile (Save | None): A dictionary in the Save format.
+
+        Returns:
+            bool: Indicates if loading the save file was successful.
         """
 
         if not isinstance(saveFile, dict):
-            return
+            return False
 
         game_id = self.gameInfo.get("game_id")
         if (
@@ -189,9 +192,10 @@ class MainHandler:
                 + "Continuing without save file...",
             )
             self.roomID = self.starting_room
-            return
+            return False
 
         self.history.extend(saveFile["History"])
+        self.shop_exit = saveFile.get("shop_exit", -1)
 
         # Test for if the given attribute is a box.
 
@@ -216,6 +220,8 @@ class MainHandler:
                 self.game_state.inventory.keyItems.append(item)
 
         self.current_saveid = saveFile.get("save_id", None)
+
+        return True
 
     def setup_stdscr(self) -> None:
         """Sets up the main activity window, inside the border."""
@@ -481,16 +487,7 @@ class MainHandler:
         titlebar_right = ""
         self.ui_drawtitlebar(titlebar_centre, titlebar_left, titlebar_right)
         self.roomID = self.starting_room
-        save_handler.write_save(
-            self.game_state,
-            self.gameInfo,
-            self.roomID,
-            self.history,
-            self.saveFileName,
-            self.engineInfo["SaveVersion"],
-            self.gameInfo.get("game_id", None),
-            self.current_saveid,
-        )
+        self.fn_save_handler()
         if hasattr(self.game, "endingText") and end in self.game.endingText:
             print3(
                 self.win,
@@ -706,16 +703,7 @@ class MainHandler:
             )
             if query == 0:
                 self.win.clear()
-                save_handler.write_save(
-                    self.game_state,
-                    self.gameInfo,
-                    self.roomID,
-                    self.history,
-                    self.saveFileName,
-                    self.engineInfo["SaveVersion"],
-                    self.gameInfo.get("game_id", None),
-                    self.current_saveid,
-                )
+                self.fn_save_handler()
                 sys.exit(0)
             if query == 1:
                 sys.exit(0)
@@ -735,6 +723,164 @@ class MainHandler:
         if not isinstance(query, int):
             query = self.ui_option(text, options, Inventory)
         return query
+
+    def fn_battle_handler(self) -> None:
+        """Handles battles in the SHM Engine.
+
+        The attribute battle_hooks should be set up before calling this.
+        The gamefile should also have the attributes 'enemies' and
+        'battle_hooks'.
+        """
+        DEFAULT_LOSS_TEXT: str = "You have fallen in battle..."
+        TIME_BATTLETEXT_DISPLAYED: float = 0.5
+
+        if not self.battle_hooks:
+            return
+
+        if not hasattr(self.game, "enemies"):
+            return
+
+        if not hasattr(self.game, "battle_hooks"):
+            return
+
+        enemy: Enemy | None = self.fn_battle_get_enemy()
+
+        if enemy is None:
+            return
+
+        if "BattleText" in self.room and isinstance(self.room["BattleText"], str):
+            print3(self.win, self.room["BattleText"])
+            time.sleep(TIME_BATTLETEXT_DISPLAYED)
+
+        if hasattr(self.game, "battle_items") and isinstance(
+            self.game.battle_items, dict
+        ):
+            battle_items: dict[str, BattleItem] | None = self.game.battle_items
+        else:
+            battle_items: dict[str, BattleItem] | None = None
+
+        try:
+            items: list[str] = self.game_state.inventory.items
+        except:
+            items: list[str] = []
+
+        if not isinstance(items, list):
+            self.err_log_error(error_type="Error", error_msg="Unable to get items.")
+            return
+
+        if "variable_damage" in self.gameInfo:
+            variable_damage: bool = self.gameInfo["variable_damage"]
+        else:
+            variable_damage: bool = False
+
+        battle: BattleHandler = BattleHandler(
+            stdscr=self.win,
+            hook_dict=self.battle_hooks,
+            enemy=enemy,
+            variable_damage=variable_damage,
+            battle_items=battle_items,
+            items=items,
+        )
+        if battle.battle_handler():
+            self.ui_drawtitlebar()
+            return
+        elif "loss_text" in self.battle_hooks:
+            loss_text: str = self.battle_hooks.get("loss_text")
+        else:
+            loss_text: str = DEFAULT_LOSS_TEXT
+        self.ui_lose(loss_text)
+
+    def fn_battle_get_enemy(self) -> Enemy | None:
+        """Gets an enemy for an encounter, based on the current room.
+
+        Returns:
+            Enemy | None:
+            None indicates that there is no enemy, or if an error
+            was encountered and an enemy was unable to be obtained.
+            Enemy is a dict (see typeddicts.py) that represents the enemy.
+        """
+        # If Enemies and EnemyChances do not exist, we cannot pick an enemy
+        if "Enemies" not in self.room or "EnemyChances" not in self.room:
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: Enemies or EnemyChances"
+                + "do not exist.",
+            )
+            return
+        if not isinstance(self.room["Enemies"], list):
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: Enemies is not a list.",
+            )
+            return
+        if not isinstance(self.room["EnemyChances"], list):
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: EnemyChances is not a list.",
+            )
+            return
+        # If Enemies and EnemyChances are not the same length, then they are
+        # meaningless.
+        if not len(self.room["Enemies"]) == len(self.room["EnemyChances"]):
+            self.err_log_error(
+                error_type="Warning",
+                error_msg="Unable to generate enemy: Enemies and EnemyChances"
+                + "are not the same length.",
+            )
+            return
+
+        total_chance: float = 0.0  # sum of all chances
+
+        # number of digits after decimal point in longest float
+        # used to determine the required precision
+        longest_decimal: int = 0
+
+        for i in self.room["EnemyChances"]:
+            # If a chance is not a number, it is meaningless; quit
+            if not isinstance(i, float | int):
+                return
+            length: int = len(str(i)) - 2
+            if length > longest_decimal:
+                longest_decimal = length
+            total_chance += i
+
+        multiplier: float = 1.0
+        chances: list[float | int] = self.room["EnemyChances"].copy()
+
+        # If the developer put total chances at above 1, we need to sort this out
+        if total_chance > 1:
+            multiplier: float = 1 / total_chance
+
+        if multiplier != 1:
+            for i in chances:
+                i = i * multiplier
+                length: int = len(str(i)) - 2
+                if length > longest_decimal:
+                    longest_decimal = length
+        accuracy: int = int("1" + "0" * longest_decimal)
+        rng: int | float = rand(0, accuracy + 1)
+        rng /= accuracy
+        chosen_enemy: int = -1
+
+        # Get the randomly-chosen enemy
+        for i in range(len(chances)):
+            rng -= chances[i]
+            if rng <= 0:
+                chosen_enemy = i
+                break
+
+        # No enemy has been chosen; return None
+        if chosen_enemy == -1:
+            return
+
+        enemy_id = self.room["Enemies"][chosen_enemy]
+        # Enemy must be string or an integer
+        if not isinstance(enemy_id, str) and not isinstance(enemy_id, int):
+            return
+
+        enemy: Enemy | None = self.game.enemies.get(enemy_id, None)
+
+        return enemy
 
     def fn_itemHandler(self, attr: str) -> None:
         """Handles items within a room, including item requirements.
@@ -1002,6 +1148,20 @@ class MainHandler:
         elif isinstance(room_id, int) and (room_id >= 0 or not negIDsupport):
             self.roomID = room_id
 
+    def fn_save_handler(self) -> None:
+        save_handler.write_save(
+            self.game_state,
+            self.gameInfo,
+            self.roomID,
+            self.history,
+            self.saveFileName,
+            self.engineInfo["SaveVersion"],
+            self.gameInfo.get("game_id", None),
+            self.current_saveid,
+            self.shop_exit
+
+        )
+
     def fn_gameLoop(self) -> None:
         """The main loop of the game and calls all other functions.
 
@@ -1080,164 +1240,6 @@ class MainHandler:
         """Simple loop function that loops fn_gameLoop()"""
         while 1:
             self.fn_gameLoop()
-
-    def fn_battle_handler(self) -> None:
-        """Handles battles in the SHM Engine.
-
-        The attribute battle_hooks should be set up before calling this.
-        The gamefile should also have the attributes 'enemies' and
-        'battle_hooks'.
-        """
-        DEFAULT_LOSS_TEXT: str = "You have fallen in battle..."
-        TIME_BATTLETEXT_DISPLAYED: float = 0.5
-
-        if not self.battle_hooks:
-            return
-
-        if not hasattr(self.game, "enemies"):
-            return
-
-        if not hasattr(self.game, "battle_hooks"):
-            return
-
-        enemy: Enemy | None = self.fn_battle_get_enemy()
-
-        if enemy is None:
-            return
-
-        if "BattleText" in self.room and isinstance(self.room["BattleText"], str):
-            print3(self.win, self.room["BattleText"])
-            time.sleep(TIME_BATTLETEXT_DISPLAYED)
-
-        if hasattr(self.game, "battle_items") and isinstance(
-            self.game.battle_items, dict
-        ):
-            battle_items: dict[str, BattleItem] | None = self.game.battle_items
-        else:
-            battle_items: dict[str, BattleItem] | None = None
-
-        try:
-            items: list[str] = self.game_state.inventory.items
-        except:
-            items: list[str] = []
-
-        if not isinstance(items, list):
-            self.err_log_error(error_type="Error", error_msg="Unable to get items.")
-            return
-
-        if "variable_damage" in self.gameInfo:
-            variable_damage: bool = self.gameInfo["variable_damage"]
-        else:
-            variable_damage: bool = False
-
-        battle: BattleHandler = BattleHandler(
-            stdscr=self.win,
-            hook_dict=self.battle_hooks,
-            enemy=enemy,
-            variable_damage=variable_damage,
-            battle_items=battle_items,
-            items=items,
-        )
-        if battle.battle_handler():
-            self.ui_drawtitlebar()
-            return
-        elif "loss_text" in self.battle_hooks:
-            loss_text: str = self.battle_hooks.get("loss_text")
-        else:
-            loss_text: str = DEFAULT_LOSS_TEXT
-        self.ui_lose(loss_text)
-
-    def fn_battle_get_enemy(self) -> Enemy | None:
-        """Gets an enemy for an encounter, based on the current room.
-
-        Returns:
-            Enemy | None:
-            None indicates that there is no enemy, or if an error
-            was encountered and an enemy was unable to be obtained.
-            Enemy is a dict (see typeddicts.py) that represents the enemy.
-        """
-        # If Enemies and EnemyChances do not exist, we cannot pick an enemy
-        if "Enemies" not in self.room or "EnemyChances" not in self.room:
-            self.err_log_error(
-                error_type="Warning",
-                error_msg="Unable to generate enemy: Enemies or EnemyChances"
-                + "do not exist.",
-            )
-            return
-        if not isinstance(self.room["Enemies"], list):
-            self.err_log_error(
-                error_type="Warning",
-                error_msg="Unable to generate enemy: Enemies is not a list.",
-            )
-            return
-        if not isinstance(self.room["EnemyChances"], list):
-            self.err_log_error(
-                error_type="Warning",
-                error_msg="Unable to generate enemy: EnemyChances is not a list.",
-            )
-            return
-        # If Enemies and EnemyChances are not the same length, then they are
-        # meaningless.
-        if not len(self.room["Enemies"]) == len(self.room["EnemyChances"]):
-            self.err_log_error(
-                error_type="Warning",
-                error_msg="Unable to generate enemy: Enemies and EnemyChances"
-                + "are not the same length.",
-            )
-            return
-
-        total_chance: float = 0.0  # sum of all chances
-
-        # number of digits after decimal point in longest float
-        # used to determine the required precision
-        longest_decimal: int = 0
-
-        for i in self.room["EnemyChances"]:
-            # If a chance is not a number, it is meaningless; quit
-            if not isinstance(i, float | int):
-                return
-            length: int = len(str(i)) - 2
-            if length > longest_decimal:
-                longest_decimal = length
-            total_chance += i
-
-        multiplier: float = 1.0
-        chances: list[float | int] = self.room["EnemyChances"].copy()
-
-        # If the developer put total chances at above 1, we need to sort this out
-        if total_chance > 1:
-            multiplier: float = 1 / total_chance
-
-        if multiplier != 1:
-            for i in chances:
-                i = i * multiplier
-                length: int = len(str(i)) - 2
-                if length > longest_decimal:
-                    longest_decimal = length
-        accuracy: int = int("1" + "0" * longest_decimal)
-        rng: int | float = rand(0, accuracy + 1)
-        rng /= accuracy
-        chosen_enemy: int = -1
-
-        # Get the randomly-chosen enemy
-        for i in range(len(chances)):
-            rng -= chances[i]
-            if rng <= 0:
-                chosen_enemy = i
-                break
-
-        # No enemy has been chosen; return None
-        if chosen_enemy == -1:
-            return
-
-        enemy_id = self.room["Enemies"][chosen_enemy]
-        # Enemy must be string or an integer
-        if not isinstance(enemy_id, str) and not isinstance(enemy_id, int):
-            return
-
-        enemy: Enemy | None = self.game.enemies.get(enemy_id, None)
-
-        return enemy
 
 
 def run(

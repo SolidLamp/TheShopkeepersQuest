@@ -93,13 +93,14 @@ class GameFile(TypedDict):
 
 
 class Save(TypedDict):
-    """This is the canonical format for save files with save version 1."""
+    """This is the canonical format for save files with save version 2."""
 
     Game: str
     Saved: str
     save_version: int
     RoomID: int
     History: list[int]
+    shop_exit: NotRequired[int]
     game_state: dict[str, Any]
     inventory: dict[str, list[str]]
     game_id: NotRequired[int | str]

@@ -97,6 +97,7 @@ def write_save(
     save_version: int = 0,
     game_id: str | uuid.UUID | None = None,
     save_id: str | uuid.UUID | None = None,
+    shop_exit: int = -1,
 ) -> None:
     """file_name should not include the .sav file extension"""
     file_name = remove_extension(file_name)
@@ -116,6 +117,7 @@ def write_save(
         "save_version": save_version,
         "RoomID": room,
         "History": history,
+        "shop_exit": shop_exit,
         "game_state": json_game_state,
     }
     if "inventory" in json_game_state:
