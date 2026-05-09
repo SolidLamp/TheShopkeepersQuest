@@ -20,3 +20,6 @@
 - [x] Update to src/ layout
 - [x] Typing file
 - [x] Write documentation for the engine
+
+- [ ] Restructure dirs
+- [ ] restricted_win

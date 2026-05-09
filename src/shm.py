@@ -675,6 +675,8 @@ class MainHandler:
             int: The user's chosen option, as corresponds to the place within
             the options list.
         """
+        if text[0] != "\n":
+            text = "\n" + text 
         choices = options.copy()
         if not hasattr(self.game_state, "inventory"):
             Inventory = False

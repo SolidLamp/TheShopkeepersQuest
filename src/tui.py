@@ -320,7 +320,7 @@ def option(
     win.nodelay(False)
     while 1:
         win.clear()
-        newline(win)
+        # newline(win)
         max_y, max_x = win.getmaxyx()
         if "\n" not in text:
             centre_text(win, text)
