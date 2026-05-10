@@ -8,3 +8,4 @@ from .typeddicts import EngineInfo as EngineInfo
 from .typeddicts import GameFile as GameFile
 from .typeddicts import GameInfo as GameInfo
 from .typeddicts import Save as Save
+from .restrictedscr import RestrictedWindow as RestrictedWindow
