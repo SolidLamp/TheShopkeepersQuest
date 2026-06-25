@@ -1,0 +1,45 @@
+[project]
+name = "shm"
+version = "1.2"
+description = "A text-based, adventure-style game engine for Python"
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+requires-python = ">= 3.11"
+readme = "README.md"
+keywords = ["adventure", "game", "tsq", "shm"]
+dependencies = ["windows-curses; platform_system == 'Windows'"]
+authors = [{ name = "SolidLamp" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console :: Curses",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Topic :: Games/Entertainment",
+    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[tool.basedpyright]
+include = ["src"]
+pythonPlatform = "All"
+pythonVersion = "3.11"
+
+[tool.black]
+line-length = 88
+target-version = ["py311", "py312", "py313"]
+
+[tool.isort]
+line_length = 87
+profile = "black"
+py_version = 311
+
+[tool.setuptools.packages.find]
+where = ["src"]

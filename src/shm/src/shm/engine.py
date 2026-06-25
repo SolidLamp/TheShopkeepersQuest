@@ -14,9 +14,6 @@ import curses
 import os.path
 import platform
 import re
-from src.typing.box import Box
-from src.typing.box import Box
-from src.typing.box import Box
 import sys
 import time
 from collections.abc import Callable
@@ -28,10 +25,10 @@ from random import randrange as rand
 from types import ModuleType
 from typing import Any
 
-from src import save_handler, toml_reader, tui
-from src.battle import BattleHandler
-from src.tui import print3
-from src.typing import (
+from shm import save_handler, toml_reader, tui
+from .battle import BattleHandler
+from .tui import print3
+from shm.typing import (
     BattleHooks,
     BattleItem,
     Box,

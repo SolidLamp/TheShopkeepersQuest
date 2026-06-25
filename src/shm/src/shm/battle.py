@@ -13,9 +13,9 @@ from collections.abc import Callable
 from enum import IntEnum
 from random import randrange as rand
 
-from src import tui
-from src.tui import print3
-from src.typing import BattleHooks, BattleItem, Box, Enemy
+from shm import tui
+from .tui import print3
+from shm.typing import BattleHooks, BattleItem, Box, Enemy
 
 
 class BattleHandler:

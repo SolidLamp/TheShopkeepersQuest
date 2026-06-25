@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import curses
 
-from src import game, tui
+from shm import tui
 
 # NOTE: This script is for testing purposes only!
 

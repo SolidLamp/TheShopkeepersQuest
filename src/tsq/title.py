@@ -9,6 +9,7 @@ title_screen = MiniSHM(win, options_dict, title_string)
 import os.path
 import sys
 from collections.abc import Callable
+from importlib.resources import files
 from typing import Any, NoReturn
 
 try:
@@ -17,7 +18,11 @@ except ImportError as e:
     print(f"The curses module was not found.\nError: {e}")
     sys.exit(1)
 
-from src import save_handler, shm, toml_reader, tui
+import shm.save_handler as save_handler
+import shm.toml_reader as toml_reader
+import shm.tui as tui
+
+import shm
 
 
 class MiniSHM:
@@ -108,6 +113,8 @@ def handle_save(
         Defaults to "game".
 
     """
+    module_path: str = str(files(__spec__.parent))
+
     if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
         save_handler.read_save(save_path)
     ):
@@ -118,11 +125,15 @@ def handle_save(
             saveFileName=save_path,
             saveFile=saveFile,
             gameFile_name=game_path,
-            gameFile_path="./src",
+            gameFile_path=module_path,
         )
     else:
         shm.run(
-            win, saveFileName=save_path, gameFile_name=game_path, gameFile_path="./src"
+            win,
+            starting_room=0,
+            saveFileName=save_path,
+            gameFile_name=game_path,
+            gameFile_path=module_path,
         )
 
 
@@ -183,8 +194,7 @@ def main(win: curses.window) -> None:
 
 
 def title() -> None:
-    """Sets up a curses wrapper and creates the title screen.
-    """
+    """Sets up a curses wrapper and creates the title screen."""
     print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)

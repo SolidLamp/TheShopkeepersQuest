@@ -14,7 +14,7 @@ from itertools import chain
 from pathlib import Path
 from typing import Any, TypeVar, overload
 
-from src.typing import FormatDict, Room
+from shm.typing import FormatDict, Room
 
 
 def read_toml(file: str = "game.toml", abs_path: bool = False) -> dict[Any, Any]:

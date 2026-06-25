@@ -8,8 +8,10 @@ import os
 import platform
 import sys
 
-from src import title, toml_reader
-from src.typing import FormatDict
+from tsq import title
+
+from shm import toml_reader
+from shm.typing import FormatDict
 
 
 def main() -> None:

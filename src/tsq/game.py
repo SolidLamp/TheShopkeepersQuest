@@ -5,16 +5,20 @@ Typical usage example:
 """
 
 import curses
+import os.path
 import random
-from src.typing.box import Box
 import sys
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from importlib.resources import files
 from typing import Any
 
-from src import toml_reader, tui
-from src.typing import Box
+from shm.typing import Box
+
+from shm import toml_reader, tui
+
+module_path: str = str(files(__spec__.parent))
 
 print3: Callable[..., None] = tui.print3
 
@@ -27,8 +31,9 @@ loseText: dict[str, str]
 defaultLose: str
 keyItems: list[str]
 
+toml_path: str = os.path.join(module_path, "game.toml")
 
-gameInfo: dict[str, Any] = toml_reader.read_toml("game.toml")["game_info"]
+gameInfo: dict[str, Any] = toml_reader.read_toml(toml_path)["game_info"]
 
 history: list[int] = []
 
@@ -174,7 +179,7 @@ def get_rooms(win: curses.window) -> dict[int, dict]:
         (For more info see room_format.rst)
     """
     hasItem = game_state.inventory.hasItem
-    rooms: dict[int | str, dict] = toml_reader.read_gamedata("game.toml")
+    rooms: dict[int | str, dict] = toml_reader.read_gamedata(toml_path)
     room_scripts: dict[int, dict] = {
         0: {
             "Script": lambda: debug(win),

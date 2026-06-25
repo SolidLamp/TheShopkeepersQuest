@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from src.typing import GameInfo, Save
+from shm.typing import GameInfo, Save
 
 
 def save_validifier(saveFile: Save) -> bool:
