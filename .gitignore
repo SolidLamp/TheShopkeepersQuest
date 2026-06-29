@@ -1,6 +1,11 @@
 __pycache__/
+build/
+dist/
+*.7z
+*.tar.bz2
 *.tar.gz
 *.tar.xz
+*.tar.zst
 *.zip
 *.sav
 **/error.log
