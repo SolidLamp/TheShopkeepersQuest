@@ -1,26 +1,29 @@
 [project]
 name = "TheShopkeepersQuest"
-version = "1.2-dev7"
+version = "1.2rc2"
 description = "The Shopkeeper's Quest - an open-source, text-based adventure game."
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
 requires-python = ">= 3.11"
 readme = "README.md"
 keywords = ["adventure", "game", "tsq", "shm"]
-dependencies = ["windows-curses; platform_system == 'Windows'"]
-authors = [{ name = "SolidLamp" }]
+dependencies = [
+    "windows-curses; platform_system == 'Windows'",
+]
+authors = [
+  {name = "SolidLamp"},
+]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Environment :: Console :: Curses",
-    "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
-    "Natural Language :: English",
-    "Topic :: Games/Entertainment",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
+  "Development Status :: 4 - Beta",
+  "Environment :: Console :: Curses",
+  "Intended Audience :: End Users/Desktop",
+  "Natural Language :: English",
+  "Topic :: Games/Entertainment",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 
 [build-system]
@@ -40,3 +43,16 @@ target-version = ["py311", "py312", "py313"]
 line_length = 87
 profile = "black"
 py_version = 311
+
+[tool.setuptools]
+# packages = ["shm", "shm.typing"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tsq = ["*.json", "*.toml"]
+
+
+

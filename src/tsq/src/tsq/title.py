@@ -9,8 +9,9 @@ title_screen = MiniSHM(win, options_dict, title_string)
 import os.path
 import sys
 from collections.abc import Callable
-from importlib.resources import files
 from typing import Any, NoReturn
+from importlib.resources import files
+
 
 try:
     import curses
@@ -18,11 +19,10 @@ except ImportError as e:
     print(f"The curses module was not found.\nError: {e}")
     sys.exit(1)
 
+import shm
 import shm.save_handler as save_handler
 import shm.toml_reader as toml_reader
 import shm.tui as tui
-
-import shm
 
 
 class MiniSHM:
@@ -97,7 +97,7 @@ class MiniSHM:
 
 
 def handle_save(
-    win: curses.window, game_path: str = "game", save_path: str = "game"
+    win: curses.window, game_path: str = "game", save_path: str = "game", dir_save: bool = False
 ) -> None:
     """Handles the save files.
 
@@ -105,16 +105,17 @@ def handle_save(
         win (curses.window): A curses window instance.
 
         game_path (str, optional):
-        The relative path to the gamefile.
+        The relative path to the gamefile, relative to the program's install location.
         Defaults to "game".
 
         save_path (str, optional):
-        The relative path to the savefile.
+        The relative path to the savefile, relative to the program's install location.
         Defaults to "game".
 
     """
     module_path: str = str(files(__spec__.parent))
-
+    save_path: str = os.path.join(module_path, save_path)
+    
     if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
         save_handler.read_save(save_path)
     ):
@@ -129,11 +130,7 @@ def handle_save(
         )
     else:
         shm.run(
-            win,
-            starting_room=0,
-            saveFileName=save_path,
-            gameFile_name=game_path,
-            gameFile_path=module_path,
+            win, starting_room=0, saveFileName=save_path, gameFile_name=game_path, gameFile_path=module_path
         )
 
 
@@ -194,7 +191,8 @@ def main(win: curses.window) -> None:
 
 
 def title() -> None:
-    """Sets up a curses wrapper and creates the title screen."""
+    """Sets up a curses wrapper and creates the title screen.
+    """
     print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)

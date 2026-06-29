@@ -24,6 +24,7 @@ from itertools import chain
 from random import randrange as rand
 from types import ModuleType
 from typing import Any
+from importlib.resources import files
 
 from shm import save_handler, toml_reader, tui
 from .battle import BattleHandler
@@ -85,11 +86,12 @@ class MainHandler:
             The name of the save file to write to when the game is saved.
             Defaults to "game".
         """
+        module_path: str = str(files(__spec__.parent))
+        toml_path: str = os.path.join(module_path, "engine_info.toml")
+        
         self.COMPATIBLE_COMPLEVELS: list[int] = [1, 2]
         self.current_saveid: int | str | None = None
-        self.engineInfo: FormatDict = FormatDict(
-            toml_reader.read_toml("engine_info.toml")
-        )
+        self.engineInfo: FormatDict = FormatDict(toml_reader.read_toml(toml_path))
         self.game: ModuleType = self.setup_gameFile(gameFile_name, gameFile_path)
         self.gameFile_name: str = gameFile_name
         self.gameInfo: dict[str, Any] = self.game.gameInfo
@@ -1285,6 +1287,8 @@ def run(
         May not include the file itself or only the directory.
         Defaults to "./".
     """
+    module_path: str = str(files(__spec__.parent))
+    toml_path: str = os.path.join(module_path, "engine_info.toml")
 
     curses.curs_set(0)
     win.scrollok(True)
@@ -1297,7 +1301,7 @@ def run(
         validSave: bool = save_handler.save_validifier(saveFile)
     if saveFile and validSave:
         save_version: int = int(saveFile.get("save_version", 0))
-        engine_info: EngineInfo = toml_reader.read_toml("engine_info.toml")
+        engine_info: EngineInfo = toml_reader.read_toml(toml_path)
         engine_save_version = engine_info.get("SaveVersion", 0)
         supported_version: bool = save_version <= engine_save_version
     if saveFile and not validSave:

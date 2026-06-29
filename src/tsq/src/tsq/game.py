@@ -3,22 +3,23 @@
 Typical usage example:
     rooms = game.get_rooms(win)
 """
+import game
 
 import curses
-import os.path
 import random
 import sys
 import time
+import os.path
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from importlib.resources import files
 from typing import Any
-
-from shm.typing import Box
+from importlib.resources import files
 
 from shm import toml_reader, tui
+from shm.typing import Box
 
 module_path: str = str(files(__spec__.parent))
+toml_path: str = os.path.join(module_path, "game.toml")
 
 print3: Callable[..., None] = tui.print3
 
@@ -30,8 +31,6 @@ defaultEnding: str
 loseText: dict[str, str]
 defaultLose: str
 keyItems: list[str]
-
-toml_path: str = os.path.join(module_path, "game.toml")
 
 gameInfo: dict[str, Any] = toml_reader.read_toml(toml_path)["game_info"]
 
@@ -185,7 +184,7 @@ def get_rooms(win: curses.window) -> dict[int, dict]:
             "Script": lambda: debug(win),
         },
         4: {
-            "Option0Requirements": lambda: hasItem("Rusted Sword"),
+            "Option0Requirements": lambda: not hasItem("Rusted Sword"),
         },
         5: {
             "Option0Requirements": lambda: not hasItem("Bow and Arrow"),

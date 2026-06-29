@@ -13,6 +13,7 @@ import tomllib
 from itertools import chain
 from pathlib import Path
 from typing import Any, TypeVar, overload
+from importlib.resources import files
 
 from shm.typing import FormatDict, Room
 
@@ -275,8 +276,11 @@ def get_engine_info(
     Returns:
         str: The string after all keys have been replaced.
     """
-    engineInfo = read_toml("engine_info.toml")
+    module_path: str = str(files(__spec__.parent))
+    toml_path: str = os.path.join(module_path, "engine_info.toml")
+    engineInfo = read_toml(toml_path)
     engineInfo = FormatDict(engineInfo)
+
     if not engineInfo["Patch"] or engineInfo["Patch"][0] == "-":
         engineInfo["PatchConnector"] = ""
     else:

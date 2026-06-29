@@ -7,6 +7,7 @@ This should never be used outside of being entry point for the module.
 import os
 import platform
 import sys
+from importlib.resources import files
 
 from shm import toml_reader # title
 from shm.typing import FormatDict
@@ -22,24 +23,30 @@ def main() -> None:
         for arg in sys.argv:
             match arg:
                 case "--about" | "--help" | "-h":
-                    gameInfo = toml_reader.read_toml("cli_info.toml")
+                    module_path: str = str(files(__spec__.parent))
+                    toml_path: str = os.path.join(module_path, "engine_info.toml")
+                    
+                    gameInfo = toml_reader.read_toml(toml_path)
                     gameInfo = FormatDict(gameInfo)
+                    
                     if not gameInfo["Patch"] or gameInfo["Patch"][0] == "-":
                         gameInfo["PatchConnector"] = ""
                     else:
                         gameInfo["PatchConnector"] = " "
+                        
                     infoString = (
-                        "{Name}{PatchConnector}{Version}\n{ReleaseDate}"
+                        "{Name}{PatchConnector} {MajorVersion}{Patch}\n{ReleaseDate}"
                         "\n{Licence}\nCreated by {Creator}\n{Link}"
                     )
                     infoString = infoString.format_map(gameInfo)
                     print(infoString)
                     print(
-                        "\n-h | --help | --about  --  opens this menu\n[no args]  --  runs the game"
+                        "\n-h | --help | --about  --  opens this menu"
                     )
         sys.exit(0)
     else:
-        title.title()
+        #title.title()
+        sys.exit()
 
 
 if __name__ == "__main__":
