@@ -53,7 +53,7 @@ class Inventory:
 
 
 @dataclass
-class gameState:
+class GameState:
     inventory: Inventory
     money: Box[int] = field(default_factory=lambda: Box(0))
 

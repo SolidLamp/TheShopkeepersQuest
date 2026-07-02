@@ -34,6 +34,7 @@ from shm.typing import (
     Enemy,
     EngineInfo,
     FormatDict,
+    GameState,
     Save,
 )
 
@@ -96,7 +97,7 @@ class MainHandler:
         self.game: ModuleType = self.setup_gameFile(gameFile_name, gameFile_path)
         self.gameFile_name: str = gameFile_name
         self.gameInfo: dict[str, Any] = self.game.gameInfo
-        self.game_state: Any = self.game.game_state
+        self.game_state: GameState = self.game.game_state
         self.globaldebug: bool = False
         self.history: list[int] = self.game.history
         self.room: dict[str, Any] = {}

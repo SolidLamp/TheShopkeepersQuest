@@ -1,7 +1,7 @@
 from .box import Box as Box
 from .format_dict import FormatDict as FormatDict
 from .game_state import Inventory as Inventory
-from .game_state import gameState as gameState
+from .game_state import GameState as GameState
 from .restrictedscr import RestrictedWindow as RestrictedWindow
 from .room import Room as Room
 from .typeddicts import BattleHooks as BattleHooks
