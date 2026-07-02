@@ -41,5 +41,12 @@ line_length = 87
 profile = "black"
 py_version = 311
 
+[tool.setuptools]
+# packages = ["shm", "shm.typing"]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+shm = ["*.json", "*.toml"]
