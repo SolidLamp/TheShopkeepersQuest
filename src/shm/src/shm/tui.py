@@ -79,7 +79,7 @@ def print3(
     break_lines: bool = True,
 ) -> None:
     r"""A typewriter printing function for curses with neat features.
-    
+
     Function to print string `text` to the provided curses window using a
     typewriter effect. Also handles control and escape codes.
     When skip_text is true (true by default), pressing a key skips all delay.
@@ -170,7 +170,7 @@ def handleCSI_m(
     attr: int = 0,
 ) -> tuple[int, int, int, int, int]:
     r"""Handles Control Sequence Introducer (CSI; "\033[")_m codes.
-    
+
     Send the text to this function and the position after the "[" character.
     Handles 3-bit, 4-bit and 8-bit Select Graphic Rendition (SGR) colours.
 

@@ -1,4 +1,4 @@
-Name  = "SHM Engine"
+Name = "SHM Engine"
 MajorVersion = "1.2"
 Patch = "-rc3"
 Indev = true

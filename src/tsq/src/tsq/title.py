@@ -9,9 +9,8 @@ title_screen = MiniSHM(win, options_dict, title_string)
 import os.path
 import sys
 from collections.abc import Callable
-from typing import Any, NoReturn
 from importlib.resources import files
-
+from typing import Any, NoReturn
 
 try:
     import curses
@@ -97,7 +96,10 @@ class MiniSHM:
 
 
 def handle_save(
-    win: curses.window, game_path: str = "game", save_path: str = "game", dir_save: bool = False
+    win: curses.window,
+    game_path: str = "game",
+    save_path: str = "game",
+    dir_save: bool = False,
 ) -> None:
     """Handles the save files.
 
@@ -115,7 +117,7 @@ def handle_save(
     """
     module_path: str = str(files(__spec__.parent))
     save_path: str = os.path.join(module_path, save_path)
-    
+
     if os.path.exists(save_path + ".sav") and save_handler.save_validifier(
         save_handler.read_save(save_path)
     ):
@@ -130,7 +132,11 @@ def handle_save(
         )
     else:
         shm.run(
-            win, starting_room=0, saveFileName=save_path, gameFile_name=game_path, gameFile_path=module_path
+            win,
+            starting_room=0,
+            saveFileName=save_path,
+            gameFile_name=game_path,
+            gameFile_path=module_path,
         )
 
 
@@ -191,8 +197,7 @@ def main(win: curses.window) -> None:
 
 
 def title() -> None:
-    """Sets up a curses wrapper and creates the title screen.
-    """
+    """Sets up a curses wrapper and creates the title screen."""
     print("[The Shopkeeper's Quest]")
     while 1:
         curses.wrapper(main)

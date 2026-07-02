@@ -1,5 +1,8 @@
 from .box import Box as Box
 from .format_dict import FormatDict as FormatDict
+from .game_state import Inventory as Inventory
+from .game_state import gameState as gameState
+from .restrictedscr import RestrictedWindow as RestrictedWindow
 from .room import Room as Room
 from .typeddicts import BattleHooks as BattleHooks
 from .typeddicts import BattleItem as BattleItem
@@ -8,6 +11,3 @@ from .typeddicts import EngineInfo as EngineInfo
 from .typeddicts import GameFile as GameFile
 from .typeddicts import GameInfo as GameInfo
 from .typeddicts import Save as Save
-from .restrictedscr import RestrictedWindow as RestrictedWindow
-from .game_state import Inventory as Inventory
-from .game_state import gameState as gameState

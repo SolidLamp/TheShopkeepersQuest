@@ -19,16 +19,14 @@ import time
 from collections.abc import Callable
 from datetime import datetime
 from importlib.machinery import ModuleSpec
+from importlib.resources import files
 from importlib.util import module_from_spec, spec_from_file_location
 from itertools import chain
 from random import randrange as rand
 from types import ModuleType
 from typing import Any
-from importlib.resources import files
 
 from shm import save_handler, toml_reader, tui
-from .battle import BattleHandler
-from .tui import print3
 from shm.typing import (
     BattleHooks,
     BattleItem,
@@ -38,6 +36,9 @@ from shm.typing import (
     FormatDict,
     Save,
 )
+
+from .battle import BattleHandler
+from .tui import print3
 
 HISTORY_MAX_LEN: int = 10
 AUTOMOVE_DELAY: float = 1.0

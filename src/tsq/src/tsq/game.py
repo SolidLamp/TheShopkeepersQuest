@@ -4,14 +4,14 @@ Typical usage example:
     rooms = game.get_rooms(win)
 """
 
+import os.path
 import random
 import sys
 import time
-import os.path
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
 from importlib.resources import files
+from typing import Any
 
 from shm import toml_reader, tui
 from shm.typing import Box, RestrictedWindow

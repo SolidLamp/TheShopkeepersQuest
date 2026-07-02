@@ -29,8 +29,8 @@ class Room(TypedDict, total=False):
     KeyItemRequirements: Callable[[], bool]
     KeyItemText: str
     ShopItems: list[str]
-    ShopItemCosts: list[int] 
-    ShopItemMove: list[int | tuple[str, int]] # -1 represents none
+    ShopItemCosts: list[int]
+    ShopItemMove: list[int | tuple[str, int]]  # -1 represents none
     ShopEntrance: str | list[str]
     ShopExit: str | list[str]
     BattleText: str

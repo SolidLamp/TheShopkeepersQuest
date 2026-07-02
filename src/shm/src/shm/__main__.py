@@ -9,8 +9,9 @@ import platform
 import sys
 from importlib.resources import files
 
-from shm import toml_reader # title
+from shm import toml_reader  # title
 from shm.typing import FormatDict
+
 
 def display_help_menu() -> None:
     module_path: str = str(files(__spec__.parent))
@@ -30,9 +31,8 @@ def display_help_menu() -> None:
     )
     infoString = infoString.format_map(gameInfo)
     print(infoString)
-    print(
-        "\n-h | --help | --about  --  opens this menu"
-    )
+    print("\n-h | --help | --about  --  opens this menu")
+
 
 def main() -> None:
     """The main function to be loaded. Handles arguments. Loads title screen."""

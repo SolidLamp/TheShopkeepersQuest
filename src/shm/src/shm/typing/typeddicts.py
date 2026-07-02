@@ -9,10 +9,10 @@ from .room import Room
 class BattleItem(TypedDict, total=False):
     description: str
     item_type: Required[Literal["Damage", "Heal", "Escape", "Script"]]
-    magnitude: int # only used with "Damage" and "Heal" types
-    script: Callable[[], None] # only used with "Script" type
-    escape_chance: float # must be less than 1; only used with "Escape" type
-    escape_chance_modifier: float # only used with "Escape" type
+    magnitude: int  # only used with "Damage" and "Heal" types
+    script: Callable[[], None]  # only used with "Script" type
+    escape_chance: float  # must be less than 1; only used with "Escape" type
+    escape_chance_modifier: float  # only used with "Escape" type
 
 
 class BattleHooks(TypedDict):
@@ -94,6 +94,7 @@ class GameFile(TypedDict):
 
 class Save(TypedDict):
     """This is the canonical format for save files with save version 2."""
+
     Game: str
     Saved: str
     save_version: int

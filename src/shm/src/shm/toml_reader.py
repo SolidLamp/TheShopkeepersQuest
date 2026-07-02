@@ -10,10 +10,10 @@ gamedata = toml_reader.read_gamedata("game.toml")
 
 import os
 import tomllib
+from importlib.resources import files
 from itertools import chain
 from pathlib import Path
 from typing import Any, TypeVar, overload
-from importlib.resources import files
 
 from shm.typing import FormatDict, Room
 

@@ -8,10 +8,10 @@ import os
 import platform
 import sys
 
-from tsq import title
-
 from shm import toml_reader
 from shm.typing import FormatDict
+
+from tsq import title
 
 
 def main() -> None:

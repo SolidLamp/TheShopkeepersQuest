@@ -7,15 +7,16 @@ Typical usage example:
 
 import curses
 import math
-from typing import Literal
 import time
 from collections.abc import Callable
 from enum import IntEnum
 from random import randrange as rand
+from typing import Literal
 
 from shm import tui
-from .tui import print3
 from shm.typing import BattleHooks, BattleItem, Box, Enemy
+
+from .tui import print3
 
 
 class BattleHandler:
