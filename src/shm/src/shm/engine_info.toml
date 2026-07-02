@@ -1,9 +1,9 @@
 Name  = "SHM Engine"
 MajorVersion = "1.2"
-Patch = "-rc1"
+Patch = "-rc3"
 Indev = true
 PythonVer = 3.11
-ReleaseDate = "2026-06-29"
+ReleaseDate = "2026-07-02"
 Dist = "The Shopkeeper's Quest 1.2"
 Link = "https://github.com/solidlamp"
 SaveVersion = 2

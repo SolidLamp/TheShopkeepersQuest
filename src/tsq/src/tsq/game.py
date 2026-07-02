@@ -3,9 +3,7 @@
 Typical usage example:
     rooms = game.get_rooms(win)
 """
-import game
 
-import curses
 import random
 import sys
 import time
@@ -16,7 +14,7 @@ from typing import Any
 from importlib.resources import files
 
 from shm import toml_reader, tui
-from shm.typing import Box
+from shm.typing import Box, RestrictedWindow
 
 module_path: str = str(files(__spec__.parent))
 toml_path: str = os.path.join(module_path, "game.toml")
@@ -94,13 +92,13 @@ class Inventory:
     items: list[str] = field(default_factory=list)
     keyItems: list[str] = field(default_factory=list)
 
-    def getItem(self, item: str, win: curses.window) -> None:
+    def getItem(self, item: str, win: RestrictedWindow) -> None:
         print3(win, "\nYou got \033[1m" + str(item) + "\033[0m!\n")
         self.items.append(item)
         print3(win, "Press any button to continue...")
         win.getch()
 
-    def getKeyItem(self, item: str, win: curses.window) -> None:
+    def getKeyItem(self, item: str, win: RestrictedWindow) -> None:
         if item in self.keyItems:
             return
         print3(win, "\nYou got \033[1m" + str(item) + "\033[0m!\n")
@@ -141,7 +139,7 @@ class gameState:
     caveOpened: bool = False
     fletcherOpen: bool = True
 
-    def getRuby(self, obtained: int, win: curses.window) -> None:
+    def getRuby(self, obtained: int, win: RestrictedWindow) -> None:
         print3(win, "\nYou got \033[1m" + str(obtained) + "\033[0m Rubies!")
         self.rubies += obtained
         print3(
@@ -167,11 +165,11 @@ def overwrite_rooms(rooms: dict, extrarooms: dict) -> dict:
     return new_rooms
 
 
-def get_rooms(win: curses.window) -> dict[int, dict]:
+def get_rooms(win: RestrictedWindow) -> dict[int, dict]:
     """The most important part; returns a dict of rooms to the engine.
 
     Args:
-        win (curses.window): A curses window instance.
+        win (RestrictedWindow): A curses window instance.
 
     Returns:
         dict[int, dict]: The dictionary of rooms.
@@ -415,7 +413,7 @@ def itemEvaluation() -> int:
     return cursedItems
 
 
-def ShopkeeperFinalSpeech(win: curses.window) -> None:
+def ShopkeeperFinalSpeech(win: RestrictedWindow) -> None:
     print3(
         win,
         "\033[93m'Well, I'll be. That's all of them. Honestly, I kind of "
@@ -427,7 +425,7 @@ def ShopkeeperFinalSpeech(win: curses.window) -> None:
     time.sleep(1.5)
 
 
-def ShopkeeperAffirmations(win: curses.window) -> None:
+def ShopkeeperAffirmations(win: RestrictedWindow) -> None:
     cursedItems = len(
         {"Rusted Sword", "Amber Necklace", "Golden Idol"}
         & set(game_state.inventory.keyItems)
@@ -439,7 +437,7 @@ def ShopkeeperAffirmations(win: curses.window) -> None:
     )
 
 
-def fishEvaluation(win: curses.window) -> None:
+def fishEvaluation(win: RestrictedWindow) -> None:
     fishBought = len(
         {
             "Fillet of Cod",
@@ -465,7 +463,7 @@ def fishEvaluation(win: curses.window) -> None:
         )
 
 
-def mineralEvaluation(win: curses.window) -> None:
+def mineralEvaluation(win: RestrictedWindow) -> None:
     for item in [
         item for item in list(game_state.inventory.items) if item in list(mysticalRocks)
     ]:  # This is not that readable but it does stuff basically]
@@ -479,7 +477,7 @@ def mineralEvaluation(win: curses.window) -> None:
     )
 
 
-def debug(win: curses.window) -> None:
+def debug(win: RestrictedWindow) -> None:
     game_state.inventory.getKeyItem("Rusted Sword", win)
     game_state.inventory.getKeyItem("Amber Necklace", win)
     game_state.inventory.getKeyItem("Golden Idol", win)

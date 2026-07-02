@@ -21,5 +21,5 @@
 - [x] Typing file
 - [x] Write documentation for the engine
 
-- [ ] Restructure dirs
-- [ ] restricted_win
+- [x] Restructure dirs
+- [x] restricted_win

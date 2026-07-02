@@ -1,7 +1,7 @@
 [game_info]
 Name = "The Shopkeeper's Quest"
-Version = "Experimental"
-ReleaseDate = "2026-03-30"
+Version = "1.2"
+ReleaseDate = "2026-07-02"
 Licence = "MIT License"
 Creator = "SolidLamp"
 Link = "https://github.com/solidlamp"
@@ -31,11 +31,11 @@ Lose = "you fail"
 Text = "You are standing at the outskirts of the village. There is a road to the north, leading to the main parts of the village, a forest to the east, a cave to the south, a shop and bazaar to the west."
 Desc = "Outskirts of the Village"
 Options = [
-      'Go to the forest',
-      'Follow the road to the village',
-      'Explore the cave',
-      "Go to {game_state.shopkeeperName}'s shop",
-      'Go to the bazaar',
+    'Go to the forest',
+    'Follow the road to the village',
+    'Explore the cave',
+    "Go to {game_state.shopkeeperName}'s shop",
+    'Go to the bazaar',
 ]
 Move = [3, 9, 88, 66, 73]
 
@@ -43,11 +43,11 @@ Move = [3, 9, 88, 66, 73]
 Text = "You are standing at the outskirts of the village."
 Desc = "Outskirts of the Village"
 Options = [
-      'Go to the forest',
-      'Follow the road to the village',
-      'Explore the cave',
-      "Go to {game_state.shopkeeperName}'s shop",
-      'Go to the bazaar',
+    'Go to the forest',
+    'Follow the road to the village',
+    'Explore the cave',
+    "Go to {game_state.shopkeeperName}'s shop",
+    'Go to the bazaar',
 ]
 Move = [3, 9, 88, 66, 73]
 
@@ -89,9 +89,9 @@ Lose = "Bonobos are quite aggressive."
 Text = "You are standing within the village. It seems barren and no one is there."
 Desc = "Within the Village"
 Options = [
-      'Follow the High Steet',
-      'Sit on a bench for a while',
-      'Return to the outskirts of the village',
+    'Follow the High Steet',
+    'Sit on a bench for a while',
+    'Return to the outskirts of the village',
 ]
 Move = [11, 10, 2]
 
@@ -154,9 +154,9 @@ Move = [19, 12]
 Text = "You come to a dead-end on the street, where you see a mysterious door that doesn't seem to lead anywhere. Its lock seems rusted. There is a keyhole. What will you do?"
 Desc = "Mysterious Door"
 Options = [
-      'Unlock the door with the Ancient Key',
-      'Attempt to turn the handle',
-      'Go back',
+    'Unlock the door with the Ancient Key',
+    'Attempt to turn the handle',
+    'Go back',
 ]
 Move = [21, 20, 18]
 
@@ -205,12 +205,12 @@ Move = [26]
 Text = "It is the back room of {game_state.shopkeeperName}'s shop. It is full of rubies and products. There is a letter on a nearby desk."
 Desc = "Inside the Shop"
 Options = [
-      'Take some rubies',
-      'Take some lamp oil',
-      'Take some rope',
-      'Take some bombs',
-      'Go through to the front',
-      'Inspect the letter',
+    'Take some rubies',
+    'Take some lamp oil',
+    'Take some rope',
+    'Take some bombs',
+    'Go through to the front',
+    'Inspect the letter',
 ]
 Inventory = false
 Move = [27, 28, 29, 30, 32, 31]
@@ -450,26 +450,26 @@ Desc = "Inside the Shop"
 ShopItems = ["Lamp Oil", "Rope", "Bomb"]
 ShopItemCosts = [15, 20, 30]
 ShopEntrance = [
-      "\\033[93m'Welcome!'\\033[0m",
-      "\\033[93m'Sit down, my friend. Stay a while.'\\033[0m",
-      "\\033[93m'You'll always be welcome here in my shop.'\\033[0m",
-      "\\033[93m'Have a look at my wares. They could prove to be useful.'\\033[0m",
-      "\\033[93m'Sorry I can't give discounts - I have a business to run, and I must make my money somehow.'\\033[0m",
-      "\\033[93m'I don't blame you for coming inside in this winter.'\\033[0m",
-      "\\033[93m'Sit down a while. I don't want you too stressed, my friend.'\\033[0m",
-      "\\033[93m'I always believe that everyone has a tale worth telling - maybe talk to more people.'\\033[0m",
-      "\\033[93m'Have you checked out the bazaar? There's a fisherman there who sells excellent-quality rods.'\\033[0m",
-      "\\033[93m'Have you heard the news about the King? It's said that he's fallen ill. He's a good man - I hope he fully recovers.'\\033[0m",
-      "\\033[93m'Have you seen the nearby forest? There's been some monkey sightings there.'\\033[0m",
+    "\\033[93m'Welcome!'\\033[0m",
+    "\\033[93m'Sit down, my friend. Stay a while.'\\033[0m",
+    "\\033[93m'You'll always be welcome here in my shop.'\\033[0m",
+    "\\033[93m'Have a look at my wares. They could prove to be useful.'\\033[0m",
+    "\\033[93m'Sorry I can't give discounts - I have a business to run, and I must make my money somehow.'\\033[0m",
+    "\\033[93m'I don't blame you for coming inside in this winter.'\\033[0m",
+    "\\033[93m'Sit down a while. I don't want you too stressed, my friend.'\\033[0m",
+    "\\033[93m'I always believe that everyone has a tale worth telling - maybe talk to more people.'\\033[0m",
+    "\\033[93m'Have you checked out the bazaar? There's a fisherman there who sells excellent-quality rods.'\\033[0m",
+    "\\033[93m'Have you heard the news about the King? It's said that he's fallen ill. He's a good man - I hope he fully recovers.'\\033[0m",
+    "\\033[93m'Have you seen the nearby forest? There's been some monkey sightings there.'\\033[0m",
 ]
 ShopExit = [
-      "\\033[93m'Remember, tomorrow is another day.'\\033[0m",
-      "\\033[93m'Be seeing you.'\\033[0m",
-      "\\033[93m'I wish you the best of luck.'\\033[0m",
-      "\\033[93m'I give you my grace.'\\033[0m",
-      "\\033[93m'I wish you luck on your quest.'\\033[0m",
-      "\\033[93m'I'll get started on my tea.'\\033[0m",
-      "\\033[93m'May all the spirits be with you.'\\033[0m",
+    "\\033[93m'Remember, tomorrow is another day.'\\033[0m",
+    "\\033[93m'Be seeing you.'\\033[0m",
+    "\\033[93m'I wish you the best of luck.'\\033[0m",
+    "\\033[93m'I give you my grace.'\\033[0m",
+    "\\033[93m'I wish you luck on your quest.'\\033[0m",
+    "\\033[93m'I'll get started on my tea.'\\033[0m",
+    "\\033[93m'May all the spirits be with you.'\\033[0m",
 ]
 
 Options = ['Haggle', 'Ask about quest', 'Ask about quest', 'Ask about quest']
@@ -495,10 +495,10 @@ Text = "You are in the bazaar. There are not many attended stalls around. There 
 AlternateText = "You are in the bazaar. There are not many attended stalls around. There appears to be a fisherman and a mineral collector at two seperate stalls."
 Desc = "The Bazaar"
 Options = [
-      'Go to the fisherman',
-      'Go to the fletcher',
-      'Go to the mineral collector',
-      'Go back to the village outskirts',
+    'Go to the fisherman',
+    'Go to the fletcher',
+    'Go to the mineral collector',
+    'Go back to the village outskirts',
 ]
 Move = [74, 82, 85, 2]
 
@@ -506,11 +506,11 @@ Move = [74, 82, 85, 2]
 Text = "\\033[36m'Anything else?'\\033[0m"
 Desc = "The Bazaar"
 ShopItems = [
-      "Fillet of Cod",
-      "Fillet of Salmon",
-      "Smoked Trout",
-      "Jar of Tuna",
-      "Fillet of Smoked Haddock",
+    "Fillet of Cod",
+    "Fillet of Salmon",
+    "Smoked Trout",
+    "Jar of Tuna",
+    "Fillet of Smoked Haddock",
 ]
 ShopItemCosts = [2, 2, 9, 3, 6]
 ShopEntrance = "\\033[36m'What are you here to buy?'\\033[0m"
@@ -640,10 +640,10 @@ Text = "You are within the cave. It is difficult to see. There is a path to your
 AlternateText = "You are within the cave. It is difficult to see. There is a path to your northeast and south. There is a lot of rubble to your northwest."
 Desc = "Within the Cave"
 Options = [
-      'Go northeast',
-      'Go south',
-      'Go northwest',
-      'Destroy the rubble with a bomb',
+    'Go northeast',
+    'Go south',
+    'Go northwest',
+    'Destroy the rubble with a bomb',
 ]
 Move = [100, 98, 52, 89]
 

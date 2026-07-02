@@ -12,6 +12,27 @@ from importlib.resources import files
 from shm import toml_reader # title
 from shm.typing import FormatDict
 
+def display_help_menu() -> None:
+    module_path: str = str(files(__spec__.parent))
+    toml_path: str = os.path.join(module_path, "engine_info.toml")
+
+    gameInfo = toml_reader.read_toml(toml_path)
+    gameInfo = FormatDict(gameInfo)
+
+    if not gameInfo["Patch"] or gameInfo["Patch"][0] == "-":
+        gameInfo["PatchConnector"] = ""
+    else:
+        gameInfo["PatchConnector"] = " "
+
+    infoString = (
+        "{Name}{PatchConnector} {MajorVersion}{Patch}\n{ReleaseDate}"
+        "\n{Licence}\nCreated by {Creator}\n{Link}"
+    )
+    infoString = infoString.format_map(gameInfo)
+    print(infoString)
+    print(
+        "\n-h | --help | --about  --  opens this menu"
+    )
 
 def main() -> None:
     """The main function to be loaded. Handles arguments. Loads title screen."""
@@ -23,30 +44,11 @@ def main() -> None:
         for arg in sys.argv:
             match arg:
                 case "--about" | "--help" | "-h":
-                    module_path: str = str(files(__spec__.parent))
-                    toml_path: str = os.path.join(module_path, "engine_info.toml")
-                    
-                    gameInfo = toml_reader.read_toml(toml_path)
-                    gameInfo = FormatDict(gameInfo)
-                    
-                    if not gameInfo["Patch"] or gameInfo["Patch"][0] == "-":
-                        gameInfo["PatchConnector"] = ""
-                    else:
-                        gameInfo["PatchConnector"] = " "
-                        
-                    infoString = (
-                        "{Name}{PatchConnector} {MajorVersion}{Patch}\n{ReleaseDate}"
-                        "\n{Licence}\nCreated by {Creator}\n{Link}"
-                    )
-                    infoString = infoString.format_map(gameInfo)
-                    print(infoString)
-                    print(
-                        "\n-h | --help | --about  --  opens this menu"
-                    )
+                    display_help_menu()
         sys.exit(0)
     else:
-        #title.title()
-        sys.exit()
+        display_help_menu()
+        sys.exit(0)
 
 
 if __name__ == "__main__":

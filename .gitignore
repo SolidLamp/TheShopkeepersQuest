@@ -1,13 +1,19 @@
 __pycache__/
+artefacts/
 build/
 dist/
+
+*.egg-info
+uv.lock
+
 *.7z
 *.tar.bz2
 *.tar.gz
 *.tar.xz
 *.tar.zst
+*.whl
 *.zip
-*.sav
+
 **/error.log
-game2.py
+*.sav
 
